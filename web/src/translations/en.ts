@@ -29,5 +29,6 @@ export const en = {
     loggingIn: 'Logging in',
     loggedIn: 'Logged in!',
     evaluating: 'Evaluating',
+    submittedAt: 'Submitted at',
   },
 };

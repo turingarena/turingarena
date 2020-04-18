@@ -1,14 +1,13 @@
 import { gql } from '@apollo/client';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { AgGridReact } from 'ag-grid-react';
-import { css, cx } from 'emotion';
+import { css } from 'emotion';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { RecordFragment, SubmissionFragment } from '../generated/graphql-types';
-import { gridCss } from '../util/components/grid';
+import { SubmissionFragment } from '../generated/graphql-types';
 import { FragmentProps } from '../util/fragment-props';
-import { columnFragment, getFieldColumns, recordFragment } from './field-table';
-import { textFragment } from './text';
+import { columnFragment, recordFragment } from './field-table';
+import { Field } from './fields/field';
+import { Text, textFragment } from './text';
 
 export const submissionFragment = gql`
   fragment Submission on Submission {
@@ -42,7 +41,6 @@ export const submissionFragment = gql`
 `;
 
 export function Submission({ data }: FragmentProps<SubmissionFragment>) {
-  const rowData = JSON.parse(JSON.stringify(data.feedbackTable.rows)) as typeof data.feedbackTable.rows; // allow AgGrid to mess with this data
   const { t } = useTranslation();
 
   return (
@@ -61,13 +59,28 @@ export function Submission({ data }: FragmentProps<SubmissionFragment>) {
       >
         <FontAwesomeIcon icon="spinner" pulse /> {t('evaluating')}...
       </div>
-      <div className={cx(gridCss)}>
-        <AgGridReact
-          columnDefs={getFieldColumns(data.feedbackTable.columns, (row: RecordFragment) => row)}
-          domLayout="autoHeight"
-          rowData={rowData}
-        />
-      </div>
+      <table className="table">
+        <thead className="thead-light">
+          <tr>
+            {data.feedbackTable.columns.map((col, colIndex) => (
+              <th key={`submission-table-col-${colIndex}`}>
+                <Text data={col.title} />
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {data.feedbackTable.rows.map((row, rowIndex) => (
+            <tr key={`submission-table-${rowIndex}`}>
+              {row.fields.map((field, fieldIndex) => (
+                <td key={`submission-table-${rowIndex}-${fieldIndex}`}>
+                  <Field data={field} />
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </>
   );
 }
