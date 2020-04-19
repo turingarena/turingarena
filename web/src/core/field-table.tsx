@@ -32,6 +32,7 @@ export const recordFragment = gql`
 export function getTableClassByValence(valence: Valence | null) {
   switch (valence) {
     case 'WARNING':
+    case 'PARTIAL':
       return 'table-warning';
     case 'SUCCESS':
       return 'table-success';

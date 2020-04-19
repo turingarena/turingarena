@@ -50,7 +50,7 @@ export function ContestProblemAssignmentUserTacklingAside({
   const history = useHistory();
   const { t } = useTranslation();
 
-  const lastSubmission = data.submissions.length > 0 ? data.submissions[data.submissions.length - 1] : null;
+  const lastSubmission = data.submissions.length > 0 ? data.submissions[0] : null;
 
   return (
     <div
