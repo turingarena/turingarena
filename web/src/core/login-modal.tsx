@@ -55,8 +55,8 @@ export function LoginModal({ onClose }: { onClose: () => void }) {
     }
 
     auth.setAuth({
-      username: data.logIn?.user.username,
-      token: data.logIn?.token,
+      username: data.logIn.user.username,
+      token: data.logIn.token,
     });
 
     onClose();
