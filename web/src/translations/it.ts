@@ -29,6 +29,6 @@ export const it = {
     loggingIn: 'Accesso in corso',
     loggedIn: 'Accesso riuscito!',
     evaluating: 'Valutazione in corso',
-    submittedAt: 'Sottoposto a',
+    submittedAt: 'Inviato',
   },
 };
