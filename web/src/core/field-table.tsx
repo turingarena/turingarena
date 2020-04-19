@@ -1,4 +1,5 @@
 import { gql } from '@apollo/client';
+import { Valence } from '../generated/graphql-types';
 import { fieldFragment } from './fields/field';
 import { textFragment } from './text';
 
@@ -22,7 +23,21 @@ export const recordFragment = gql`
         valence
       }
     }
+    valence
   }
 
   ${fieldFragment}
 `;
+
+export function getTableClassByValence(valence: Valence | null) {
+  switch (valence) {
+    case 'WARNING':
+      return 'table-warning';
+    case 'SUCCESS':
+      return 'table-success';
+    case 'FAILURE':
+      return 'table-danger';
+    default:
+      return '';
+  }
+}

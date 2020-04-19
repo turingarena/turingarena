@@ -15,6 +15,7 @@ export const fieldSchema = gql`
     "Collection of fields, in 1-to-1 correspondence with a collection of columns."
     type Record {
         fields: [Field!]!
+        valence: Valence
     }
 
     type FeedbackTable {

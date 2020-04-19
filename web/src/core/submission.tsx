@@ -6,7 +6,7 @@ import { Table } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
 import { SubmissionFragment } from '../generated/graphql-types';
 import { FragmentProps } from '../util/fragment-props';
-import { columnFragment, recordFragment } from './field-table';
+import { columnFragment, getTableClassByValence, recordFragment } from './field-table';
 import { Field } from './fields/field';
 import { Text, textFragment } from './text';
 
@@ -72,7 +72,7 @@ export function Submission({ data }: FragmentProps<SubmissionFragment>) {
         </thead>
         <tbody>
           {data.feedbackTable.rows.map((row, rowIndex) => (
-            <tr key={`submission-table-${rowIndex}`}>
+            <tr key={`submission-table-${rowIndex}`} className={getTableClassByValence(row.valence)}>
               {row.fields.map((field, fieldIndex) => (
                 <td key={`submission-table-${rowIndex}-${fieldIndex}`}>
                   <Field data={field} />

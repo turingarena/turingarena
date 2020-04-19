@@ -9,7 +9,7 @@ import { Link } from 'react-router-dom';
 import { ContestProblemAssignmentUserTacklingSubmissionListFragment } from '../generated/graphql-types';
 import { FragmentProps } from '../util/fragment-props';
 import { useBasePath } from '../util/paths';
-import { columnFragment, recordFragment } from './field-table';
+import { columnFragment, getTableClassByValence, recordFragment } from './field-table';
 import { Field } from './fields/field';
 import { Text, textFragment } from './text';
 
@@ -78,7 +78,7 @@ export function ContestProblemAssignmentUserTacklingSubmissionList({
       </thead>
       <tbody>
         {data.submissions.map((submission, submissionIndex) => (
-          <tr key={`submission-${submissionIndex}`}>
+          <tr key={`submission-${submissionIndex}`} className={getTableClassByValence(submission.summaryRow.valence)}>
             <td>
               <Link
                 className={css`

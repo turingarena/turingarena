@@ -199,8 +199,13 @@ export class SubmissionApi extends ApiObject {
     }
 
     async getSummaryRow(s: Submission) {
+        const scoreRange = (await this.getMaterial(s)).scoreRange;
+        const score = (await this.getTotalScore(s))?.score;
+
         return {
             __typename: 'Record',
+            valence:
+                score !== undefined ? (score >= scoreRange.max ? 'SUCCESS' : score > 0 ? 'PARTIAL' : 'FAILURE') : null,
             fields: [
                 ...(await this.getAwardAchievements(s)).map(({ award: { gradeDomain }, achievement }) => {
                     if (gradeDomain instanceof ScoreGradeDomain) {
@@ -226,8 +231,8 @@ export class SubmissionApi extends ApiObject {
                 }),
                 {
                     __typename: 'ScoreField',
-                    score: (await this.getTotalScore(s))?.score,
-                    scoreRange: (await this.getMaterial(s)).scoreRange,
+                    score,
+                    scoreRange,
                 },
             ],
         };
@@ -280,6 +285,7 @@ export class SubmissionApi extends ApiObject {
             __typename: 'FeedbackTable',
             columns: evaluationFeedbackColumns,
             rows: testCasesData.map(({ awardIndex, score, message, timeUsage, memoryUsage }, testCaseIndex) => ({
+                valence: score !== null ? (score >= 1 ? 'SUCCESS' : score > 0 ? 'PARTIAL' : 'FAILURE') : null,
                 fields: [
                     {
                         __typename: 'HeaderField',
