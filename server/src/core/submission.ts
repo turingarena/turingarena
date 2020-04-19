@@ -99,7 +99,7 @@ export class SubmissionApi extends ApiObject {
             (
                 await this.ctx
                     .table(SubmissionData)
-                    .findAll({ where: { problemName, contestId, username }, order: [['createdAt', 'ASC']] })
+                    .findAll({ where: { problemName, contestId, username }, order: [['createdAt', 'DESC']] })
             ).map(data => this.fromId(data.id)),
     );
 
