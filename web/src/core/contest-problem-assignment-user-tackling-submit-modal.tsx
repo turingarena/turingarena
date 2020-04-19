@@ -138,21 +138,13 @@ export function ContestProblemAssignmentUserTacklingSubmitModal({
         e.preventDefault();
         loadFilesAndSubmit(new FormData(e.target as HTMLFormElement));
       }}
-      className={css`
-        width: 40rem;
-      `}
     >
       <Modal.Header>
         <h4>
           {t('solutionOf')}: <strong>{data.assignmentView.assignment.problem.title.variant}</strong>
         </h4>
       </Modal.Header>
-      <Modal.Body
-        className={css`
-          max-height: calc(100vh - 260px);
-          overflow-y: auto;
-        `}
-      >
+      <Modal.Body>
         {data.assignmentView.assignment.problem.submissionFields.map(f => (
           <FileInput
             key={f.name}
