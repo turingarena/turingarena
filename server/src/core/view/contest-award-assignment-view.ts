@@ -1,6 +1,7 @@
 import { gql } from 'apollo-server-core';
 import { ApiObject } from '../../main/api';
 import { Resolvers } from '../../main/resolver-types';
+import { typed } from '../../util/types';
 import { ContestAwardAssignment } from '../contest-award-assignment';
 import {
     ContestAwardAssignmentUserTackling,
@@ -28,10 +29,10 @@ export const contestAwardAssignmentViewSchema = gql`
     }
 `;
 
-export class ContestAwardAssignmentView {
-    constructor(readonly assignment: ContestAwardAssignment, readonly user: User | null) {}
-
-    tackling = this.user !== null ? new ContestAwardAssignmentUserTackling(this.assignment, this.user) : null;
+export interface ContestAwardAssignmentView {
+    __typename: 'ContestAwardAssignmentView';
+    assignment: ContestAwardAssignment;
+    user: User | null;
 }
 
 export interface ContestAwardAssignmentViewModelRecord {
@@ -39,13 +40,24 @@ export interface ContestAwardAssignmentViewModelRecord {
 }
 
 export class ContestAwardAssignmentViewApi extends ApiObject {
+    getTackling({ assignment, user }: ContestAwardAssignmentView) {
+        if (user === null) return null;
+
+        return typed<ContestAwardAssignmentUserTackling>({
+            __typename: 'ContestAwardAssignmentUserTackling',
+            assignment,
+            user,
+        });
+    }
+
     async getGradeField(v: ContestAwardAssignmentView) {
         const { gradeDomain: domain } = v.assignment.award;
+        const tackling = this.getTackling(v);
 
         if (domain instanceof FulfillmentGradeDomain) {
             const grade =
-                v.tackling !== null
-                    ? await this.ctx.api(ContestAwardAssignmentUserTacklingApi).getFulfillmentGrade(v.tackling)
+                tackling !== null
+                    ? await this.ctx.api(ContestAwardAssignmentUserTacklingApi).getFulfillmentGrade(tackling)
                     : null;
 
             return new FulfillmentField(grade?.fulfilled ?? null);
@@ -53,8 +65,8 @@ export class ContestAwardAssignmentViewApi extends ApiObject {
 
         if (domain instanceof ScoreGradeDomain) {
             const grade =
-                v.tackling !== null
-                    ? await this.ctx.api(ContestAwardAssignmentUserTacklingApi).getScoreGrade(v.tackling, domain)
+                tackling !== null
+                    ? await this.ctx.api(ContestAwardAssignmentUserTacklingApi).getScoreGrade(tackling, domain)
                     : null;
 
             return new ScoreField(domain.scoreRange, grade?.score ?? null);
@@ -69,7 +81,11 @@ export const contestAwardAssignmentViewResolvers: Resolvers = {
         assignment: v => v.assignment,
         user: v => v.user,
         problemAssignmentView: async ({ assignment, user }) =>
-            new ContestProblemAssignmentView(assignment.problemAssignment, user),
+            typed<ContestProblemAssignmentView>({
+                __typename: 'ContestProblemAssignmentView',
+                assignment: assignment.problemAssignment,
+                user,
+            }),
         gradeField: (v, {}, ctx) => ctx.api(ContestAwardAssignmentViewApi).getGradeField(v),
     },
 };

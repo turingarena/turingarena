@@ -3,7 +3,6 @@ import { Resolvers } from '../../main/resolver-types';
 import { Contest, ContestApi } from '../contest';
 import { SubmissionApi } from '../submission';
 import { User } from '../user';
-import { ContestView } from './contest-view';
 
 export const mainViewSchema = gql`
     """
@@ -41,12 +40,12 @@ export const mainViewResolvers: Resolvers = {
         title: async (v, {}, ctx) => [
             { value: (await ctx.api(ContestApi).getMetadata(v.contest)).title ?? 'TuringArena' },
         ],
-        contestView: async (v, {}, ctx) => new ContestView(v.contest, v.user),
+        contestView: ({ contest, user }) => ({ __typename: 'ContestView', contest, user }),
         pendingSubmissions: async (v, {}, ctx) =>
             v.user !== null
                 ? ctx.api(SubmissionApi).pendingByContestAndUser.load({
                       contestId: v.contest.id,
-                      username: v.user.metadata.username,
+                      username: v.user.username,
                   })
                 : [],
     },

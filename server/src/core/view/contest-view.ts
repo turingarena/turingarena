@@ -1,7 +1,7 @@
 import { gql } from 'apollo-server-core';
 import { Resolvers } from '../../main/resolver-types';
+import { typed } from '../../util/types';
 import { Contest, ContestApi } from '../contest';
-import { ContestProblemSet } from '../contest-problem-set';
 import { User } from '../user';
 import { ContestProblemSetView } from './contest-problem-set-view';
 
@@ -20,8 +20,10 @@ export const contestViewSchema = gql`
     }
 `;
 
-export class ContestView {
-    constructor(readonly contest: Contest, readonly user: User | null) {}
+export interface ContestView {
+    __typename: 'ContestView';
+    contest: Contest;
+    user: User | null;
 }
 
 export interface ContestViewModelRecord {
@@ -37,7 +39,11 @@ export const contestViewResolvers: Resolvers = {
             switch (status) {
                 case 'RUNNING':
                 case 'ENDED':
-                    return new ContestProblemSetView(new ContestProblemSet(contest), user);
+                    return typed<ContestProblemSetView>({
+                        __typename: 'ContestProblemSetView',
+                        problemSet: { __typename: 'ContestProblemSet', contest },
+                        user,
+                    });
                 case 'NOT_STARTED':
                 default:
                     return null;

@@ -13,7 +13,7 @@ export class LocalSubmitApi extends ApiObject {
      * @param solutionPath Path of the submission file
      */
     async submitLocalFile(username: string, contestName: string, problemName: string, solutionPath: string) {
-        const contest = await this.ctx.api(ContestApi).byName.load(contestName);
+        const contest = await this.ctx.api(ContestApi).byNameLoader.load(contestName);
         await this.ctx.api(SubmitApi).submit(
             {
                 username,

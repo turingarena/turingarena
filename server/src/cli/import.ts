@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { Contest, ContestApi } from '../core/contest';
+import { ContestApi, ContestData } from '../core/contest';
 import { ArchiveApi } from '../core/files/archive';
 import { ApiObject } from '../main/api';
 
@@ -14,10 +14,15 @@ export class ContestImportApi extends ApiObject {
         if (!fs.existsSync(path.join(dir, 'turingarena.yaml'))) throw Error('Invalid contest directory');
 
         const contestArchiveId = await this.ctx.api(ArchiveApi).createArchive(dir);
-        const contest = await this.ctx.table(Contest).create({
+        const contest = await this.ctx.table(ContestData).create({
             archiveId: contestArchiveId,
         });
 
-        console.log(await this.ctx.api(ContestApi).getMetadata(contest));
+        console.log(
+            await this.ctx.api(ContestApi).getMetadata({
+                __typename: 'Contest',
+                id: contest.id,
+            }),
+        );
     }
 }

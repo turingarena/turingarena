@@ -3,11 +3,12 @@ import * as path from 'path';
 import { AllowNull, Column, ForeignKey, Table } from 'sequelize-typescript';
 import { __generated_SubmissionInput } from '../generated/graphql-types';
 import { ApiObject } from '../main/api';
-import { createByIdLoader, createSimpleLoader, UuidBaseModel } from '../main/base-model';
+import { createSimpleLoader, UuidBaseModel } from '../main/base-model';
 import { Resolvers } from '../main/resolver-types';
+import { typed } from '../util/types';
 import { AchievementApi } from './achievement';
-import { Contest, ContestApi } from './contest';
-import { ContestProblemAssignment } from './contest-problem-assignment';
+import { ContestApi, ContestData } from './contest';
+import { ContestProblemAssignmentUserTackling } from './contest-problem-assignment-user-tackling';
 import { Evaluation, EvaluationApi, EvaluationStatus } from './evaluation';
 import { EvaluationEventApi } from './evaluation-event';
 import { FulfillmentGradeDomain } from './feedback/fulfillment';
@@ -15,7 +16,6 @@ import { ScoreGrade, ScoreGradeDomain } from './feedback/score';
 import { FileContentApi } from './files/file-content';
 import { ProblemMaterialApi } from './material/problem-material';
 import { Participation } from './participation';
-import { Problem } from './problem';
 import { SubmissionFileApi } from './submission-file';
 
 export const submissionSchema = gql`
@@ -46,10 +46,9 @@ export const submissionSchema = gql`
     }
 `;
 
-/** A Submission in the system */
-@Table({ updatedAt: false })
-export class Submission extends UuidBaseModel<Submission> {
-    @ForeignKey(() => Contest)
+@Table({ updatedAt: false, tableName: 'submissions' })
+export class SubmissionData extends UuidBaseModel<SubmissionData> {
+    @ForeignKey(() => ContestData)
     @AllowNull(false)
     @Column
     contestId!: string;
@@ -63,6 +62,11 @@ export class Submission extends UuidBaseModel<Submission> {
     username!: string;
 }
 
+export interface Submission {
+    __typename: 'Submission';
+    id: string;
+}
+
 export interface SubmissionModelRecord {
     Submission: Submission;
 }
@@ -70,29 +74,66 @@ export interface SubmissionModelRecord {
 export type SubmissionInput = __generated_SubmissionInput;
 
 export class SubmissionApi extends ApiObject {
-    byId = createByIdLoader(this.ctx, Submission);
+    fromId(id: string) {
+        return typed<Submission>({ __typename: 'Submission', id });
+    }
+
+    dataLoader = createSimpleLoader((s: Submission) => this.ctx.table(SubmissionData).findByPk(s.id));
+
+    async validate(submission: Submission) {
+        await this.dataLoader.load(submission);
+
+        return submission;
+    }
+
     allByTackling = createSimpleLoader(
-        ({ problemName, contestId, username }: { problemName: string; contestId: string; username: string }) =>
-            this.ctx
-                .table(Submission)
-                .findAll({ where: { problemName, contestId, username }, order: [['createdAt', 'ASC']] }),
+        async ({
+            assignment: {
+                problem: {
+                    contest: { id: contestId },
+                    name: problemName,
+                },
+            },
+            user: { username },
+        }: ContestProblemAssignmentUserTackling) =>
+            (
+                await this.ctx
+                    .table(SubmissionData)
+                    .findAll({ where: { problemName, contestId, username }, order: [['createdAt', 'ASC']] })
+            ).map(data => this.fromId(data.id)),
     );
+
     pendingByContestAndUser = createSimpleLoader(
         async ({ contestId, username }: { contestId: string; username: string }) => {
             // TODO: denormalize DB to make this code simpler and faster
-            const submissions = await this.ctx.table(Submission).findAll({ where: { username } });
-            const officalEvaluations = await Promise.all(submissions.map(async s => this.getOfficialEvaluation(s)));
+            const submissions = await this.ctx.table(SubmissionData).findAll({ where: { username } });
+            const officalEvaluations = await Promise.all(
+                submissions.map(async s => this.getOfficialEvaluation(this.fromId(s.id))),
+            );
 
-            return submissions.filter((s, i) => officalEvaluations[i]?.status === 'PENDING');
+            return submissions
+                .filter((s, i) => officalEvaluations[i]?.status === 'PENDING')
+                .map(s => this.fromId(s.id));
         },
     );
 
-    async getContestProblemAssignment(s: Submission): Promise<ContestProblemAssignment> {
-        return new ContestProblemAssignment(s.contestId, s.problemName);
-    }
-
     async getSubmissionFiles(s: Submission) {
         return this.ctx.api(SubmissionFileApi).allBySubmissionId.load(s.id);
+    }
+
+    async getTackling(s: Submission) {
+        const { contestId, problemName, username } = await this.dataLoader.load(s);
+
+        const contest = this.ctx.api(ContestApi).fromId(contestId);
+
+        return typed<ContestProblemAssignmentUserTackling>({
+            __typename: 'ContestProblemAssignmentUserTackling',
+            assignment: {
+                __typename: 'ContestProblemAssignment',
+                problem: { __typename: 'Problem', contest, name: problemName },
+            },
+            user: { __typename: 'User', contest, username },
+        });
     }
 
     /**
@@ -125,15 +166,10 @@ export class SubmissionApi extends ApiObject {
         });
     }
 
-    async getProblem(s: Submission) {
-        return new Problem(s.contestId, s.problemName);
-    }
-
     async getMaterial(s: Submission) {
-        return this.ctx.api(ProblemMaterialApi).byContestAndProblemName.load({
-            contestId: s.contestId,
-            problemName: s.problemName,
-        });
+        const { assignment } = await this.getTackling(s);
+
+        return this.ctx.api(ProblemMaterialApi).dataLoader.load(assignment.problem);
     }
 
     async getAwardAchievements(s: Submission) {
@@ -310,20 +346,25 @@ export const submissionResolvers: Resolvers = {
     Submission: {
         id: s => s.id,
 
-        contest: (s, {}, ctx) => ctx.api(ContestApi).byId.load(s.contestId),
-        user: async (s, {}, ctx) =>
-            ctx.api(ContestApi).getUserByUsername(await ctx.api(ContestApi).byId.load(s.contestId), s.username),
-        problem: (s, {}, ctx) => new Problem(s.contestId, s.problemName),
+        contest: async (s, {}, ctx) => (await ctx.api(SubmissionApi).getTackling(s)).assignment.problem.contest,
+        user: async (s, {}, ctx) => (await ctx.api(SubmissionApi).getTackling(s)).user,
+        problem: async (s, {}, ctx) => (await ctx.api(SubmissionApi).getTackling(s)).assignment.problem,
+        participation: async (s, {}, ctx) => {
+            const tackling = await ctx.api(SubmissionApi).getTackling(s);
 
-        participation: ({ username, contestId }, {}, ctx) => new Participation(contestId, username),
-        contestProblemAssigment: ({ contestId, problemName }, {}, ctx) =>
-            new ContestProblemAssignment(contestId, problemName),
+            return typed<Participation>({
+                __typename: 'Participation',
+                contest: tackling.assignment.problem.contest,
+                user: tackling.user,
+            });
+        },
+        contestProblemAssigment: async (s, {}, ctx) => (await ctx.api(SubmissionApi).getTackling(s)).assignment,
 
         officialEvaluation: (s, {}, ctx) => ctx.api(SubmissionApi).getOfficialEvaluation(s),
         summaryRow: (s, {}, ctx) => ctx.api(SubmissionApi).getSummaryRow(s),
         feedbackTable: (s, {}, ctx) => ctx.api(SubmissionApi).getFeedbackTable(s),
 
-        createdAt: s => s.createdAt,
+        createdAt: async (s, {}, ctx) => (await ctx.api(SubmissionApi).dataLoader.load(s)).createdAt,
         evaluations: (s, {}, ctx) => ctx.api(EvaluationApi).allBySubmissionId.load(s.id),
         files: (s, {}, ctx) => ctx.api(SubmissionApi).getSubmissionFiles(s),
     },

@@ -227,21 +227,16 @@ export interface ProblemMaterialModelRecord {
 }
 
 export class ProblemMaterialApi extends ApiObject {
-    byContestAndProblemName = createSimpleLoader(
-        async ({ contestId, problemName }: { contestId: string; problemName: string }) => {
-            const problem = new Problem(contestId, problemName);
-
-            return new ProblemMaterial(problem, await this.ctx.api(ProblemTaskInfoApi).getProblemTaskInfo(problem));
-        },
+    dataLoader = createSimpleLoader(
+        async (problem: Problem) =>
+            new ProblemMaterial(problem, await this.ctx.api(ProblemTaskInfoApi).getProblemTaskInfo(problem)),
     );
 
     async loadContent(problem: Problem, path: string) {
-        const contest = await this.ctx.api(ContestApi).byId.load(problem.contestId);
+        const contest = this.ctx.api(ContestApi).fromId(problem.contest.id);
+        const { archiveId } = await this.ctx.api(ContestApi).dataLoader.load(contest);
         const file = await this.ctx.table(Archive).findOne({
-            where: {
-                uuid: contest.archiveId,
-                path: `${problem.name}/${path}`,
-            },
+            where: { uuid: archiveId, path: `${problem.name}/${path}` },
             include: [this.ctx.table(FileContent)],
         });
 

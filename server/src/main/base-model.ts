@@ -19,7 +19,7 @@ export abstract class UuidBaseModel<T> extends BaseModel<T> {
     }
 }
 
-export function createByIdLoader<T extends UuidBaseModel<T>>(ctx: ApiContext, modelClass: new () => T) {
+export function createByIdDataLoader<T extends UuidBaseModel<T>>(ctx: ApiContext, modelClass: new () => T) {
     return createSimpleLoader<string, T>(key => ctx.table(modelClass).findByPk(key));
 }
 

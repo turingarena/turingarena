@@ -1,7 +1,8 @@
 import { gql } from 'apollo-server-core';
 import { Resolvers } from '../main/resolver-types';
-import { Contest, ContestApi } from './contest';
+import { ContestApi, ContestData } from './contest';
 import { SubmissionApi } from './submission';
+import { UserApi } from './user';
 import { MainView } from './view/main-view';
 
 export const querySchema = gql`
@@ -32,13 +33,14 @@ export const queryResolvers: Resolvers = {
             return new MainView(
                 contest,
                 username !== null && username !== undefined
-                    ? await ctx.api(ContestApi).getUserByUsername(contest, username)
+                    ? await ctx.api(UserApi).validate({ __typename: 'User', contest, username })
                     : null,
             );
         },
-        contests: async ({}, {}, ctx) => ctx.table(Contest).findAll(),
+        contests: async ({}, {}, ctx) =>
+            (await ctx.table(ContestData).findAll()).map(d => ctx.api(ContestApi).fromData(d)),
         archive: (_, { uuid }) => ({ uuid }),
-        submission: async ({}, { id }, ctx) => ctx.api(SubmissionApi).byId.load(id),
+        submission: async ({}, { id }, ctx) => ctx.api(SubmissionApi).validate({ __typename: 'Submission', id }),
         fileContent: async ({}, {}, ctx) => ctx.fail(`not implemented`),
     },
 };
