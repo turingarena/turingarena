@@ -1,4 +1,6 @@
 import { gql } from '@apollo/client';
+import { IconProp } from '@fortawesome/fontawesome-svg-core';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { css, cx } from 'emotion';
 import React, { HTMLAttributes } from 'react';
 import { ContestProblemAssignmentViewAsideFragment } from '../generated/graphql-types';
@@ -36,6 +38,7 @@ export const contestProblemAssignmentViewAsideFragment = gql`
           field {
             ...Field
           }
+          icon
         }
         attachments {
           title {
@@ -212,6 +215,16 @@ export function ContestProblemAssignmentViewAside({
                   `}
                   title={a.title.variant}
                 >
+                  {a.icon !== null && (
+                    <FontAwesomeIcon
+                      icon={a.icon as IconProp}
+                      className={css`
+                        margin-right: 5px;
+                        min-width: 20px;
+                        text-align: 'left';
+                      `}
+                    />
+                  )}
                   <span
                     className={css`
                       overflow: hidden;

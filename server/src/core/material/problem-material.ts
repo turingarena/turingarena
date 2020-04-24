@@ -56,6 +56,7 @@ export const problemMaterialSchema = gql`
     type ProblemAttribute {
         title: Text!
         field: Field!
+        icon: String
     }
 
     type SubmissionField {
@@ -204,6 +205,7 @@ export class ProblemMaterial {
                     seconds: this.timeLimitSeconds,
                 },
             },
+            icon: 'memory',
         },
         {
             title: [{ value: 'Memory limit' }],
@@ -218,6 +220,7 @@ export class ProblemMaterial {
                     bytes: this.memoryLimitBytes,
                 },
             },
+            icon: 'microchip',
         },
     ];
 
