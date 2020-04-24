@@ -2,12 +2,12 @@ import { gql } from '@apollo/client';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { css, cx } from 'emotion';
 import React, { useState } from 'react';
+import { Modal } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { TopBarFragment } from '../generated/graphql-types';
 import { useAuth } from '../util/auth';
 import { buttonCss, buttonLightCss, buttonSmallCss } from '../util/components/button';
-import { Modal } from '../util/components/modal';
 import { FragmentProps } from '../util/fragment-props';
 import { Theme } from '../util/theme';
 import { LoginModal } from './login-modal';
@@ -20,7 +20,7 @@ export function TopBar({ data }: FragmentProps<TopBarFragment>) {
 
   return (
     <>
-      <Modal show={showLogInModal} onClose={() => setShowLogInModal(false)}>
+      <Modal show={showLogInModal} onHide={() => setShowLogInModal(false)} autoFocus={false} animation={false}>
         <LoginModal onClose={() => setShowLogInModal(false)} />
       </Modal>
       <nav

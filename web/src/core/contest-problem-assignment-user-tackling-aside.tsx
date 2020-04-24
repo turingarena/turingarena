@@ -2,6 +2,7 @@ import { gql } from '@apollo/client';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { css, cx } from 'emotion';
 import React from 'react';
+import { Modal } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
 import { Link, Route, useHistory } from 'react-router-dom';
 import { ContestProblemAssignmentUserTacklingAsideFragment } from '../generated/graphql-types';
@@ -12,8 +13,6 @@ import {
   buttonPrimaryCss,
   buttonSuccessCss,
 } from '../util/components/button';
-import { gridCss } from '../util/components/grid';
-import { Modal, modalFooterCss, modalHeaderCss } from '../util/components/modal';
 import { FragmentProps } from '../util/fragment-props';
 import { SetBasePath, useBasePath } from '../util/paths';
 import {
@@ -68,7 +67,7 @@ export function ContestProblemAssignmentUserTacklingAside({
           </Link>
           <Route path={`${basePath}/submit`}>
             {({ match }) => (
-              <Modal show={match !== null} onClose={() => history.replace(basePath)}>
+              <Modal show={match !== null} onHide={() => history.replace(basePath)}>
                 <ContestProblemAssignmentUserTacklingSubmitModal
                   data={data}
                   onSubmitSuccessful={id => history.replace(`${basePath}/submission/${id}`)}
@@ -115,30 +114,26 @@ export function ContestProblemAssignmentUserTacklingAside({
           </Link>
           <Route path={`${basePath}/submissions`}>
             {({ match }) => (
-              <Modal show={match !== null} onClose={() => history.replace(basePath)}>
-                <div className={modalHeaderCss}>
+              <Modal
+                show={match !== null}
+                onHide={() => history.replace(basePath)}
+                animation={false}
+                size="xl"
+                scrollable={true}
+              >
+                <Modal.Header>
                   <h4>
                     {t('submissionsFor')}: <strong>{data.assignmentView.assignment.problem.title.variant}</strong>
                   </h4>
-                </div>
-                <div
-                  className={cx(
-                    gridCss,
-                    css`
-                      padding: 0;
-                      max-height: calc(100vh - 260px);
-                      overflow-y: auto;
-                      width: 80vw;
-                    `,
-                  )}
-                >
+                </Modal.Header>
+                <Modal.Body>
                   <ContestProblemAssignmentUserTacklingSubmissionList data={data} />
-                </div>
-                <div className={modalFooterCss}>
+                </Modal.Body>
+                <Modal.Footer>
                   <button onClick={() => history.replace(basePath)} className={cx(buttonCss, buttonPrimaryCss)}>
                     Close
                   </button>
-                </div>
+                </Modal.Footer>
               </Modal>
             )}
           </Route>
@@ -148,26 +143,26 @@ export function ContestProblemAssignmentUserTacklingAside({
         {({ match }) =>
           match !== null && (
             <SetBasePath path={`${basePath}/submission/${(match.params as { id: string }).id}`}>
-              <Modal onClose={() => history.replace(basePath)}>
-                <div
-                  className={css`
-                    width: 80vw;
-                    overflow: auto;
-                  `}
+              <Modal onHide={() => history.replace(basePath)} show={true} animation={false} size="xl" scrollable={true}>
+                <Modal.Header>
+                  <h5>
+                    {/* TODO: submission index, e.g., Submission #6 for: My Problem */}
+                    {t('submissionsFor')}: <strong>{data.assignmentView.assignment.problem.title.variant}</strong>
+                  </h5>
+                </Modal.Header>
+                <Modal.Body
+                // className={css`
+                //   width: 80vw;
+                //   overflow: auto;
+                // `}
                 >
-                  <div className={modalHeaderCss}>
-                    <h5>
-                      {/* TODO: submission index, e.g., Submission #6 for: My Problem */}
-                      {t('submissionsFor')}: <strong>{data.assignmentView.assignment.problem.title.variant}</strong>
-                    </h5>
-                  </div>
                   <SubmissionLoader id={(match.params as { id: string }).id} />
-                  <div className={modalFooterCss}>
-                    <button onClick={() => history.replace(basePath)} className={cx(buttonCss, buttonPrimaryCss)}>
-                      {t('close')}
-                    </button>
-                  </div>
-                </div>
+                </Modal.Body>
+                <Modal.Footer>
+                  <button onClick={() => history.replace(basePath)} className={cx(buttonCss, buttonPrimaryCss)}>
+                    {t('close')}
+                  </button>
+                </Modal.Footer>
               </Modal>
             </SetBasePath>
           )

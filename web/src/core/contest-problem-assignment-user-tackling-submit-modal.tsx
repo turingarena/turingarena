@@ -1,6 +1,7 @@
 import { gql, useMutation } from '@apollo/client';
 import { css, cx } from 'emotion';
 import React, { InputHTMLAttributes, useRef, useState } from 'react';
+import { Modal } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
 import {
   ContestProblemAssignmentUserTacklingSubmitModalFragment,
@@ -10,7 +11,6 @@ import {
 } from '../generated/graphql-types';
 import { useAsync } from '../util/async-hook';
 import { buttonCss, buttonNormalizeCss, buttonPrimaryCss } from '../util/components/button';
-import { modalBodyCss, modalFooterCss, modalHeaderCss } from '../util/components/modal';
 import { loadFileContent } from '../util/file-load';
 import { FragmentProps } from '../util/fragment-props';
 import { textFragment } from './text';
@@ -138,24 +138,13 @@ export function ContestProblemAssignmentUserTacklingSubmitModal({
         e.preventDefault();
         loadFilesAndSubmit(new FormData(e.target as HTMLFormElement));
       }}
-      className={css`
-        width: 40rem;
-      `}
     >
-      <div className={modalHeaderCss}>
+      <Modal.Header>
         <h4>
           {t('solutionOf')}: <strong>{data.assignmentView.assignment.problem.title.variant}</strong>
         </h4>
-      </div>
-      <div
-        className={cx(
-          modalBodyCss,
-          css`
-            max-height: calc(100vh - 260px);
-            overflow-y: auto;
-          `,
-        )}
-      >
+      </Modal.Header>
+      <Modal.Body>
         {data.assignmentView.assignment.problem.submissionFields.map(f => (
           <FileInput
             key={f.name}
@@ -164,17 +153,17 @@ export function ContestProblemAssignmentUserTacklingSubmitModal({
             onChange={() => setValid(formRef.current?.checkValidity() ?? false)}
           />
         ))}
-      </div>
-      {error !== undefined && (
-        <>
-          {t('submissionError')}: {error.message}
-        </>
-      )}
-      <div className={modalFooterCss}>
+        {error !== undefined && (
+          <>
+            {t('submissionError')}: {error.message}
+          </>
+        )}
+      </Modal.Body>
+      <Modal.Footer>
         <button className={cx(buttonCss, buttonPrimaryCss)} disabled={loading || !valid} type="submit">
           {t('submit')}
         </button>
-      </div>
+      </Modal.Footer>
     </form>
   );
 }

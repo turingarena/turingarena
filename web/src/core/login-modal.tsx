@@ -2,6 +2,7 @@ import { gql, useMutation } from '@apollo/client';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { css, cx } from 'emotion';
 import React, { useState } from 'react';
+import { Modal } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
 import { LoginMutation, LoginMutationVariables } from '../generated/graphql-types';
 import { useAsync } from '../util/async-hook';
@@ -15,7 +16,6 @@ import {
   invalidCss,
   invalidFeedbackCss,
 } from '../util/components/form';
-import { modalBodyCss, modalFooterCss } from '../util/components/modal';
 
 class InvalidTokenError extends Error {}
 
@@ -68,22 +68,15 @@ export function LoginModal({ onClose }: { onClose: () => void }) {
         e.preventDefault();
         logIn();
       }}
-      className={css`
-        display: flex;
-        flex: 1;
-        flex-direction: column;
-        align-items: space-between;
-        width: 28rem;
-      `}
     >
-      <div
+      <Modal.Body
         className={css`
           display: flex;
           flex: 1;
           flex-direction: column;
         `}
       >
-        <div className={cx(modalBodyCss)}>
+        <div>
           <label htmlFor="token">Token</label>
           <div className={cx(inputGroupCss, error instanceof InvalidTokenError ? [invalidCss] : undefined)}>
             <input
@@ -127,8 +120,8 @@ export function LoginModal({ onClose }: { onClose: () => void }) {
             <small className={cx(formTextCss)}>{t('tokenRequest')}</small>
           )}
         </div>
-      </div>
-      <div className={modalFooterCss}>
+      </Modal.Body>
+      <Modal.Footer>
         <button
           className={cx(
             buttonCss,
@@ -149,7 +142,7 @@ export function LoginModal({ onClose }: { onClose: () => void }) {
         <button className={cx(buttonCss, buttonPrimaryCss)} disabled={loading} type="submit">
           {t('logIn')}
         </button>
-      </div>
+      </Modal.Footer>
     </form>
   );
 }

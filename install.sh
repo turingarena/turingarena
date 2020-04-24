@@ -61,7 +61,7 @@ tee "${CONFIG}" <<EOF
     "secret": "$(gen_secret)",
     "skipAuth": false,
     "cachePath": "${CACHE}",
-    "webRoot": "${DEST}/frontend"
+    "webRoot": "${DEST}/frontend/build"
 }
 EOF
 
