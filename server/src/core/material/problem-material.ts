@@ -205,7 +205,7 @@ export class ProblemMaterial {
                     seconds: this.timeLimitSeconds,
                 },
             },
-            icon: 'memory',
+            icon: 'stopwatch',
         },
         {
             title: [{ value: 'Memory limit' }],
