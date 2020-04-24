@@ -7,7 +7,7 @@ export const it = {
     ended: 'finito',
     submitASolution: 'Invia una soluzione',
     attachments: 'Allegati',
-    statementFile: 'Testo del problema',
+    statementFile: 'Download statement',
     awards: 'Awards',
     chooseFile: 'Scegli file',
     name: 'Nome',

@@ -239,12 +239,17 @@ export class SubmissionApi extends ApiObject {
     }
 
     async getFeedbackTable(s: Submission) {
-        const { awards, taskInfo, evaluationFeedbackColumns } = await this.getMaterial(s);
-        const { scoring, limits } = taskInfo.IOI;
+        const {
+            awards,
+            taskInfo,
+            evaluationFeedbackColumns,
+            timeLimitSeconds,
+            memoryLimitBytes,
+        } = await this.getMaterial(s);
+        const { scoring } = taskInfo.IOI;
 
         const limitsMarginMultiplier = 2;
         const memoryUnitBytes = 1024;
-        const memoryLimitUnitMultiplier = 1024;
         const warningWatermarkMultiplier = 0.2;
 
         const evaluation = await this.getOfficialEvaluation(s);
@@ -300,14 +305,14 @@ export class SubmissionApi extends ApiObject {
                     {
                         __typename: 'TimeUsageField',
                         timeUsage: timeUsage !== null ? { seconds: timeUsage } : null,
-                        timeUsageMaxRelevant: { seconds: limits.time * limitsMarginMultiplier },
-                        timeUsagePrimaryWatermark: { seconds: limits.time },
+                        timeUsageMaxRelevant: { seconds: timeLimitSeconds * limitsMarginMultiplier },
+                        timeUsagePrimaryWatermark: { seconds: timeLimitSeconds },
                         valence:
                             timeUsage === null
                                 ? null
-                                : timeUsage <= warningWatermarkMultiplier * limits.time
+                                : timeUsage <= warningWatermarkMultiplier * timeLimitSeconds
                                 ? 'NOMINAL'
-                                : timeUsage <= limits.time
+                                : timeUsage <= timeLimitSeconds
                                 ? 'WARNING'
                                 : 'FAILURE',
                     },
@@ -315,17 +320,17 @@ export class SubmissionApi extends ApiObject {
                         __typename: 'MemoryUsageField',
                         memoryUsage: memoryUsage !== null ? { bytes: memoryUsage * memoryUnitBytes } : null,
                         memoryUsageMaxRelevant: {
-                            bytes: memoryUnitBytes * limits.memory * memoryLimitUnitMultiplier * limitsMarginMultiplier,
+                            bytes: memoryLimitBytes * limitsMarginMultiplier,
                         },
                         memoryUsagePrimaryWatermark: {
-                            bytes: memoryUnitBytes * limits.memory * memoryLimitUnitMultiplier,
+                            bytes: memoryLimitBytes,
                         },
                         valence:
                             memoryUsage === null
                                 ? null
-                                : memoryUsage <= warningWatermarkMultiplier * limits.memory * memoryLimitUnitMultiplier
+                                : memoryUsage * memoryUnitBytes <= warningWatermarkMultiplier * memoryLimitBytes
                                 ? 'NOMINAL'
-                                : memoryUsage <= limits.memory * memoryLimitUnitMultiplier
+                                : memoryUsage * memoryUnitBytes <= memoryLimitBytes
                                 ? 'WARNING'
                                 : 'FAILURE',
                     },

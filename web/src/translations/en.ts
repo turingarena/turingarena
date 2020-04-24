@@ -8,7 +8,7 @@ export const en = {
     submitASolution: 'Submit a solution',
     attachments: 'Attachments',
     awards: 'Awards',
-    statementFile: 'Statement file',
+    downloadStatement: 'Download statement',
     chooseFile: 'Choose file',
     name: 'Name',
     size: 'Size',

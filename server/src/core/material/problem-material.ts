@@ -1,4 +1,5 @@
 import { gql } from 'apollo-server-core';
+import { __generated_Field } from '../../generated/graphql-types';
 import { ApiObject } from '../../main/api';
 import { createSimpleLoader } from '../../main/base-model';
 import { ContestApi } from '../contest';
@@ -20,6 +21,8 @@ export const problemMaterialSchema = gql`
         statement: Media!
         "List of attachments of this problem"
         attachments: [ProblemAttachment!]!
+        "List of attributes of this problem"
+        attributes: [ProblemAttribute!]!
         "List of awards of this problem"
         awards: [Award]!
         "List of fields that constitute a submission for this problem"
@@ -45,6 +48,14 @@ export const problemMaterialSchema = gql`
     type ProblemAttachment {
         title: Text!
         media: Media!
+    }
+
+    """
+    Attributes of a problem identified by a title and containing a field
+    """
+    type ProblemAttribute {
+        title: Text!
+        field: Field!
     }
 
     type SubmissionField {
@@ -81,6 +92,11 @@ export const problemMaterialSchema = gql`
 export interface ProblemAttachment {
     title: Text;
     media: Media;
+}
+
+export interface ProblemAttribute {
+    title: Text;
+    field: __generated_Field; // FIXME: should not use generated types here
 }
 
 const languages = {
@@ -143,6 +159,8 @@ const fileRules = [
     },
 ];
 
+const memoryUnitBytes = 1024 * 1024;
+
 export class ProblemMaterial {
     constructor(readonly problem: Problem, readonly taskInfo: ProblemTaskInfo) {}
 
@@ -168,6 +186,40 @@ export class ProblemMaterial {
             ],
         }),
     );
+
+    timeLimitSeconds = this.taskInfo.IOI.limits.time;
+    memoryLimitBytes = this.taskInfo.IOI.limits.memory * memoryUnitBytes;
+
+    attributes: ProblemAttribute[] = [
+        {
+            title: [{ value: 'Time limit' }],
+            field: {
+                __typename: 'TimeUsageField',
+                timeUsageMaxRelevant: {
+                    __typename: 'TimeUsage',
+                    seconds: this.timeLimitSeconds,
+                },
+                timeUsage: {
+                    __typename: 'TimeUsage',
+                    seconds: this.timeLimitSeconds,
+                },
+            },
+        },
+        {
+            title: [{ value: 'Memory limit' }],
+            field: {
+                __typename: 'MemoryUsageField',
+                memoryUsageMaxRelevant: {
+                    __typename: 'MemoryUsage',
+                    bytes: this.memoryLimitBytes,
+                },
+                memoryUsage: {
+                    __typename: 'MemoryUsage',
+                    bytes: this.memoryLimitBytes,
+                },
+            },
+        },
+    ];
 
     awards = this.taskInfo.IOI.scoring.subtasks.map((subtask, index): Award => new Award(this, index));
 
