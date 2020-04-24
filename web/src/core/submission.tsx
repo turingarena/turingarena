@@ -60,7 +60,7 @@ export function Submission({ data }: FragmentProps<SubmissionFragment>) {
       >
         <FontAwesomeIcon icon="spinner" pulse /> {t('evaluating')}...
       </div>
-      <Table hover responsive striped>
+      <Table hover responsive striped style={{ marginBottom: 0 }}>
         <thead className="thead-light">
           <tr>
             {data.feedbackTable.columns.map((col, colIndex) => (

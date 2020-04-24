@@ -126,7 +126,7 @@ export function ContestProblemAssignmentUserTacklingAside({
                     {t('submissionsFor')}: <strong>{data.assignmentView.assignment.problem.title.variant}</strong>
                   </h4>
                 </Modal.Header>
-                <Modal.Body>
+                <Modal.Body style={{ padding: 0 }}>
                   <ContestProblemAssignmentUserTacklingSubmissionList data={data} />
                 </Modal.Body>
                 <Modal.Footer>
@@ -150,12 +150,7 @@ export function ContestProblemAssignmentUserTacklingAside({
                     {t('submissionsFor')}: <strong>{data.assignmentView.assignment.problem.title.variant}</strong>
                   </h5>
                 </Modal.Header>
-                <Modal.Body
-                // className={css`
-                //   width: 80vw;
-                //   overflow: auto;
-                // `}
-                >
+                <Modal.Body style={{ padding: 0 }}>
                   <SubmissionLoader id={(match.params as { id: string }).id} />
                 </Modal.Body>
                 <Modal.Footer>

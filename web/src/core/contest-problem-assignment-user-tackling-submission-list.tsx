@@ -65,7 +65,7 @@ export function ContestProblemAssignmentUserTacklingSubmissionList({
   const { t } = useTranslation();
 
   return (
-    <Table hover striped responsive>
+    <Table hover striped responsive style={{ marginBottom: 0 }}>
       <thead className="thead-light">
         <tr>
           <th>{t('submittedAt')}</th>
