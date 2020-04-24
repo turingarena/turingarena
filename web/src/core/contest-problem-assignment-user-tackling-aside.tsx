@@ -3,9 +3,9 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { css, cx } from 'emotion';
 import React from 'react';
 import { Modal } from 'react-bootstrap';
-import { useTranslation } from 'react-i18next';
 import { Link, Route, useHistory } from 'react-router-dom';
 import { ContestProblemAssignmentUserTacklingAsideFragment } from '../generated/graphql-types';
+import { useT } from '../translations/main';
 import {
   buttonBlockCss,
   buttonCss,
@@ -48,7 +48,7 @@ export function ContestProblemAssignmentUserTacklingAside({
 }: FragmentProps<ContestProblemAssignmentUserTacklingAsideFragment>) {
   const basePath = useBasePath();
   const history = useHistory();
-  const { t } = useTranslation();
+  const t = useT();
 
   const lastSubmission = data.submissions.length > 0 ? data.submissions[0] : null;
 

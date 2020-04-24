@@ -2,13 +2,13 @@ import { gql, useMutation } from '@apollo/client';
 import { css, cx } from 'emotion';
 import React, { InputHTMLAttributes, useRef, useState } from 'react';
 import { Modal } from 'react-bootstrap';
-import { useTranslation } from 'react-i18next';
 import {
   ContestProblemAssignmentUserTacklingSubmitModalFragment,
   ContestProblemAssignmentUserTacklingSubmitModalSubmissionFieldFragment,
   SubmitMutation,
   SubmitMutationVariables,
 } from '../generated/graphql-types';
+import { useT } from '../translations/main';
 import { useAsync } from '../util/async-hook';
 import { buttonCss, buttonNormalizeCss, buttonPrimaryCss } from '../util/components/button';
 import { loadFileContent } from '../util/file-load';
@@ -81,7 +81,7 @@ export function ContestProblemAssignmentUserTacklingSubmitModal({
 }: FragmentProps<ContestProblemAssignmentUserTacklingSubmitModalFragment> & {
   onSubmitSuccessful: (submissionId: string) => void;
 }) {
-  const { t } = useTranslation();
+  const t = useT();
   const [submit] = useMutation<SubmitMutation, SubmitMutationVariables>(
     gql`
       mutation Submit($submission: SubmissionInput!) {
@@ -178,7 +178,7 @@ function FileInput({
 } & InputHTMLAttributes<HTMLInputElement>) {
   const fileFieldId = `${field.name}.file`;
 
-  const { t } = useTranslation();
+  const t = useT();
   const fileInput = useRef<HTMLInputElement>(null);
   const [file, setFile] = useState<File | null>(null);
 
@@ -259,7 +259,7 @@ function FileTypeInfo({
   file: File;
 }) {
   const rule = getTypingRule({ data, field, file });
-  const { t } = useTranslation();
+  const t = useT();
   const [overrideType, setOverrideType] = useState(false);
   const defaultType = overrideType ? null : rule.defaultType;
 

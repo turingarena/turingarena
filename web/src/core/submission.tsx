@@ -3,8 +3,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { css } from 'emotion';
 import React from 'react';
 import { Table } from 'react-bootstrap';
-import { useTranslation } from 'react-i18next';
 import { SubmissionFragment } from '../generated/graphql-types';
+import { useT } from '../translations/main';
 import { FragmentProps } from '../util/fragment-props';
 import { columnFragment, getTableClassByValence, recordFragment } from './field-table';
 import { Field } from './fields/field';
@@ -42,7 +42,7 @@ export const submissionFragment = gql`
 `;
 
 export function Submission({ data }: FragmentProps<SubmissionFragment>) {
-  const { t } = useTranslation();
+  const t = useT();
 
   return (
     <>

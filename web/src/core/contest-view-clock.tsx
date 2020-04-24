@@ -2,11 +2,11 @@ import { gql } from '@apollo/client';
 import { css } from 'emotion';
 import { DateTime, Duration } from 'luxon';
 import React from 'react';
-import { useTranslation } from 'react-i18next';
 import { interval } from 'rxjs';
 import { useObservable } from 'rxjs-hooks';
 import { map, startWith } from 'rxjs/operators';
 import { ContestStatus, ContestViewClockFragment } from '../generated/graphql-types';
+import { useT } from '../translations/main';
 import { unexpected } from '../util/check';
 
 export const contestViewClockFragment = gql`
@@ -37,7 +37,7 @@ const getContestStatus = (status: ContestStatus) => {
 };
 
 export function ContestViewClock({ data }: { data: ContestViewClockFragment }) {
-  const { t } = useTranslation();
+  const t = useT();
 
   const clock = useObservable(() =>
     interval(Duration.fromObject({ seconds: 1 }).as('milliseconds')).pipe(

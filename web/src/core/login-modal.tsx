@@ -3,8 +3,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { css, cx } from 'emotion';
 import React, { useState } from 'react';
 import { Modal } from 'react-bootstrap';
-import { useTranslation } from 'react-i18next';
 import { LoginMutation, LoginMutationVariables } from '../generated/graphql-types';
+import { useT } from '../translations/main';
 import { useAsync } from '../util/async-hook';
 import { useAuth } from '../util/auth';
 import { buttonCss, buttonOutlineSecondaryCss, buttonPrimaryCss, buttonSecondaryCss } from '../util/components/button';
@@ -23,7 +23,7 @@ export function LoginModal({ onClose }: { onClose: () => void }) {
   const [showPassword, setShowPassword] = useState(false);
   const auth = useAuth();
   const [token, setToken] = useState('');
-  const { t } = useTranslation();
+  const t = useT();
 
   const [logInMutate] = useMutation<LoginMutation, LoginMutationVariables>(gql`
     mutation Login($token: String!) {
@@ -115,7 +115,7 @@ export function LoginModal({ onClose }: { onClose: () => void }) {
           ) : error !== undefined ? (
             <small className={cx(invalidFeedbackCss)}>{error.message}</small>
           ) : successful ? (
-            <small className={cx(formTextCss)}>{t('logggedIn')}</small>
+            <small className={cx(formTextCss)}>{t('loggedIn')}</small>
           ) : (
             <small className={cx(formTextCss)}>{t('tokenRequest')}</small>
           )}

@@ -30,5 +30,6 @@ export const en = {
     loggedIn: 'Logged in!',
     evaluating: 'Evaluating',
     submittedAt: 'Submitted at',
+    info: 'Info',
   },
 };
