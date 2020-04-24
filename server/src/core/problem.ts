@@ -34,6 +34,7 @@ export const problemResolvers: Resolvers = {
         title: async (p, {}, ctx) => (await ctx.api(ProblemMaterialApi).dataLoader.load(p)).title,
         statement: async (p, {}, ctx) => (await ctx.api(ProblemMaterialApi).dataLoader.load(p)).statement,
         attachments: async (p, {}, ctx) => (await ctx.api(ProblemMaterialApi).dataLoader.load(p)).attachments,
+        attributes: async (p, {}, ctx) => (await ctx.api(ProblemMaterialApi).dataLoader.load(p)).attributes,
         awards: async (p, {}, ctx) => (await ctx.api(ProblemMaterialApi).dataLoader.load(p)).awards,
         submissionFields: async (p, {}, ctx) => (await ctx.api(ProblemMaterialApi).dataLoader.load(p)).submissionFields,
         submissionFileTypes: async (p, {}, ctx) =>
