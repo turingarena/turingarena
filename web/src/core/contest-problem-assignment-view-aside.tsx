@@ -188,9 +188,9 @@ export function ContestProblemAssignmentViewAside({
             </div>
           </>
         )}
+        <h3 className={asideTitleCss}>{t('info')}</h3>
         {data.assignment.problem.attributes.length > 0 && (
           <>
-            <h3 className={asideTitleCss}>{t('info')}</h3>
             <div
               className={css`
                 margin-bottom: 16px;
@@ -235,6 +235,16 @@ export function ContestProblemAssignmentViewAside({
             </div>
           </>
         )}
+        <MediaDownload
+          className={cx(
+            downloadLinkCss,
+            css`
+              margin-bottom: 16px;
+            `,
+          )}
+          data={data.assignment.problem.statement}
+          text={t('downloadStatement')}
+        />
         {data.assignment.problem.attachments.length > 0 && (
           <>
             <h3 className={asideTitleCss}>{t('attachments')}</h3>
@@ -244,13 +254,11 @@ export function ContestProblemAssignmentViewAside({
               `}
             >
               {data.assignment.problem.attachments.map((a, i) => (
-                <MediaDownload key={i} className={downloadLinkCss} data={a.media} />
+                <MediaDownload key={i} className={downloadLinkCss} data={a.media} text={a.title.variant} />
               ))}
             </div>
           </>
         )}
-        <h2 className={asideTitleCss}>{t('statementFile')}</h2>
-        <MediaDownload className={downloadLinkCss} data={data.assignment.problem.statement} />
       </div>
     </div>
   );

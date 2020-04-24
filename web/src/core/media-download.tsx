@@ -24,11 +24,12 @@ export const mediaDownloadFragment = gql`
 
 export function MediaDownload({
   data,
+  text,
   ...rest
-}: FragmentProps<MediaDownloadFragment> & AnchorHTMLAttributes<HTMLAnchorElement>) {
+}: FragmentProps<MediaDownloadFragment> & AnchorHTMLAttributes<HTMLAnchorElement> & { text: string }) {
   return (
     <a title={data.variant.name} download={data.variant.name} href={data.variant.url} {...rest}>
-      <FontAwesomeIcon icon={mimeTypeIcons[data.variant.type] ?? 'file'} /> {data.variant.name}
+      <FontAwesomeIcon icon={mimeTypeIcons[data.variant.type] ?? 'file'} /> {text}
     </a>
   );
 }
