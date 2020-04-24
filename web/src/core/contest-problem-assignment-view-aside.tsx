@@ -9,6 +9,7 @@ import {
   ContestProblemAssignmentUserTacklingAside,
   contestProblemAssignmentUserTacklingAsideFragment,
 } from './contest-problem-assignment-user-tackling-aside';
+import { Field, fieldFragment } from './fields/field';
 import { GradeField, gradeFieldFragment, scoreFieldFragment } from './fields/grade-field';
 import { MediaDownload, mediaDownloadFragment } from './media-download';
 import { mediaInlineFragment } from './media-inline';
@@ -27,6 +28,14 @@ export const contestProblemAssignmentViewAsideFragment = gql`
         statement {
           ...MediaInline
           ...MediaDownload
+        }
+        attributes {
+          title {
+            ...Text
+          }
+          field {
+            ...Field
+          }
         }
         attachments {
           title {
@@ -68,6 +77,7 @@ export const contestProblemAssignmentViewAsideFragment = gql`
   ${textFragment}
   ${mediaInlineFragment}
   ${mediaDownloadFragment}
+  ${fieldFragment}
   ${scoreFieldFragment}
   ${gradeFieldFragment}
   ${contestProblemAssignmentUserTacklingAsideFragment}
@@ -172,6 +182,53 @@ export function ContestProblemAssignmentViewAside({
                     )}
                   >
                     <GradeField data={v.gradeField} />
+                  </span>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
+        {data.assignment.problem.attributes.length > 0 && (
+          <>
+            <h3 className={asideTitleCss}>{t('info')}</h3>
+            <div
+              className={css`
+                margin-bottom: 16px;
+              `}
+            >
+              {data.assignment.problem.attributes.map((a, i) => (
+                <div
+                  key={i}
+                  className={css`
+                    margin: 0 -16px;
+                    padding: 0 16px;
+
+                    overflow: hidden;
+
+                    display: flex;
+                    flex-direction: row;
+
+                    align-items: baseline;
+                  `}
+                  title={a.title.variant}
+                >
+                  <span
+                    className={css`
+                      overflow: hidden;
+                      text-overflow: ellipsis;
+                      white-space: nowrap;
+                    `}
+                  >
+                    {a.title.variant}
+                  </span>
+                  <span
+                    className={css`
+                      margin-left: auto;
+                      font-weight: bold;
+                      font-size: 90%;
+                    `}
+                  >
+                    <Field data={a.field} />
                   </span>
                 </div>
               ))}
