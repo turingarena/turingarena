@@ -1,4 +1,6 @@
-export const it = {
+import { TranslationObject } from './main';
+
+export const it: TranslationObject = {
   translation: {
     score: 'punteggio',
     problems: 'problemi',
@@ -7,7 +9,7 @@ export const it = {
     ended: 'finito',
     submitASolution: 'Invia una soluzione',
     attachments: 'Allegati',
-    statementFile: 'Download statement',
+    downloadStatement: 'Download statement',
     awards: 'Awards',
     chooseFile: 'Scegli file',
     name: 'Nome',
@@ -30,5 +32,6 @@ export const it = {
     loggedIn: 'Accesso riuscito!',
     evaluating: 'Valutazione in corso',
     submittedAt: 'Inviato',
+    info: 'Info',
   },
 };

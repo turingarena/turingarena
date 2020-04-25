@@ -3,8 +3,8 @@ import { IconProp } from '@fortawesome/fontawesome-svg-core';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { css, cx } from 'emotion';
 import React, { HTMLAttributes } from 'react';
-import { useTranslation } from 'react-i18next';
 import { ContestProblemAssignmentViewAsideFragment } from '../generated/graphql-types';
+import { useT } from '../translations/main';
 import { badgeCss, getBadgeCssByValence } from '../util/components/badge';
 import { FragmentProps } from '../util/fragment-props';
 import {
@@ -111,7 +111,7 @@ export function ContestProblemAssignmentViewAside({
   className,
   ...rest
 }: FragmentProps<ContestProblemAssignmentViewAsideFragment> & HTMLAttributes<HTMLDivElement>) {
-  const { t } = useTranslation();
+  const t = useT();
 
   return (
     <div

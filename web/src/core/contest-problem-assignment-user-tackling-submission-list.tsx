@@ -4,9 +4,9 @@ import { css } from 'emotion';
 import { DateTime } from 'luxon';
 import React from 'react';
 import { Table } from 'react-bootstrap';
-import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { ContestProblemAssignmentUserTacklingSubmissionListFragment } from '../generated/graphql-types';
+import { useT } from '../translations/main';
 import { FragmentProps } from '../util/fragment-props';
 import { useBasePath } from '../util/paths';
 import { columnFragment, getTableClassByValence, recordFragment } from './field-table';
@@ -62,7 +62,7 @@ export function ContestProblemAssignmentUserTacklingSubmissionList({
   data,
 }: FragmentProps<ContestProblemAssignmentUserTacklingSubmissionListFragment>) {
   const basePath = useBasePath();
-  const { t } = useTranslation();
+  const t = useT();
 
   return (
     <Table hover striped responsive style={{ marginBottom: 0 }}>

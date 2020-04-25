@@ -2,9 +2,9 @@ import { gql } from '@apollo/client';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { css, cx } from 'emotion';
 import React, { useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import { NavLink } from 'react-router-dom';
 import { ContestViewAsideFragment } from '../generated/graphql-types';
+import { useT } from '../translations/main';
 import { badgeCss, getBadgeCssByValence } from '../util/components/badge';
 import { buttonNormalizeCss } from '../util/components/button';
 import { FragmentProps } from '../util/fragment-props';
@@ -24,7 +24,7 @@ const headerClass = css`
 
 export function ContestViewAside({ data }: FragmentProps<ContestViewAsideFragment>) {
   const [visible, setVisible] = useState(true);
-  const { t } = useTranslation();
+  const t = useT();
 
   if (data.problemSetView === null) {
     return null;

@@ -22,10 +22,7 @@ i18next
   .use(initReactI18next) // passes i18n down to react-i18next
   .use(I18nextBrowserLanguageDetector)
   .init({
-    resources: {
-      en,
-      it,
-    },
+    resources: { en, it },
     fallbackLng: 'en',
     interpolation: {
       escapeValue: false,
