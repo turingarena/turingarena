@@ -33,5 +33,7 @@ export const it: TranslationObject = {
     evaluating: 'Valutazione in corso',
     submittedAt: 'Inviato',
     info: 'Info',
+    messages: 'Messaggi',
+    send: 'Invia',
   },
 };

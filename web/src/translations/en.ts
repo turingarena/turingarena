@@ -31,5 +31,7 @@ export const en = {
     evaluating: 'Evaluating',
     submittedAt: 'Submitted at',
     info: 'Info',
+    messages: 'Messages',
+    send: 'Send',
   },
 };

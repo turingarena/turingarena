@@ -11,10 +11,12 @@ import { buttonCss, buttonLightCss, buttonSmallCss } from '../util/components/bu
 import { FragmentProps } from '../util/fragment-props';
 import { Theme } from '../util/theme';
 import { LoginModal } from './login-modal';
+import { MessagesModal } from './messages-modal';
 import { textFragment } from './text';
 
 export function TopBar({ data }: FragmentProps<TopBarFragment>) {
   const [showLogInModal, setShowLogInModal] = useState(false);
+  const [showMessagesModal, setShowMessagesModal] = useState(false);
   const auth = useAuth();
   const { t, i18n } = useTranslation();
 
@@ -22,6 +24,9 @@ export function TopBar({ data }: FragmentProps<TopBarFragment>) {
     <>
       <Modal show={showLogInModal} onHide={() => setShowLogInModal(false)} autoFocus={false} animation={false}>
         <LoginModal onClose={() => setShowLogInModal(false)} />
+      </Modal>
+      <Modal show={showMessagesModal} onHide={() => setShowMessagesModal(false)} animation={false} size="lg">
+        <MessagesModal onClose={() => setShowMessagesModal(false)} />
       </Modal>
       <nav
         className={css`
@@ -75,6 +80,19 @@ export function TopBar({ data }: FragmentProps<TopBarFragment>) {
             >
               {data.user.name}
             </span>
+            <button
+              className={cx(
+                buttonCss,
+                buttonLightCss,
+                buttonSmallCss,
+                css`
+                  margin-right: 5px;
+                `,
+              )}
+              onClick={() => setShowMessagesModal(true)}
+            >
+              <FontAwesomeIcon icon="envelope" /> {t('messages')}
+            </button>
             <button
               className={cx(buttonCss, buttonLightCss, buttonSmallCss)}
               onClick={() => {
