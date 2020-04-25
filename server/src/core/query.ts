@@ -1,6 +1,7 @@
 import { gql } from 'apollo-server-core';
 import { Resolvers } from '../main/resolver-types';
 import { ContestApi, ContestData } from './contest';
+import { MessageApi } from './message';
 import { SubmissionApi } from './submission';
 import { UserApi } from './user';
 import { MainView } from './view/main-view';
@@ -16,6 +17,8 @@ export const querySchema = gql`
         fileContent(id: ID!): FileContent!
         archive(uuid: ID!): Archive!
         submission(id: ID!): Submission!
+        message(id: ID!): Message
+        messages(id: ID!): [Message!]!
     }
 `;
 
@@ -42,5 +45,7 @@ export const queryResolvers: Resolvers = {
         archive: (_, { uuid }) => ({ uuid }),
         submission: async ({}, { id }, ctx) => ctx.api(SubmissionApi).validate({ __typename: 'Submission', id }),
         fileContent: async ({}, {}, ctx) => ctx.fail(`not implemented`),
+        message: async ({}, { id }, ctx) => ctx.api(MessageApi).fromId(id),
+        messages: async ({}, { id }, ctx) => ctx.api(MessageApi).find(id),
     },
 };

@@ -35,7 +35,7 @@ import { FulfillmentModelRecord, fulfillmentResolvers, fulfillmentSchema } from 
 import { gradeResolvers, gradeSchema } from './feedback/grade';
 import { headerSchema } from './feedback/header';
 import { memoryUsageSchema } from './feedback/memory-usage';
-import { messageSchema } from './feedback/message';
+import { messageFieldSchema } from './feedback/message';
 import { ScoreModelRecord, scoreResolvers, scoreSchema } from './feedback/score';
 import { timeUsageSchema } from './feedback/time-usage';
 import { valenceSchema } from './feedback/valence';
@@ -45,6 +45,7 @@ import { AwardModelRecord, awardResolvers, awardSchema } from './material/award'
 import { MediaModelRecord, mediaResolvers, mediaSchema } from './material/media';
 import { ProblemMaterialModelRecord, problemMaterialSchema } from './material/problem-material';
 import { TextModelRecord, textResolvers, textSchema } from './material/text';
+import { Message, messageSchema } from './message';
 import { MutationModelRecord, mutationResolvers, mutationSchema } from './mutation';
 import { ParticipationModelRecord, participationSchema } from './participation';
 import { ProblemModelRecord, problemResolvers, problemSchema } from './problem';
@@ -97,7 +98,7 @@ export const schema = gql`
     ${mainViewSchema}
     ${mediaSchema}
     ${memoryUsageSchema}
-    ${messageSchema}
+    ${messageFieldSchema}
     ${mutationSchema}
     ${participationSchema}
     ${problemMaterialSchema}
@@ -110,6 +111,7 @@ export const schema = gql`
     ${timeUsageSchema}
     ${userSchema}
     ${valenceSchema}
+    ${messageSchema}
 
     enum Ok {
         OK
@@ -126,6 +128,7 @@ export const modelConstructors = {
     FileContent,
     SubmissionData,
     SubmissionFile,
+    Message,
 };
 
 export type ModelRecord = unknown &
