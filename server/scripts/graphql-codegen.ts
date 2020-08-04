@@ -20,8 +20,10 @@ const config: CodegenConfig = {
                 },
                 'typescript-resolvers',
                 'typescript-operations',
-                { add: '/* tslint:disable */' },
-                { add: `import { Mapper } from '../main/mapper'` },
+                { add: { content: ['/* tslint:disable */'] } },
+                { add: { content: [`import { Mapper } from '../main/mapper'`] } },
+                // for some unknown reason graphql-code-generator used this type but didn't include it
+                { add: { content: [`type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };`] } },
             ],
             config: {
                 defaultMapper: 'Mapper<{T}>',

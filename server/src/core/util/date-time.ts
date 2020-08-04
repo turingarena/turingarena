@@ -45,8 +45,8 @@ function makeDateTimeResolver<T>(
 
 export const dateTimeResolvers: Resolvers = {
     DateTime: {
-        utc: makeDateTimeResolver(t => t.toUTC().toISO()),
-        local: makeDateTimeResolver(t => t.toISO()),
+        utc: makeDateTimeResolver(t => t.toUTC().toISO() ?? `invalid date-time`),
+        local: makeDateTimeResolver(t => t.toISO() ?? `invalid date-time`),
         millisFromEpochInteger: makeDateTimeResolver(t => t.toMillis()),
         secondsFromEpochDecimal: makeDateTimeResolver(t => t.toSeconds()),
         secondsFromEpochInteger: makeDateTimeResolver(t => Math.floor(t.toSeconds())),
