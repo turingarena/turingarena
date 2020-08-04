@@ -98,6 +98,7 @@ export interface ProblemAttachment {
 export interface ProblemAttribute {
     title: Text;
     field: __generated_Field; // FIXME: should not use generated types here
+    icon: string;
 }
 
 const languages = {
