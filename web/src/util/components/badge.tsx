@@ -6,7 +6,6 @@ export const badgeCss = cx(
   'badge',
   'badge-pill',
   css`
-    margin-top: 0.2rem;
     border: 1px solid transparent;
   `,
 );

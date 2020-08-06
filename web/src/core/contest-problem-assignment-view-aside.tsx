@@ -144,24 +144,29 @@ export function ContestProblemAssignmentViewAside({
                 margin-bottom: 16px;
               `}
             >
-              {data.awardAssignmentViews.map((v, i) => (
+              {data.awardAssignmentViews.map((v) => (
                 <div
-                  key={i}
+                  key={v.assignment.id}
                   className={css`
-                    margin: 0 -16px;
-                    padding: 0 16px;
+                    height: 32px;
+                    border-radius: 16px;
+                    padding: 0 8px;
+                    cursor: pointer;
 
-                    overflow: hidden;
+                    background-color: rgba(0, 0, 0, 0.03);
+                    background-clip: padding-box;
+                    border: 1px solid rgba(0, 0, 0, 0.1);
+
+                    &:hover {
+                      background-color: rgba(0, 0, 0, 0.01);
+                    }
 
                     display: flex;
                     flex-direction: row;
+                    align-items: center;
 
-                    &:nth-of-type(odd) {
-                      background-color: rgba(0, 0, 0, 0.05);
-                    }
-
-                    &:nth-of-type(even) {
-                      background-color: rgba(0, 0, 0, 0.02);
+                    &:not(:first-of-type) {
+                      margin-top: 8px;
                     }
                   `}
                   title={v.assignment.award.title.variant}
@@ -171,19 +176,12 @@ export function ContestProblemAssignmentViewAside({
                       overflow: hidden;
                       text-overflow: ellipsis;
                       white-space: nowrap;
+                      flex: 1 1 auto;
                     `}
                   >
                     {v.assignment.award.title.variant}
                   </span>
-                  <span
-                    className={cx(
-                      css`
-                        margin-left: auto;
-                      `,
-                      badgeCss,
-                      getBadgeCssByValence(v.gradeField?.valence ?? null),
-                    )}
-                  >
+                  <span className={cx(badgeCss, getBadgeCssByValence(v.gradeField?.valence ?? null))}>
                     <GradeField data={v.gradeField} />
                   </span>
                 </div>
@@ -199,9 +197,9 @@ export function ContestProblemAssignmentViewAside({
                 margin-bottom: 16px;
               `}
             >
-              {data.assignment.problem.attributes.map((a, i) => (
+              {data.assignment.problem.attributes.map((a) => (
                 <div
-                  key={i}
+                  key={a.title.variant}
                   className={css`
                     margin: 0 -16px;
                     padding: 0 16px;
@@ -267,7 +265,12 @@ export function ContestProblemAssignmentViewAside({
               `}
             >
               {data.assignment.problem.attachments.map((a, i) => (
-                <MediaDownload key={i} className={downloadLinkCss} data={a.media} text={a.title.variant} />
+                <MediaDownload
+                  key={a.title.variant}
+                  className={downloadLinkCss}
+                  data={a.media}
+                  text={a.title.variant}
+                />
               ))}
             </div>
           </>

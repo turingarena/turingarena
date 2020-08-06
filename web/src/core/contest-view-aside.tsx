@@ -119,6 +119,7 @@ export function ContestViewAside({ data }: FragmentProps<ContestViewAsideFragmen
 
                 display: flex;
                 flex-direction: row;
+                align-items: center;
                 text-decoration: none;
                 color: ${Theme.colors.blue};
 
@@ -155,6 +156,7 @@ export function ContestViewAside({ data }: FragmentProps<ContestViewAsideFragmen
                   white-space: nowrap;
                   overflow: hidden;
                   text-overflow: ellipsis;
+                  flex: 1 1 auto;
                 `}
               >
                 {assignmentView.assignment.problem.title.variant}
@@ -164,7 +166,6 @@ export function ContestViewAside({ data }: FragmentProps<ContestViewAsideFragmen
                 className={cx(
                   css`
                     white-space: nowrap;
-                    margin-left: auto;
                   `,
                   badgeCss,
                   getBadgeCssByValence(assignmentView.totalScoreField.valence),
