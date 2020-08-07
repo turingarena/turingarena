@@ -34,14 +34,7 @@ export class EvaluateApi extends ApiObject {
             .extract(submission, path.join(this.ctx.environment.config.cachePath, 'submission'));
 
         const solutionPath = path.join(submissionPath, 'solution.cpp.cpp');
-        const taskMakerConf = this.ctx.environment.config.taskMaker;
-        const taskMaker = new TaskMaker({
-            taskMakerPath: taskMakerConf.executable,
-            dryRun: true,
-            noStatement: true,
-            localStoreDir: taskMakerConf.storeDir,
-            remote: taskMakerConf.remote,
-        });
+        const taskMaker = new TaskMaker(this.ctx.environment.config.taskMaker);
 
         const { lines, child, stderr } = taskMaker.evaluate({
             taskDir: problemDir,

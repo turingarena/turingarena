@@ -1,3 +1,4 @@
+import { Config as TaskMakerConfig } from '@edomora97/task-maker';
 import { randomBytes } from 'crypto';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -7,12 +8,7 @@ export interface Config {
     db: Options;
     port: number;
     host: string;
-    taskMaker: {
-        executable?: string;
-        cachePath?: string;
-        storeDir?: string;
-        remote?: string;
-    };
+    taskMaker: TaskMakerConfig;
     cachePath: string;
     skipAuth: boolean;
     secret: string;
@@ -70,7 +66,7 @@ export const defaultConfig: Config = {
     port: 3000,
     host: 'localhost',
     taskMaker: {
-        executable: 'task-maker-rust',
+        taskMakerPath: 'task-maker-rust',
     },
     skipAuth: false,
     secret: randomBytes(48).toString('hex'),
