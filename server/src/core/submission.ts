@@ -268,16 +268,16 @@ export class SubmissionApi extends ApiObject {
         );
 
         for (const { data } of events) {
-            if ('IOITestcaseScore' in data) {
+            if (typeof data === 'object' && 'IOITestcaseScore' in data) {
                 const { testcase, score, message } = data.IOITestcaseScore;
                 const testCaseData = testCasesData[testcase];
                 testCaseData.message = message;
                 testCaseData.score = score;
             }
 
-            if ('IOIEvaluation' in data) {
+            if (typeof data === 'object' && 'IOIEvaluation' in data) {
                 const { status, testcase } = data.IOIEvaluation;
-                if (status.Done !== undefined) {
+                if (typeof status === 'object' && 'Done' in status) {
                     const { cpu_time, memory } = status.Done.result.resources;
                     const testCaseData = testCasesData[testcase];
                     testCaseData.memoryUsage = memory;
