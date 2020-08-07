@@ -6,5 +6,8 @@
     "host": "localhost",
     "port": 3000,
     "secret": "superSecretCode",
-    "skipAuth": true
+    "skipAuth": true,
+    "taskMaker": {
+        "remote": "tcp://localhost"
+    }
 }
