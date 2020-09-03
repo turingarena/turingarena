@@ -4,29 +4,40 @@
 A collection of libraries and tools to create programming challenges and competitions.
 
 ## Getting started
-
 1. Make sure to have (a recent version of) Node and NPM installed and in `PATH`.
-2. To install dependencies, run:
+2. Make sure to have installed [tmux](https://github.com/tmux/tmux/wiki/Installing)
+3. To install dependencies, run:
 
 ```bash
     ( cd server/ ; npm ci )
     ( cd web/ ; npm ci )
 ```
 
-3. Import the example contest with:
+**Possible issue**
+
+*On Ubuntu 18.04 (and maybe other older version) the NPM could not be updated to the latest version available with a default installation. 
+This could make the previous code to not work because it is not recognizing the comand `npm ci`. 
+To fix this problem you need to upgrade to a recent version of NPM running:*
+
+```bash
+    curl -sL https://deb.nodesource.com/setup_14.x | sudo -E bash -
+    sudo apt-get install -y nodejs
+```
+
+4. Import the example contest with:
 
 ```bash
     ( cd server/ ; npm run cli -- import ../examples/example-contest/ )
 ```
 
-4. The `start.sh` scripts creates a `tmux` sessions with all the commands needed to develop running in parallel. Warning: can impact the use of CPU and RAM. Either use the script or inspect the scripts in `web/package.json` and `server/package.json` and run them individually as needed.
-To use the script, run:
+5. The `start.sh` scripts creates a `tmux` sessions with all the commands needed to develop running in parallel. Warning: can impact the use of CPU and RAM. Either use the script or inspect the scripts in `web/package.json` and `server/package.json` and run them individually as needed.
+   To use the script, run:
 
 ```bash
     ./start.sh
 ```
 
-5. TODO: running the server in production
+6. TODO: running the server in production
 
 ## Using Docker
 
