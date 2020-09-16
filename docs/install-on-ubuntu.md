@@ -25,7 +25,6 @@ git clone https://github.com/turingarena/turingarena.git
 ```bash
 wget https://github.com/edomora97/task-maker-rust/releases/download/v0.4.0/task-maker-rust_0.4.0_amd64.deb
 sudo dpkg -i task-maker-rust_0.4.0_amd64.deb
-sudo apt install -f task-maker-rust
 ```
 
 ## Step 4 - Install Turingarena
