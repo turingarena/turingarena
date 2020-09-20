@@ -1,9 +1,12 @@
+import { UIMessage } from '@edomora97/task-maker';
 import { DataTypes } from 'sequelize';
 import { AllowNull, Column, ForeignKey, Table } from 'sequelize-typescript';
 import { ApiObject } from '../main/api';
 import { createSimpleLoader, UuidBaseModel } from '../main/base-model';
 import { Achievement } from './achievement';
 import { Evaluation } from './evaluation';
+
+export type TaskMakerEvent = UIMessage;
 
 /** Evant of an evaluation */
 @Table({ updatedAt: false })
@@ -27,7 +30,7 @@ export class EvaluationEventApi extends ApiObject {
     );
 
     async storeAchievements(e: EvaluationEvent) {
-        if ('IOISubtaskScore' in e.data) {
+        if (typeof e.data === 'object' && 'IOISubtaskScore' in e.data) {
             const { subtask, normalized_score, score } = e.data.IOISubtaskScore;
             await this.ctx.table(Achievement).create({
                 evaluationId: e.evaluationId,
@@ -37,64 +40,4 @@ export class EvaluationEventApi extends ApiObject {
             });
         }
     }
-}
-
-export type TaskMakerEvent =
-    | TaskMakerIOISolutionEvent
-    | TaskMakerIOISubtaskScoreEvent
-    | TaskMakerIOITestCaseScoreEvent
-    | TaskMakerCompilationEvent;
-
-interface TaskMakerExecutionResult {
-    status: string;
-    was_killed: boolean;
-    was_cached: boolean;
-    resources: {
-        cpu_time: number;
-        sys_time: number;
-        wall_time: number;
-        memory: number;
-    };
-}
-
-// FIXME: should this be an enum or union type?
-interface TaskMakerStatus {
-    Done?: {
-        result: TaskMakerExecutionResult;
-    };
-}
-
-interface TaskMakerIOISolutionEvent {
-    IOIEvaluation: {
-        subtask: number;
-        testcase: number;
-        solution: string;
-        status: TaskMakerStatus;
-    };
-}
-
-interface TaskMakerIOITestCaseScoreEvent {
-    IOITestcaseScore: {
-        subtask: number;
-        testcase: number;
-        solution: string;
-        score: number;
-        message: string;
-    };
-}
-
-interface TaskMakerIOISubtaskScoreEvent {
-    IOISubtaskScore: {
-        subtask: number;
-        solution: string;
-        normalized_score: number;
-        score: number;
-    };
-}
-
-interface TaskMakerCompilationEvent {
-    Compilation: {
-        file: string;
-        status: TaskMakerStatus;
-    };
 }
