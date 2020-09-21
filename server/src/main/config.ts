@@ -1,3 +1,4 @@
+import { Config as TaskMakerConfig } from '@edomora97/task-maker';
 import { randomBytes } from 'crypto';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -7,7 +8,7 @@ export interface Config {
     db: Options;
     port: number;
     host: string;
-    taskMakerExecutable: string;
+    taskMaker: TaskMakerConfig;
     cachePath: string;
     skipAuth: boolean;
     secret: string;
@@ -64,7 +65,9 @@ export const defaultConfig: Config = {
     },
     port: 3000,
     host: 'localhost',
-    taskMakerExecutable: 'task-maker-rust',
+    taskMaker: {
+        taskMakerPath: 'task-maker-rust',
+    },
     skipAuth: false,
     secret: randomBytes(48).toString('hex'),
     cachePath: path.join(process.env.HOME ?? '/tmp', '.cache/turingarena/'),
