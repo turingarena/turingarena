@@ -1,4 +1,5 @@
 import { TaskMaker } from '@edomora97/task-maker';
+import * as fs from 'fs';
 import * as path from 'path';
 import { bufferTime, concatAll, concatMap, toArray } from 'rxjs/operators';
 import { ApiObject } from '../main/api';
@@ -33,7 +34,8 @@ export class EvaluateApi extends ApiObject {
             .api(SubmissionApi)
             .extract(submission, path.join(this.ctx.environment.config.cachePath, 'submission'));
 
-        const solutionPath = path.join(submissionPath, 'solution.cpp.cpp');
+        const filepath = fs.readdirSync(submissionPath)[0];
+        const solutionPath = path.join(submissionPath, filepath);
         const taskMaker = new TaskMaker(this.ctx.environment.config.taskMaker);
 
         const { lines, child, stderr } = taskMaker.evaluate({

@@ -107,7 +107,7 @@ const languages = {
         title: [{ value: 'Python 2 (cpython)' }],
     },
     python3: {
-        name: 'python3',
+        name: 'py',
         title: [{ value: 'Python 3 (cpython)' }],
     },
     c: {

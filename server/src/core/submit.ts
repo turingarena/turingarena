@@ -10,7 +10,7 @@ import { UserApi } from './user';
 export class SubmitApi extends ApiObject {
     async submit(
         { contestId, problemName, username, files }: SubmissionInput,
-        // Path of a local file to submit as solution (C++ only), used as a shortcut for the CLI
+        // Path of a local file to submit as solution (C++, C , Python only), used as a shortcut for the CLI
         // FIXME: improve the CLI to support multiple fields/file-types
         solutionPath?: string,
     ) {
@@ -37,7 +37,7 @@ export class SubmitApi extends ApiObject {
             await this.ctx.table(SubmissionFile).create({
                 submissionId: submissionData.id,
                 fieldName: 'solution',
-                fileTypeName: 'cpp',
+                fileTypeName: path.extname(solutionPath),
                 fileName: path.basename(solutionPath),
                 contentId: (await this.ctx.api(FileContentApi).createFromPath(solutionPath)).id,
             });
