@@ -7,6 +7,8 @@ For the installation we recommend you to have at least 20 GB of free space on yo
 ## Step 1 - Install requirements
 
 ```bash
+sudo apt update
+sudo apt upgrade
 sudo apt install git
 sudo apt install build-essential
 wget -q -O- https://deb.nodesource.com/setup_14.x | sudo -E bash -
@@ -31,16 +33,16 @@ sudo dpkg -i task-maker-rust_0.4.0_amd64.deb
 
 From the folder `turingarena` execute:
 
-```
+```bash
 cd server
-npm ci
+sudo npm ci
 cd ../web
-npm ci
+sudo npm ci
 ```
 
 ## Step 5 - Increase the inotify watch limit
 
-```
+```bash
 echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
 ```
 
