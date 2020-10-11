@@ -45,8 +45,8 @@ export abstract class ApiContext {
         // });
     }
 
-    abstract authorizeUser(username: string): void;
-    abstract authorizeAdmin(username: string): void;
+    abstract authorizeUser(username: string): Promise<void>;
+    abstract authorizeAdmin(): Promise<void>;
 
     readonly apiObjectCache = new Map<unknown, unknown>();
 
@@ -73,8 +73,12 @@ export abstract class ApiContext {
  * Context for API requests made programmatically. Authentication is skipped.
  */
 export class LocalApiContext extends ApiContext {
-    authorizeUser(username: string) {}
-    authorizeAdmin(username: string) {}
+    async authorizeUser(username: string) {
+        return;
+    }
+    async authorizeAdmin() {
+        return;
+    }
 }
 
 export class RemoteApiContext extends ApiContext {
@@ -82,20 +86,29 @@ export class RemoteApiContext extends ApiContext {
         super(environment);
     }
 
-    authorizeUser(username: string) {
-        if (this.environment.config.skipAuth) return;
+    private async isAdmin() {
+        if (this.environment.config.skipAuth) return true;
 
-        if (this.user?.username !== username) throw new Error(`User ${username} not authorized`);
+        if (this.user === undefined) return false;
+        const { role } = await this.api(UserApi).metadataLoader.load(this.user);
+
+        return role === 'admin';
     }
 
-    async authorizeAdmin(username: string) {
+    async authorizeUser(username: string) {
         if (this.environment.config.skipAuth) return;
 
-        this.authorizeUser(username);
+        if (this.user?.username === username) return;
+        if (await this.isAdmin()) return;
 
-        if (this.user === undefined || (await this.api(UserApi).metadataLoader.load(this.user)).role !== 'admin') {
-            throw new Error(`User ${username} is not an admin`);
-        }
+        throw new Error(`Not logged in as '${username}', nor admin`);
+    }
+
+    async authorizeAdmin() {
+        if (this.environment.config.skipAuth) return;
+        if (await this.isAdmin()) return;
+
+        throw new Error(`Not authorized`);
     }
 
     schema = createSchema();
