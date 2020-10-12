@@ -29,6 +29,10 @@ export interface QueryModelRecord {
 export const queryResolvers: Resolvers = {
     Query: {
         mainView: async ({}, { username }, ctx): Promise<MainView> => {
+            if (username !== null && username !== undefined) {
+                await ctx.authorizeUser(username);
+            }
+
             const contest = await ctx.api(ContestApi).getDefault();
 
             if (contest === null) throw new Error(`missing 'default' contest (not supported right now)`);
