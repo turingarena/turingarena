@@ -2,7 +2,7 @@ import { gql } from 'apollo-server-core';
 import { Resolvers } from '../main/resolver-types';
 import { ContestApi, ContestData } from './contest';
 import { MessageApi } from './message';
-import { SubmissionApi, Submission } from './submission';
+import { SubmissionApi} from './submission';
 import { UserApi } from './user';
 import { MainView } from './view/main-view';
 
