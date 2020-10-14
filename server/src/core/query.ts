@@ -48,18 +48,30 @@ export const queryResolvers: Resolvers = {
             (await ctx.table(ContestData).findAll()).map(d => ctx.api(ContestApi).fromData(d)),
         archive: (_, { uuid }) => ({ uuid }),
         submission: async ({}, { id }, ctx) => {
-            const sub = await ctx.api(SubmissionApi).validate({ __typename: 'Submission', id })
-            
+            const sub = await ctx.api(SubmissionApi).validate({ __typename: 'Submission', id });
+
             // Get the username of who had made the submission and verify if 
             // the current user has teh permission to made the query.
             // The query is valid if is made by the owner or by an admin user.
-            const username = await (await ctx.api(SubmissionApi).getTackling(sub)).user.username 
+            const username = await (await ctx.api(SubmissionApi).getTackling(sub)).user.username;
             await ctx.authorizeUser(username);
-            return sub
+            return sub;
         }
         ,
         fileContent: async ({}, {}, ctx) => ctx.fail(`not implemented`),
-        message: async ({}, { id }, ctx) => ctx.api(MessageApi).fromId(id),
-        messages: async ({}, { id }, ctx) => ctx.api(MessageApi).find(id),
+        message: async ({}, { id }, ctx) => {
+            const msg = await ctx.api(MessageApi).fromId(id);
+            const username =  msg?.from;
+
+            if(typeof username === 'string') await ctx.authorizeUser(username);
+            else throw new Error (`Cannot find the message : ${id}`);
+            
+            return msg;
+
+        },
+        messages: async ({}, { id }, ctx) => {
+            await ctx.authorizeUser(id);
+            return ctx.api(MessageApi).find(id);
+        },
     },
 };
