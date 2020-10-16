@@ -44,9 +44,14 @@ export const queryResolvers: Resolvers = {
                     : null,
             );
         },
-        contests: async ({}, {}, ctx) =>
-            (await ctx.table(ContestData).findAll()).map(d => ctx.api(ContestApi).fromData(d)),
-        archive: (_, { uuid }) => ({ uuid }),
+        contests: async ({}, {}, ctx) =>{
+            await ctx.authorizeAdmin();
+            return (await ctx.table(ContestData).findAll()).map(d => ctx.api(ContestApi).fromData(d))
+        },
+        archive: async (_, { uuid }, ctx) =>{
+            await ctx.authorizeAdmin();
+            return ({ uuid })
+        },
         submission: async ({}, { id }, ctx) => {
             const sub = await ctx.api(SubmissionApi).validate({ __typename: 'Submission', id });
 
@@ -60,13 +65,11 @@ export const queryResolvers: Resolvers = {
         ,
         fileContent: async ({}, {}, ctx) => ctx.fail(`not implemented`),
         message: async ({}, { id }, ctx) => {
-            const msg = await ctx.api(MessageApi).fromId(id);
-            const username =  msg?.from;
 
-            if(typeof username === 'string') await ctx.authorizeUser(username);
-            else throw new Error (`Cannot find the message : ${id}`);
+            //TODO: Add the possibility for who received and for who sended the message to use this query
+            await ctx.authorizeAdmin();
             
-            return msg;
+            return ctx.api(MessageApi).fromId(id);
 
         },
         messages: async ({}, { id }, ctx) => {

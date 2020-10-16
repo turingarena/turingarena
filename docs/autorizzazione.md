@@ -83,7 +83,7 @@ Se l'utente ha le autorizzazioni necessarie per effettuare l'operazione le funzi
 
 ### authorizeUser
 La funzione prende come parametro una stringa che nel corretto utilizzo dovrebbe rappresentare il proprietario dell'informazione alla quale si sta tentando di accedere. 
-Inzialmente viene effettuato un controllo per vedere se il parametro skipAuth è impostato a `true` e in tal caso la funzione termina.
+Inizialmente viene effettuato un controllo per vedere se il parametro skipAuth è impostato a `true` e in tal caso la funzione termina.
 Se invece `skipAuth` è false allora viene controllato se l'utente che ha fatto la richiesta è l'`username` passato come parametro oppure un admin. Se nessuna delle due condizioni viene soddisfatta viene lanciato un errore.
 ``` javascript
 async authorizeUser(username: string) {
@@ -98,7 +98,7 @@ async authorizeUser(username: string) {
 
 ### authorizeAdmin
 Anche in questo caso come nel precedente viene fatto un controllo iniziale per verificare se l'autorizzazione non è richiesta dalle impostazioni del server.
-In caso negativo viene controllato se l'utente è loggato nel sistema come amminsitratore e se così non fosse viene lanciato un errore
+In caso negativo viene controllato se l'utente è loggato nel sistema come amministratore e se così non fosse viene lanciato un errore
 ``` javascript
 async authorizeAdmin() {
         if (this.environment.config.skipAuth) return;
@@ -110,7 +110,7 @@ async authorizeAdmin() {
 
 ### Esempio d'uso delle funzioni per l'autorizzazione
 
-All'interno del file [`server/src/core/query.ts`](../server/src/core/query.ts)) è possibile trovare il segeunte uso della funzione  `authorizeUser`. 
+All'interno del file [`server/src/core/query.ts`](../server/src/core/query.ts)) è possibile trovare il seguente uso della funzione  `authorizeUser`. 
 
 ``` javascript
 export const queryResolvers: Resolvers = {
@@ -128,7 +128,31 @@ export const queryResolvers: Resolvers = {
 };
 ```
 
-E' il codice che espone la query per ottenere una `submission`. Una `submission` rappresenta la sottomissionione di una soluzione da parte di un utente ad un dato problema.
+E' il codice che espone la query per ottenere una `submission`. Una `submission` rappresenta la sottomissione di una soluzione da parte di un utente ad un dato problema.
 
-Dopo aver recuperato la sottmission corrispondente all'`id` richiesto viene estrapolato tramite la funzione `getTackling` l'utente che ha effettuato la sottomissione. 
+Dopo aver recuperato la sottomissione corrispondente all'`id` richiesto viene estrapolato tramite la funzione `getTackling` l'utente che ha effettuato la sottomissione. 
 Viene quindi chiamata la funzione `authorizeUser` passando come parametro l'owner della submission. Si ottiene quindi che un user che non sia admin non può richiedere al server le sottomissioni effettuate dagli altri utenti ma solamente le proprie.
+
+### Autorizzazioni necessarie per le varie query
+
+#### Query
+
+
+| Query | Requisito |
+|-|-|
+|mainView  | Se viene specificato l'user di cui si deve ottenere la vista principale <br/>allora l'utente deve essere loggato come quel specifico user o essere amministratore |
+|contests |E' necessario godere dei privilegi di amministratore|
+|fileContent| Query non ancora implementata   
+|archive | E' necessario godere dei privilegi di amministratore    
+|submission | L'utente deve essere loggato con lo stesso account dell'user di cui si sta richiedendo <br/> la sottomissione o essere amministratore |
+|message |  E' necessario godere dei privilegi di amministratore |
+|messages | L'utente deve essere loggato con lo stesso user di cui si stanno richiedendo i messaggi <br/> o essere amministratore  |
+
+
+#### Mutation
+| Mutation | Requisito |
+|-|-|
+| init | Non sono richiesti requisiti particolari |
+| submit | L'utente deve essere loggato con lo stesso account dell'user che sta effettuando la sottomissione <br/>o essere amministratore |
+| logIn | Non sono richiesti requisiti particolari |
+| sendMessage | L'utente deve essere loggato con lo stesso user che sta mandando il messaggio  <br/> o essere amministratore |
