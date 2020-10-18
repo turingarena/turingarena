@@ -188,7 +188,11 @@ export const contestResolvers: Resolvers = {
         end: async (c, {}, ctx) => (await ctx.api(ContestApi).getMetadata(c)).end ?? null,
         status: (c, {}, ctx) => ctx.api(ContestApi).getStatus(c),
         problemSet: c => ({ __typename: 'ContestProblemSet', contest: c }),
-        archive: async (c, {}, ctx) => ({ uuid: (await ctx.api(ContestApi).dataLoader.load(c)).archiveId }),
+        archive: async (c, {}, ctx) => {
+            await ctx.authorizeAdmin();
+
+            return { uuid: (await ctx.api(ContestApi).dataLoader.load(c)).archiveId };
+        },
         statement: (c, {}, ctx) => ctx.api(ContestApi).getStatement(c),
     },
 };

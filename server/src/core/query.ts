@@ -2,7 +2,7 @@ import { gql } from 'apollo-server-core';
 import { Resolvers } from '../main/resolver-types';
 import { ContestApi, ContestData } from './contest';
 import { MessageApi } from './message';
-import { SubmissionApi } from './submission';
+import { SubmissionApi} from './submission';
 import { UserApi } from './user';
 import { MainView } from './view/main-view';
 
@@ -44,12 +44,38 @@ export const queryResolvers: Resolvers = {
                     : null,
             );
         },
-        contests: async ({}, {}, ctx) =>
-            (await ctx.table(ContestData).findAll()).map(d => ctx.api(ContestApi).fromData(d)),
-        archive: (_, { uuid }) => ({ uuid }),
-        submission: async ({}, { id }, ctx) => ctx.api(SubmissionApi).validate({ __typename: 'Submission', id }),
+        contests: async ({}, {}, ctx) => {
+            await ctx.authorizeAdmin();
+
+            return (await ctx.table(ContestData).findAll()).map(d => ctx.api(ContestApi).fromData(d))
+        },
+        archive: async (_, { uuid }, ctx) => {
+            await ctx.authorizeAdmin();
+
+            return ({ uuid })
+        },
+        submission: async ({}, { id }, ctx) => {
+            const sub = await ctx.api(SubmissionApi).validate({ __typename: 'Submission', id });
+
+            // Get the username of who had made the submission and verify if 
+            // the current user has teh permission to made the query.
+            // The query is valid if is made by the owner or by an admin user.
+            const username = (await ctx.api(SubmissionApi).getTackling(sub)).user.username;
+            await ctx.authorizeUser(username);
+
+            return sub;
+        },
         fileContent: async ({}, {}, ctx) => ctx.fail(`not implemented`),
-        message: async ({}, { id }, ctx) => ctx.api(MessageApi).fromId(id),
-        messages: async ({}, { id }, ctx) => ctx.api(MessageApi).find(id),
+        message: async ({}, { id }, ctx) => {
+            //TODO: Add the possibility for who received and for who sended the message to use this query
+            await ctx.authorizeAdmin();
+
+            return ctx.api(MessageApi).fromId(id);
+        },
+        messages: async ({}, { id }, ctx) => {
+            await ctx.authorizeUser(id);
+
+            return ctx.api(MessageApi).find(id);
+        },
     },
 };
