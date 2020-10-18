@@ -23,18 +23,17 @@ export const mutationResolvers: Resolvers = {
 
             return true;
         },
-        submit: async ({}, { submission }, ctx) =>{
+        submit: async ({}, { submission }, ctx) => {
             await ctx.authorizeUser(submission.username);
+
             return ctx.api(SubmitApi).submit(submission);
-        }
-        ,
+        },
         logIn: ({}, { token }, ctx) => ctx.environment.authService.logIn(token),
-        sendMessage: async ({}, { message }, ctx) =>{ 
-            
-            if(typeof message.from === 'string') await ctx.authorizeUser(message.from);
+        sendMessage: async ({}, { message }, ctx) => {
+            if (typeof message.from === 'string') await ctx.authorizeUser(message.from);
             else await ctx.authorizeAdmin();
-            
-            return ctx.api(MessageApi).sendMessage(message)
+
+            return ctx.api(MessageApi).sendMessage(message);
         },
     },
 };

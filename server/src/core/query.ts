@@ -44,12 +44,14 @@ export const queryResolvers: Resolvers = {
                     : null,
             );
         },
-        contests: async ({}, {}, ctx) =>{
+        contests: async ({}, {}, ctx) => {
             await ctx.authorizeAdmin();
+
             return (await ctx.table(ContestData).findAll()).map(d => ctx.api(ContestApi).fromData(d))
         },
-        archive: async (_, { uuid }, ctx) =>{
+        archive: async (_, { uuid }, ctx) => {
             await ctx.authorizeAdmin();
+
             return ({ uuid })
         },
         submission: async ({}, { id }, ctx) => {
@@ -58,22 +60,21 @@ export const queryResolvers: Resolvers = {
             // Get the username of who had made the submission and verify if 
             // the current user has teh permission to made the query.
             // The query is valid if is made by the owner or by an admin user.
-            const username = await (await ctx.api(SubmissionApi).getTackling(sub)).user.username;
+            const username = (await ctx.api(SubmissionApi).getTackling(sub)).user.username;
             await ctx.authorizeUser(username);
+
             return sub;
-        }
-        ,
+        },
         fileContent: async ({}, {}, ctx) => ctx.fail(`not implemented`),
         message: async ({}, { id }, ctx) => {
-
             //TODO: Add the possibility for who received and for who sended the message to use this query
             await ctx.authorizeAdmin();
-            
-            return ctx.api(MessageApi).fromId(id);
 
+            return ctx.api(MessageApi).fromId(id);
         },
         messages: async ({}, { id }, ctx) => {
             await ctx.authorizeUser(id);
+
             return ctx.api(MessageApi).find(id);
         },
     },
