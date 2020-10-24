@@ -1,0 +1,56 @@
+\renewcommand{\nomebreve}{game123}
+\renewcommand{\titolo}{Uno, due, o tre passi?}
+
+\introduzione{}
+
+Alice e Bob si alternano nell'atto di rimuovere pedine da un certo tavolo di gioco.
+Ad ogni suo turno, ciascun giocatore deve rimuovere una, oppure due, oppure tre pedine.
+Il giocatore che non riesce più a muovere (perchè il numero di pedine è ormai sceso a zero) perde la partita, mentre il suo avversario viene proclamato vincitore degli undergames 2018.
+
+Devi scrivere una funzione che riceve in input il numero di pedine attualmente presenti sul tavolo e cerca, se possibile, di effettuare una mossa vincente.
+
+Trovi un template della soluzione nel file \textbf{\file{game123\_template\_sol.py}} tra gli attachments, dovrai solo curare l'implementazione della funzione richiesta:
+
+\begin{verbatim}
+def play(n):
+    return 0
+\end{verbatim}
+
+Attualmente {\tt play} ritorna sempre $0$, che equivale ad abbandonare la partita. Tuttavia questa è la risposta corretta solo in quelle situazioni in cui il giocatore non abbia una strategia vincente (ossia non possa vincere pur assumendo che l'avversario giochi ottimamente). Quando invece il giocatore sia in grado di vincere a gioco ottimo, allora vorremmo che la funzione {\tt play} computasse una mossa vincente e ritornasse il numero di pedine da rimuovere ($1$, $2$, oppure $3$). Il tuo compito è correggere/completare l'implementazione attuale della funzione {\tt play}. 
+
+
+\sezionetesto{Dati di input}
+Il vostro programma riceve come suo input un numero naturale $n$; esso indica il numero di pedine presenti sul tavolo quando siete chiamati a compiere la vostra mossa.
+
+\sezionetesto{Dati di output}
+
+Dovete ritornare in output il numero $0$ quando realizzate che la partita è ormai persa, in tutti gli altri casi dovete invece ritornare una codifica di una qualche mossa vincente. La mossa vincente è rappresentata dal numero di pedine che essa prevede di rimuovere dal tavolo.
+
+% Esempi
+\sezionetesto{Esempi di input/output}
+\esempio{4}{
+0
+}
+
+\esempio{9}{
+1
+}
+
+\esempio{10}{
+2
+}
+
+% Assunzioni
+\sezionetesto{Assunzioni}
+\begin{itemize}[nolistsep, noitemsep]
+  \item $0 \le n \le 1\,000\,000$.
+\end{itemize}
+
+  \section*{Subtask}
+  \begin{itemize}
+    \item \textbf{Subtask 1 [10 punti]:} gli esempi del testo.
+    \item \textbf{Subtask 2 [30 punti]:} $n \leq 10$.
+    \item \textbf{Subtask 3 [30 punti]:} $n \leq 15$.
+    \item \textbf{Subtask 4 [30 punti]:} $n \leq 1\,000\,000$.
+  \end{itemize}
+  

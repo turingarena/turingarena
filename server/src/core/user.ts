@@ -5,6 +5,7 @@ import { Resolvers } from '../main/resolver-types';
 import { typed } from '../util/types';
 import { Contest, ContestApi } from './contest';
 
+
 export const userSchema = gql`
     type User {
         id: ID!
