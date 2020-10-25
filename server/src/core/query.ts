@@ -5,7 +5,6 @@ import { MessageApi } from './message';
 import { SubmissionApi} from './submission';
 import { UserApi } from './user';
 import { MainView } from './view/main-view';
-import {UsersApi} from './users';
 export const querySchema = gql`
     type Query {
         """

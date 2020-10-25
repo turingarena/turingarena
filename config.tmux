@@ -41,3 +41,6 @@ select-layout tiled
 
 split-window -c web/ npm run watch:prepare
 select-layout tiled
+
+split-window -c dashboard-api/ npm run start
+select-layout tiled

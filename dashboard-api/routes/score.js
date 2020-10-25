@@ -35,7 +35,6 @@ GROUP by  username, problem_name
     if (err) {
       throw err;
     }
-    console.log(rows)
     res.send(rows)
   });
   db.close();
