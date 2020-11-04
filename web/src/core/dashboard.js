@@ -10,7 +10,7 @@ export function Dashboard() {
   const [props, setProps] = useState(null);
 
   useEffect(() => {
-    fetch('http://localhost:9090/score')
+    fetch('http://localhost:3000/score')
       .then(result => result.json())
       .then(rowData => setData(rowData));
   }, []);
