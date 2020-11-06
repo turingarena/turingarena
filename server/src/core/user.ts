@@ -27,6 +27,11 @@ export const userSchema = gql`
     }
 `;
 
+export enum UserRole {
+    USER,
+    ADMIN,
+}
+
 export interface User {
     __typename: 'User';
     contest: Contest;

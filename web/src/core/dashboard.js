@@ -1,8 +1,8 @@
+import { utimes } from 'fs';
 import React, { useState, useEffect } from 'react';
-
 import PivotTableUI from 'react-pivottable/PivotTableUI';
 import './dashboard.css';
-
+import {bearerHeader} from '../util/auth'
 // see documentation for supported input formats
 
 export function Dashboard() {
@@ -10,10 +10,11 @@ export function Dashboard() {
   const [props, setProps] = useState(null);
 
   useEffect(() => {
-    fetch('http://localhost:3000/score')
+    const requestOptions = { method: 'GET', headers: bearerHeader() };
+    fetch('/score',requestOptions)
       .then(result => result.json())
       .then(rowData => setData(rowData));
-  }, []);
+  }, [localStorage.auth]);
 
   return (
     <div class="pivottablemycontainer">

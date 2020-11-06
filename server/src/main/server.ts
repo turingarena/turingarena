@@ -8,7 +8,7 @@ import { FileContent } from '../core/files/file-content';
 import { ApiEnvironment, RemoteApiContext } from './api-context';
 import { Config } from './config';
 import { createSchema } from './executable-schema';
-import getScoreForDashboard from '../core/score'; //
+import {getUsersScore} from '../core/score'; //
 var cors = require('cors');
 // Needed to make Docker exit correctly on CTRL-C
 process.on('SIGINT', () => process.exit(0));
@@ -45,11 +45,10 @@ export function serve(config: Config) {
 
     app.use(express.static(config.webRoot));
 
-
     /**
      * Serve the maximum score made by each player in each problem
      */
-    app.get('/score', getScoreForDashboard);
+    app.get('/score', getUsersScore);
 
     /**
      * Serve static files directly from the database.
