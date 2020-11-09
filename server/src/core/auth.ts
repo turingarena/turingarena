@@ -1,8 +1,9 @@
 import { gql } from 'apollo-server-core';
 import { sign, verify } from 'jsonwebtoken';
 import { ApiEnvironment, LocalApiContext } from '../main/api-context';
+import { loadConfig } from '../main/config';
 import { ContestApi } from './contest';
-import { User, UserApi, UserRole } from './user';
+import { User, UserApi } from './user';
 
 export const authSchema = gql`
     type AuthResult {
@@ -36,7 +37,7 @@ export class AuthService {
 
     /**
      * Generate the response for a request of login.
-     * It checks if exist in the default contest a user with the same token (secret) 
+     * It checks if exist in the default contest a user with the same token (secret)
      * that is passed as parameter.
      * @param token Unique secret that identify  the user
      * @returns A structure that contains the username of the user and the JsonWebToken TokenPayload generated and signed if token is valid,
@@ -85,8 +86,10 @@ export function isLogged(req): boolean {
         const bearerToken = bearerHeader.split(' ')[1];
 
         try {
+            const config = loadConfig();
+
             //if the JsonWebToken is correctly signed return true
-            verify(bearerToken, 'superSecretCode'); //FIXME: fix the hardocded secret
+            verify(bearerToken, config.secret); //FIXME: fix the hardocded secret
 
             return true;
         } catch (err) {
