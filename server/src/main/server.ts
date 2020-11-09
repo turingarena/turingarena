@@ -8,13 +8,15 @@ import { FileContent } from '../core/files/file-content';
 import { ApiEnvironment, RemoteApiContext } from './api-context';
 import { Config } from './config';
 import { createSchema } from './executable-schema';
-
+import {getUsersScore} from '../core/score'; //
+var cors = require('cors');
 // Needed to make Docker exit correctly on CTRL-C
 process.on('SIGINT', () => process.exit(0));
 
 export function serve(config: Config) {
     const app = express();
 
+    app.use(cors());
     console.log(config);
 
     const env = new ApiEnvironment(config);
@@ -42,6 +44,11 @@ export function serve(config: Config) {
     server.applyMiddleware({ app });
 
     app.use(express.static(config.webRoot));
+
+    /**
+     * Serve the maximum score made by each player in each problem
+     */
+    app.get('/score', getUsersScore);
 
     /**
      * Serve static files directly from the database.

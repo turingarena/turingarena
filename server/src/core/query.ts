@@ -5,14 +5,12 @@ import { MessageApi } from './message';
 import { SubmissionApi} from './submission';
 import { UserApi } from './user';
 import { MainView } from './view/main-view';
-
 export const querySchema = gql`
     type Query {
         """
         Data visible in a front page, i.e., to contestants.
         """
         mainView("Name of the user viewing the front page, if logged in" username: ID): MainView!
-
         contests: [Contest!]!
         fileContent(id: ID!): FileContent!
         archive(uuid: ID!): Archive!

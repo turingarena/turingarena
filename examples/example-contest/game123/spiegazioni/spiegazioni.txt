@@ -1,0 +1,82 @@
+La prendo un po' larga e, oltre a giocare insieme, facciamo persino un po' di teoria introducendo qualche nozione che possa servirvi più in generale.
+
+Di fronte a questo gioco combinatorico a 2 giocatori, assumo di partire con n pedine, e mi chiedo se comunque vada la partita essa sia giocoforza destinata a terminare.
+
+Secondo tè è vero che la partita è destinata a terminare?
+
+PAUSE_AND_THINK_YOURSELF
+
+[Noto che ad ogni mossa il numero di pedine cala strattamente. Quindi il numero di pedine, che parte dal numero naturale n (che per quanto magari grandissimo ma sarà pur sempre finito come tutti i naturali), è la nostra monovariante che cala ad ogni mossa.]
+
+A mio avviso questo fatto implica che sia determinato in bella partenza quale dei due giocatori sia in possesso di una strategia vincente e quale invece sia condannato a sconfitta (assumendo gioco ottimo dell'avversario, che è la nostra assunzione ed approccio base al problema).
+
+Sei d'accordo con la conclusione sopra? Sai argomentarla?
+
+PAUSE_AND_THINK_YOURSELF
+
+[Potrei rappresentarmi il mondo di tutte le possibili partite come un albero i cui nodi sono tutte le configurazioni visitabili: il nodo radice corrisponde alla posizione iniziale (n, TOCCA_A_ME). La radice ha i tre figli:
+ (n-1, TOCCA_A_TE)
+ (n-2, TOCCA_A_TE)
+ (n-3, TOCCA_A_TE)
+
+e questa regola di filiazione vale grosso modo per ogni nodo. Ovviamente, quando n < 3 avrò qualche figlio in meno. In particolare, quando n = 0, non avrò alcun figlio (siamo nei nodi foglia dell'albero).
+Il valore del gioco è così determinato in tutte le foglie (posizioni con zero pedine) dalla seguente regola:
+   chi tocca perde!
+Questa regola fà da base a definire induttivamente i valori di gioco di ogni altro nodo partendo dalle foglie.
+Nei nodi dove tocca a mè muovere mi chiedo se una delle mosse consegna una posizione dove la vittoria è mia, devo cioè fare lo OR dei figli per quanto riguardi il valore di verità della proposizione "vinco io".
+Nei nodi dove tocca all'avversario dovrò invece fare lo AND della stessa proposizione "vinco io" poichè debbo assicurarmi che l'avversario non abbia alcuna contromossa vincente.
+Risalendo lungo l'albero viene quindi a determinarsi il valore di gioco di ogni nodo, fino alla radice.
+
+Questo è un esempio di dimostrazione costruttiva. Altresì di induzione matematica.]
+
+Potrei quindi scrivere una procedura ricorsiva che visita tutto l'albero. Così come definito nella dimostrazione sopra presa alla lettera, l'albero è di dimensione esponenziale:
+1 solo nodo di prima generazione (la radice), 3 nodi di seconda generazione, 9 nodi di terza generazione, ..., insomma una pericolosa esplosione che non consente a questo metodo di terminare per n > 20.
+Si noti tuttavia che già nei nodi di terza generazione stiamo generando più volte lo stesso nodo. In realtà, se prestiamo attenzione a risolvere uno stesso problema una sola volta, i problemi del nostro castello di carte induttivo sono solo i seguenti:
+
+{ (i, TOCCA_A_ME), (i, TOCCA_A_TE) : i = 0, 1, 2, ..., n }
+
+Cioè ci basta labellare Vero o Falso solamente 3(n+1) sottoproblemi della famiglia di problemi chiusa rispetto ad induzione che abbiamo in sostanza definito più sopra.
+Se ci facciamo la lista di questi problemi/domande e li risolviamo/rispondiamo tutti dal più piccolo al più grande questi ci cadono come i birilli senza opporci alcuna resistenza. Questo modo di procedere è un'esempio della tecnica algoritmica chiamata Programmazione Dinamica. 
+
+Provo a dare un'altra visione, se non arriva avremo occasioni future di ritornarci: Tornando al grafo delle configurazioni visitabili, una volta identificati qui nodi dell'albero che in realtà rappresntano la stessa identica configurazione il grafo di 3(n+1) nodi (=configurazioni) che ci troviamo tra le mani sarà un DAG, ossia un grafo diretto che comunque non contiene cicli diretti (dato che il gioco è destinato a terminare).
+
+Il gioco proposto alla provetta era poi molto semplice, con la teoria sopra abbiamo forse complicato un pò le cose sparando con un cannone alla formica, ma sono comunque contento di avervi fornito in questo documento uno strumento, visioni astratte, e metodi più generali, che possano aiutarvi in molti altri contesti dove il gioco dovesse farsi più difficile. 
+
+Una prima importante semplificazione derivava dal fatto che il gioco era imparziale, ossia la configurazione attuale della partita basta da sola a stabilire di chi sia la vittoria senza sapere chi debba muovere.
+Possiamo cioè parlare di "configurazioni chi tocca vince" e di "configurazioni chi tocca perde".
+Notate che questa proprietà non è così scontata, non vale ad esempio per giochi quali gli scacchi o la dama, dove il colore delle pedine entra in gioco.
+
+Stiamo quindi parlando di un progressively finite game (in buona sostanza di un gioco il cui grafo delle configurazioni è un DAG), dove le foglie (ora chiamate pozzi, non è più consentito chiamerle foglie poichè più archi possono ora entrare in uno stesso nodo dopo che abbiamo collassato le classi di equivalenza nel mondo delle configurazioni visitate) sono tutte posizioni chi tocca perde ed un generico nodo è chi tocca vince se e solo se da quella configurazione posso consegnare una chi tocca perde all'avversario.
+
+Voglio promuovere la vostra visione astratta.
+DAG è l'acronimo per Directed Acyclic Graph.
+Dato un DAG $D = (V.A)$, un insieme di nodi $X \subseteq V$ è un kernel se e solo se valgono le due seguenti condizioni:
+C1. non esiste alcun arco di $D$ (mossa del gioco) che abbia sia coda che testa in $X$;
+C2. per ogni nodo $v\in V \setminus X$ esiste un arco con coda in $v$ e testa in $X$.
+
+Ecco tre esercizi:
+
+1. Prova a dimostrare che in ogni DAG esiste ed è unico il kernel.
+
+2. Realizza che il kernel del DAG di un gioco corrisponde esattamente all'insieme delle posizioni chi tocca perde.
+
+3. Individua il kernel del gioco nel gioco poroposto alla provetta.
+
+PAUSE_AND_THINK_YOURSELF
+
+Hint: se sei smarrito, prova a partire dal classificare le foglie. Poi risali induttivamente. Ogni cosa sarà univocamente forzata. Un pò come i birilli che sono caduti più sopra. Anzi, stiamo proprio facendo la stessa cosa.
+
+PAUSE_AND_THINK_YOURSELF
+
+Nel gioco proposto alla provetta il kernel del gioco erano le posizioni in cui il numero delle pedine n era divisibile per 4.
+
+Prova a verificare che tale insieme di posizioni costituisce effettivamente il kernel del gioco, ossia prova a verificare le condizioni C1 e C2
+
+PAUSE_AND_THINK_YOURSELF
+
+Infatti, se mi trovo in una posizione del kernel, ossia con un numero di pedine divisibile per 4, e rimuovo 1,2, oppure 3 pedine, di necessità mi ritrovo con un numero che non è più divilibile per 4, ossia fuori dal kernel. Quindi la C1 è soddisfatta, quando muovo dal kernel di necessità al mio avversario consegno una posizione fuori kernel.
+
+E quando mi arriva una posizione fuori kernel posso sempre ributtare il mio avversario dentro il kernel.
+
+Individuare direttamente il kernel di un gioco, senza dover compilare tutta la tabella di Programmazione Dinamica, a volte (in casi magici) è possibile, e poi, a valle dell'intuizione del kernel, col semplice controllo di C1 e C2 è come essere di fronte ad una profezia che si autorealizza. Chi lo ha fatto in questo caso magico semplice ha dovuto esibire astrazione ed intuizione. Forse per giungerci ha lavorato con metodo partendo dall'analizzare casi per n piccolo. Complimenti comunque ci siate arrivati. Ma proseguite nel corso mano a mano che alzeremo l'asticella, anzi, aiutateci ad alzarla gradualmente. Vorrebbe non solo consegnarvi l'importante (anzi ormai irrinunciabile) strumento della programmazione, ma anche introdurvi alle tecniche fondamentali del problem solving, ossia ciò che serve per produrre nuovi risultati e sempre nuova matematica.
+
