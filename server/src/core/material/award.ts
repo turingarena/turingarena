@@ -25,7 +25,7 @@ export const awardSchema = gql`
 `;
 
 export class Award {
-    constructor(readonly material: ProblemMaterial, readonly index: number) {}
+    constructor(readonly material: ProblemMaterial, readonly index: number) { }
 
     private readonly subtaskInfo = this.material.taskInfo.IOI.scoring.subtasks[this.index];
 
@@ -36,18 +36,11 @@ export class Award {
         this.subtaskInfo.max_score > 0
             ? new ScoreGradeDomain(new ScoreRange(this.subtaskInfo.max_score, 0, true))
             : new FulfillmentGradeDomain();
+
+    id = () => `${this.material.problem.contest.id}/${this.material.problem.name}/${this.index}`;
+    problem = () => this.material.problem;
 }
 
 export interface AwardModelRecord {
     Award: Award;
 }
-
-export const awardResolvers: Resolvers = {
-    Award: {
-        id: a => `${a.material.problem.contest.id}/${a.material.problem.name}/${a.index}`,
-        problem: a => a.material.problem,
-        name: a => a.name,
-        gradeDomain: a => a.gradeDomain,
-        title: a => a.title,
-    },
-};
