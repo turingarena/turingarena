@@ -36,7 +36,7 @@ import { gradeResolvers, gradeSchema } from './feedback/grade';
 import { headerSchema } from './feedback/header';
 import { memoryUsageSchema } from './feedback/memory-usage';
 import { messageFieldSchema } from './feedback/message';
-import { ScoreModelRecord, scoreResolvers, scoreSchema } from './feedback/score';
+import { ScoreModelRecord, scoreSchema } from './feedback/score';
 import { timeUsageSchema } from './feedback/time-usage';
 import { valenceSchema } from './feedback/valence';
 import { Archive, ArchiveModelRecord, archiveResolvers, archiveSchema } from './files/archive';
@@ -185,7 +185,6 @@ export const resolvers: Resolvers = {
     ...mutationResolvers,
     ...problemResolvers,
     ...queryResolvers,
-    ...scoreResolvers,
     ...submissionResolvers,
     ...textResolvers,
     ...userResolvers,

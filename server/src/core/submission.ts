@@ -88,14 +88,14 @@ export class SubmissionApi extends ApiObject {
 
     allByTackling = createSimpleLoader(
         async ({
-                   assignment: {
-                       problem: {
-                           contest: { id: contestId },
-                           name: problemName,
-                       },
-                   },
-                   user: { username },
-               }: ContestProblemAssignmentUserTackling) =>
+            assignment: {
+                problem: {
+                    contest: { id: contestId },
+                    name: problemName,
+                },
+            },
+            user: { username },
+        }: ContestProblemAssignmentUserTackling) =>
             (
                 await this.ctx
                     .table(SubmissionData)
@@ -313,8 +313,8 @@ export class SubmissionApi extends ApiObject {
                                 : timeUsage <= warningWatermarkMultiplier * timeLimitSeconds
                                 ? 'NOMINAL'
                                 : timeUsage <= timeLimitSeconds
-                                    ? 'WARNING'
-                                    : 'FAILURE',
+                                ? 'WARNING'
+                                : 'FAILURE',
                     },
                     {
                         __typename: 'MemoryUsageField',
@@ -331,8 +331,8 @@ export class SubmissionApi extends ApiObject {
                                 : memoryUsage * memoryUnitBytes <= warningWatermarkMultiplier * memoryLimitBytes
                                 ? 'NOMINAL'
                                 : memoryUsage * memoryUnitBytes <= memoryLimitBytes
-                                    ? 'WARNING'
-                                    : 'FAILURE',
+                                ? 'WARNING'
+                                : 'FAILURE',
                     },
                     {
                         __typename: 'MessageField',
