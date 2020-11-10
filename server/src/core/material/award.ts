@@ -1,5 +1,4 @@
 import { gql } from 'apollo-server-core';
-import { Resolvers } from '../../main/resolver-types';
 import { FulfillmentGradeDomain } from '../feedback/fulfillment';
 import { ScoreGradeDomain, ScoreRange } from '../feedback/score';
 import { ProblemMaterial } from './problem-material';
@@ -25,7 +24,7 @@ export const awardSchema = gql`
 `;
 
 export class Award {
-    constructor(readonly material: ProblemMaterial, readonly index: number) { }
+    constructor(readonly material: ProblemMaterial, readonly index: number) {}
 
     private readonly subtaskInfo = this.material.taskInfo.IOI.scoring.subtasks[this.index];
 
@@ -37,8 +36,12 @@ export class Award {
             ? new ScoreGradeDomain(new ScoreRange(this.subtaskInfo.max_score, 0, true))
             : new FulfillmentGradeDomain();
 
-    id = () => `${this.material.problem.contest.id}/${this.material.problem.name}/${this.index}`;
-    problem = () => this.material.problem;
+    id() {
+        return `${this.material.problem.contest.id}/${this.material.problem.name}/${this.index}`;
+    }
+    problem() {
+        return this.material.problem;
+    }
 }
 
 export interface AwardModelRecord {
