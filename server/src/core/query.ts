@@ -3,7 +3,7 @@ import { Resolvers } from '../main/resolver-types';
 import { ContestApi, ContestData } from './contest';
 import { MessageApi } from './message';
 import { SubmissionApi} from './submission';
-import { UserApi } from './user';
+import { User, UserApi } from './user';
 import { MainView } from './view/main-view';
 export const querySchema = gql`
     type Query {
@@ -38,7 +38,7 @@ export const queryResolvers: Resolvers = {
             return new MainView(
                 contest,
                 username !== null && username !== undefined
-                    ? await ctx.api(UserApi).validate({ __typename: 'User', contest, username })
+                    ? await ctx.api(UserApi).validate(new User(contest, username))
                     : null,
             );
         },
@@ -55,7 +55,7 @@ export const queryResolvers: Resolvers = {
         submission: async ({}, { id }, ctx) => {
             const sub = await ctx.api(SubmissionApi).validate({ __typename: 'Submission', id });
 
-            // Get the username of who had made the submission and verify if 
+            // Get the username of who had made the submission and verify if
             // the current user has teh permission to made the query.
             // The query is valid if is made by the owner or by an admin user.
             const username = (await ctx.api(SubmissionApi).getTackling(sub)).user.username;
