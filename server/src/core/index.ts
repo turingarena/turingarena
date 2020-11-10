@@ -2,7 +2,7 @@ import { gql } from 'apollo-server-core';
 import { Resolvers } from '../main/resolver-types';
 import { Achievement, AchievementModelRecord, achievementSchema } from './achievement';
 import { authSchema } from './auth';
-import { ContestData, ContestModelRecord, contestResolvers, contestSchema } from './contest';
+import { ContestData, ContestModelRecord, contestSchema } from './contest';
 import {
     ContestAwardAssignmentModelRecord,
     contestAwardAssignmentResolvers,
@@ -31,7 +31,7 @@ import {
 import { Evaluation, EvaluationModelRecord, evaluationSchema } from './evaluation';
 import { EvaluationEvent } from './evaluation-event';
 import { fieldSchema } from './feedback/field';
-import { FulfillmentModelRecord, fulfillmentResolvers, fulfillmentSchema } from './feedback/fulfillment';
+import { FulfillmentModelRecord, fulfillmentSchema } from './feedback/fulfillment';
 import { gradeResolvers, gradeSchema } from './feedback/grade';
 import { headerSchema } from './feedback/header';
 import { memoryUsageSchema } from './feedback/memory-usage';
@@ -41,7 +41,7 @@ import { timeUsageSchema } from './feedback/time-usage';
 import { valenceSchema } from './feedback/valence';
 import { Archive, ArchiveModelRecord, archiveResolvers, archiveSchema } from './files/archive';
 import { FileContent, FileContentModelRecord, fileContentResolvers, fileContentSchema } from './files/file-content';
-import { AwardModelRecord, awardResolvers, awardSchema } from './material/award';
+import { AwardModelRecord, awardSchema } from './material/award';
 import { MediaModelRecord, mediaResolvers, mediaSchema } from './material/media';
 import { ProblemMaterialModelRecord, problemMaterialSchema } from './material/problem-material';
 import { TextModelRecord, textResolvers, textSchema } from './material/text';
@@ -52,7 +52,7 @@ import { ProblemModelRecord, problemResolvers, problemSchema } from './problem';
 import { QueryModelRecord, queryResolvers, querySchema } from './query';
 import { SubmissionData, SubmissionModelRecord, submissionResolvers, submissionSchema } from './submission';
 import { SubmissionFile, submissionFileSchema } from './submission-file';
-import { UserModelRecord, userResolvers, userSchema } from './user';
+import { UserModelRecord, userSchema } from './user';
 import { DateTimeModelRecord, dateTimeResolvers, dateTimeSchema } from './util/date-time';
 import {
     ContestAwardAssignmentViewModelRecord,
@@ -165,7 +165,6 @@ export type ModelRecord = unknown &
 
 /** All GraphQL resolvers. Obtained combining resolvers from each components. */
 export const resolvers: Resolvers = {
-    ...awardResolvers,
     ...contestAssignmentUserTacklingResolvers,
     ...contestAwardAssignmentResolvers,
     ...contestAwardAssignmentViewResolvers,
@@ -174,11 +173,9 @@ export const resolvers: Resolvers = {
     ...contestProblemAssignmentViewResolvers,
     ...contestProblemSetResolvers,
     ...contestProblemSetViewResolvers,
-    ...contestResolvers,
     ...contestViewResolvers,
     ...dateTimeResolvers,
     ...fileContentResolvers,
-    ...fulfillmentResolvers,
     ...gradeResolvers,
     ...mainViewResolvers,
     ...mediaResolvers,
@@ -187,6 +184,5 @@ export const resolvers: Resolvers = {
     ...queryResolvers,
     ...submissionResolvers,
     ...textResolvers,
-    ...userResolvers,
     ...archiveResolvers,
 };
