@@ -6,6 +6,7 @@ import { AllowNull, Column, DataType, ForeignKey, Table } from 'sequelize-typesc
 import * as yaml from 'yaml';
 import { __generated_ContestStatus } from '../generated/graphql-types';
 import { ApiObject } from '../main/api';
+import { ApiContext } from '../main/api-context';
 import { createSimpleLoader, UuidBaseModel } from '../main/base-model';
 import { Resolvers } from '../main/resolver-types';
 import { typed } from '../util/types';
@@ -49,11 +50,6 @@ export class ContestData extends UuidBaseModel<ContestData> {
     archiveId!: string;
 }
 
-export interface Contest {
-    __typename: 'Contest';
-    id: string;
-}
-
 export type ContestStatus = __generated_ContestStatus;
 
 export interface MutationModelRecord {
@@ -66,7 +62,7 @@ export interface ContestModelRecord {
 
 export class ContestApi extends ApiObject {
     fromId(id: string): Contest {
-        return { __typename: 'Contest', id };
+        return new Contest(id);
     }
 
     fromData(data: ContestData): Contest {
@@ -95,10 +91,7 @@ export class ContestApi extends ApiObject {
         const data = await this.ctx.table(ContestData).findOne();
         if (data === null) return null;
 
-        return {
-            __typename: 'Contest',
-            id: data.id,
-        };
+        return new Contest(data.id);
     }
 
     async getMetadata(c: Contest) {
@@ -179,20 +172,33 @@ export class ContestApi extends ApiObject {
     }
 }
 
-export const contestResolvers: Resolvers = {
-    Contest: {
-        id: c => c.id,
-        name: async (c, {}, ctx) => (await ctx.api(ContestApi).getMetadata(c)).name,
-        title: async (c, {}, ctx) => [{ value: (await ctx.api(ContestApi).getMetadata(c)).title }],
-        start: async (c, {}, ctx) => (await ctx.api(ContestApi).getMetadata(c)).start,
-        end: async (c, {}, ctx) => (await ctx.api(ContestApi).getMetadata(c)).end ?? null,
-        status: (c, {}, ctx) => ctx.api(ContestApi).getStatus(c),
-        problemSet: c => ({ __typename: 'ContestProblemSet', contest: c }),
-        archive: async (c, {}, ctx) => {
-            await ctx.authorizeAdmin();
+export class Contest {
+    constructor(readonly id: string) {}
+    __typename = 'Contest';
+    async name({}, ctx: ApiContext) {
+        return (await ctx.api(ContestApi).getMetadata(this)).name;
+    }
+    async title({}, ctx: ApiContext) {
+        return [{ value: (await ctx.api(ContestApi).getMetadata(this)).title }];
+    }
+    async start({}, ctx: ApiContext) {
+        return (await ctx.api(ContestApi).getMetadata(this)).start;
+    }
+    async end({}, ctx: ApiContext) {
+        return (await ctx.api(ContestApi).getMetadata(this)).end ?? null;
+    }
+    status({}, ctx: ApiContext) {
+        return ctx.api(ContestApi).getStatus(this);
+    }
+    problemSet() {
+        return { __typename: 'ContestProblemSet', contest: this };
+    }
+    async archive({}, ctx: ApiContext) {
+        await ctx.authorizeAdmin();
 
-            return { uuid: (await ctx.api(ContestApi).dataLoader.load(c)).archiveId };
-        },
-        statement: (c, {}, ctx) => ctx.api(ContestApi).getStatement(c),
-    },
-};
+        return { uuid: (await ctx.api(ContestApi).dataLoader.load(this)).archiveId };
+    }
+    statement({}, ctx: ApiContext) {
+        return ctx.api(ContestApi).getStatement(this);
+    }
+}
