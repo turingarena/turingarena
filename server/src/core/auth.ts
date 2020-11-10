@@ -66,7 +66,7 @@ export class AuthService {
             throw new Error(`token not valid for current contest`);
         }
 
-        const user = await this.ctx.api(UserApi).validate({ __typename: 'User', contest, username: payload.username });
+        const user = await this.ctx.api(UserApi).validate(new User(contest, payload.username));
 
         return user;
     }
