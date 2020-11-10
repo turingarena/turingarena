@@ -9,7 +9,7 @@ import { Archive } from '../files/archive';
 import { FileContent } from '../files/file-content';
 import { Problem } from '../problem';
 import { Award } from './award';
-import { Media, MediaVariant } from './media';
+import { Media, MediaFile } from './media';
 import { ProblemTaskInfo, ProblemTaskInfoApi } from './problem-task-info';
 import { Text } from './text';
 
@@ -168,23 +168,17 @@ export class ProblemMaterial {
 
     title = [{ value: this.taskInfo.IOI.title }];
     statement = this.taskInfo.IOI.statements.map(
-        ({ path, language, content_type: type }): MediaVariant => ({
-            name: path.slice(path.lastIndexOf('/') + 1),
-            language,
-            type,
-            content: ctx => ctx.api(ProblemMaterialApi).loadContent(this.problem, path),
-        }),
+        ({ path, language, content_type: type }): MediaFile =>
+            new MediaFile(path.slice(path.lastIndexOf('/') + 1), language, type, ctx =>
+                ctx.api(ProblemMaterialApi).loadContent(this.problem, path),
+            ),
     );
 
     attachments = this.taskInfo.IOI.attachments.map(
         ({ name, path, content_type: type }): ProblemAttachment => ({
             title: [{ value: name }],
             media: [
-                {
-                    name,
-                    type,
-                    content: ctx => ctx.api(ProblemMaterialApi).loadContent(this.problem, path),
-                },
+                new MediaFile(name, null, type, ctx => ctx.api(ProblemMaterialApi).loadContent(this.problem, path)),
             ],
         }),
     );

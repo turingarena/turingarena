@@ -14,7 +14,7 @@ import { ContestMetadata } from './contest-metadata';
 import { ContestProblemAssignment } from './contest-problem-assignment';
 import { Archive } from './files/archive';
 import { FileContent } from './files/file-content';
-import { Media, MediaVariant } from './material/media';
+import { Media, MediaFile } from './material/media';
 import { ProblemMaterial, ProblemMaterialApi } from './material/problem-material';
 
 export const contestSchema = gql`
@@ -146,15 +146,16 @@ export class ContestApi extends ApiObject {
         );
     }
 
-    private statementVariantFromFile(archiveFile: Archive): MediaVariant {
+    private statementVariantFromFile(archiveFile: Archive): MediaFile {
         const type = mime.lookup(archiveFile.path);
         const pathParts = archiveFile.path.split('/');
 
-        return {
-            name: pathParts[pathParts.length - 1],
-            type: type !== false ? type : 'application/octet-stream',
-            content: () => archiveFile.getContent(),
-        };
+        return new MediaFile(
+            pathParts[pathParts.length - 1],
+            null,
+            type !== false ? type : 'application/octet-stream',
+            () => archiveFile.getContent(),
+        );
     }
 
     async getStatement(c: Contest): Promise<Media> {
@@ -168,7 +169,7 @@ export class ContestApi extends ApiObject {
             },
         });
 
-        return statementFiles.map((archiveFile): MediaVariant => this.statementVariantFromFile(archiveFile));
+        return statementFiles.map((archiveFile): MediaFile => this.statementVariantFromFile(archiveFile));
     }
 }
 

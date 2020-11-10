@@ -31,29 +31,26 @@ export const mediaSchema = gql`
     }
 `;
 
-export type Media = MediaVariant[];
-
-export interface MediaVariant {
-    language?: string;
-
-    name: string;
-    type: string;
-    content: (ctx: ApiContext) => Promise<FileContent>;
-}
+export type Media = MediaFile[];
 
 export interface MediaModelRecord {
     Media: Media;
-    MediaFile: MediaVariant;
+    MediaFile: MediaFile;
+}
+
+export class MediaFile {
+    constructor(
+        readonly name: string,
+        readonly language: string | null,
+        readonly type: string,
+        readonly content: (ctx: ApiContext) => Promise<FileContent>,
+    ) {}
+
+    async url({},ctx: ApiContext){return `/files/${(await this.content(ctx)).id}/${this.name}`;}
 }
 
 export const mediaResolvers: Resolvers = {
     Media: {
         variant: media => media[0],
-    },
-    MediaFile: {
-        url: async (f, {}, ctx) => `/files/${(await f.content(ctx)).id}/${f.name}`,
-        content: (f, {}, ctx) => f.content(ctx),
-        name: f => f.name,
-        type: f => f.type,
     },
 };
