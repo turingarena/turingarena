@@ -1,11 +1,11 @@
 import * as path from 'path';
 import { ApiObject } from '../main/api';
-import { ContestApi } from './contest';
+import { Contest, ContestApi } from './contest';
 import { EvaluateApi } from './evaluate';
 import { FileContentApi } from './files/file-content';
 import { SubmissionApi, SubmissionData, SubmissionInput } from './submission';
 import { SubmissionFile } from './submission-file';
-import { UserApi } from './user';
+import { User, UserApi } from './user';
 
 export class SubmitApi extends ApiObject {
     async submit(
@@ -14,8 +14,8 @@ export class SubmitApi extends ApiObject {
         // FIXME: improve the CLI to support multiple fields/file-types
         solutionPath?: string,
     ) {
-        const contest = await this.ctx.api(ContestApi).validate({ __typename: 'Contest', id: contestId });
-        await this.ctx.api(UserApi).validate({ __typename: 'User', contest, username });
+        const contest = await this.ctx.api(ContestApi).validate(new Contest(contestId));
+        await this.ctx.api(UserApi).validate(new User(contest, username));
 
         const submissionData = await this.ctx
             .table(SubmissionData)
