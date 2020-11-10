@@ -17,6 +17,7 @@ import { FileContentApi } from './files/file-content';
 import { ProblemMaterialApi } from './material/problem-material';
 import { Participation } from './participation';
 import { SubmissionFileApi } from './submission-file';
+import { User } from './user';
 
 export const submissionSchema = gql`
     type Submission {
@@ -132,7 +133,7 @@ export class SubmissionApi extends ApiObject {
                 __typename: 'ContestProblemAssignment',
                 problem: { __typename: 'Problem', contest, name: problemName },
             },
-            user: { __typename: 'User', contest, username },
+            user: new User(contest, username),
         });
     }
 
