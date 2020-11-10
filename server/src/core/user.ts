@@ -1,10 +1,8 @@
 import { gql } from 'apollo-server-core';
 import { ApiObject } from '../main/api';
+import { ApiContext } from '../main/api-context';
 import { createSimpleLoader } from '../main/base-model';
-import { Resolvers } from '../main/resolver-types';
-import { typed } from '../util/types';
 import { Contest, ContestApi } from './contest';
-
 
 export const userSchema = gql`
     type User {
@@ -32,10 +30,15 @@ export enum UserRole {
     ADMIN,
 }
 
-export interface User {
-    __typename: 'User';
-    contest: Contest;
-    username: string;
+export class User {
+    constructor(readonly contest: Contest, readonly username: string) {}
+    __typename = 'User';
+    id() {
+        return `${this.contest.id}/${this.username}`;
+    }
+    async name({}, ctx: ApiContext) {
+        return (await ctx.api(UserApi).metadataLoader.load(this)).name;
+    }
 }
 
 export class UserApi extends ApiObject {
@@ -61,18 +64,10 @@ export class UserApi extends ApiObject {
         if (userMetadata === null) return null;
         const { username } = userMetadata;
 
-        return typed<User>({ __typename: 'User', contest, username });
+        return new User(contest, username);
     }
 }
 
 export interface UserModelRecord {
     User: User;
 }
-
-export const userResolvers: Resolvers = {
-    User: {
-        id: ({ contest, username }) => `${contest.id}/${username}`,
-        username: u => u.username,
-        name: async (u, {}, ctx) => (await ctx.api(UserApi).metadataLoader.load(u)).name,
-    },
-};
