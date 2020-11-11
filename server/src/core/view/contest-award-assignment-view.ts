@@ -1,8 +1,6 @@
 import { gql } from 'apollo-server-core';
 import { ApiObject } from '../../main/api';
 import { ApiContext } from '../../main/api-context';
-import { Resolvers } from '../../main/resolver-types';
-import { typed } from '../../util/types';
 import { ContestAwardAssignment } from '../contest-award-assignment';
 import {
     ContestAwardAssignmentUserTackling,
@@ -34,11 +32,7 @@ export class ContestAwardAssignmentView {
     constructor(readonly assignment: ContestAwardAssignment, readonly user: User | null) {}
     __typename = 'ContestAwardAssignmentView';
     async problemAssignmentView() {
-        return typed<ContestProblemAssignmentView>({
-            __typename: 'ContestProblemAssignmentView',
-            assignment: this.assignment.problemAssignment,
-            user: this.user,
-        });
+        return new ContestProblemAssignmentView(this.assignment.problemAssignment, this.user);
     }
     gradeField({}, ctx: ApiContext) {
         return ctx.api(ContestAwardAssignmentViewApi).getGradeField(this);

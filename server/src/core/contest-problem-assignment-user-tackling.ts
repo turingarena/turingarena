@@ -76,8 +76,7 @@ export const contestProblemAssignmentUserTacklingResolvers: Resolvers = {
     ContestProblemAssignmentUserTackling: {
         canSubmit: async (t, {}, ctx) => ctx.api(ContestProblemAssignmentUserTacklingApi).canSubmit(t),
         submissions: async (t, {}, ctx) => ctx.api(SubmissionApi).allByTackling.load(t),
-        assignmentView: ({ assignment, user }) =>
-            typed<ContestProblemAssignmentView>({ __typename: 'ContestProblemAssignmentView', assignment, user }),
+        assignmentView: ({ assignment, user }) => new ContestProblemAssignmentView(assignment, user),
         user: ({ user }) => user,
     },
 };

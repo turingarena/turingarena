@@ -67,8 +67,8 @@ export const contestProblemSetViewResolvers: Resolvers = {
         contestView: ({ problemSet: { contest }, user }) =>
             typed<ContestView>({ __typename: 'ContestView', contest, user }),
         assignmentViews: async ({ problemSet, user }, {}, ctx) =>
-            (await ctx.api(ContestApi).getProblemAssignments(problemSet.contest)).map(assignment =>
-                typed<ContestProblemAssignmentView>({ __typename: 'ContestProblemAssignmentView', assignment, user }),
+            (await ctx.api(ContestApi).getProblemAssignments(problemSet.contest)).map(
+                assignment => new ContestProblemAssignmentView(assignment, user),
             ),
         tackling: (v, {}, ctx) => ctx.api(ContestProblemSetViewApi).getTackling(v),
         totalScoreField: async (v, {}, ctx) => ctx.api(ContestProblemSetViewApi).getTotalScoreField(v),

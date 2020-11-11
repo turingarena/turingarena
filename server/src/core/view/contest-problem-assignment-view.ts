@@ -1,6 +1,6 @@
 import { gql } from 'apollo-server-core';
 import { ApiObject } from '../../main/api';
-import { Resolvers } from '../../main/resolver-types';
+import { ApiContext } from '../../main/api-context';
 import { typed } from '../../util/types';
 import { ContestAwardAssignment } from '../contest-award-assignment';
 import { ContestProblemAssignment } from '../contest-problem-assignment';
@@ -43,10 +43,21 @@ export const contestProblemAssignmentViewSchema = gql`
     }
 `;
 
-export interface ContestProblemAssignmentView {
-    __typename: 'ContestProblemAssignmentView';
-    assignment: ContestProblemAssignment;
-    user: User | null;
+export class ContestProblemAssignmentView {
+    constructor(readonly assignment: ContestProblemAssignment, readonly user: User | null) {}
+    __typename = 'ContestProblemAssignmentView';
+    async problemSetView({}, ctx: ApiContext) {
+        return ctx.api(ContestProblemAssignmentViewApi).getProblemSetView(this);
+    }
+    async tackling({}, ctx: ApiContext) {
+        return ctx.api(ContestProblemAssignmentViewApi).getTackling(this);
+    }
+    async totalScoreField({}, ctx: ApiContext) {
+        return ctx.api(ContestProblemAssignmentViewApi).getTotalScoreField(this);
+    }
+    async awardAssignmentViews({}, ctx: ApiContext) {
+        return ctx.api(ContestProblemAssignmentViewApi).getAwardAssignmentViews(this);
+    }
 }
 
 export interface ContestProblemAssignmentViewModelRecord {
@@ -90,14 +101,3 @@ export class ContestProblemAssignmentViewApi extends ApiObject {
         });
     }
 }
-
-export const contestProblemAssignmentViewResolvers: Resolvers = {
-    ContestProblemAssignmentView: {
-        assignment: v => v.assignment,
-        user: v => v.user,
-        problemSetView: async (v, {}, ctx) => ctx.api(ContestProblemAssignmentViewApi).getProblemSetView(v),
-        tackling: async (v, {}, ctx) => ctx.api(ContestProblemAssignmentViewApi).getTackling(v),
-        totalScoreField: async (v, {}, ctx) => ctx.api(ContestProblemAssignmentViewApi).getTotalScoreField(v),
-        awardAssignmentViews: async (v, {}, ctx) => ctx.api(ContestProblemAssignmentViewApi).getAwardAssignmentViews(v),
-    },
-};
