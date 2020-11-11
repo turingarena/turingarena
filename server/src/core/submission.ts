@@ -8,6 +8,7 @@ import { Resolvers } from '../main/resolver-types';
 import { typed } from '../util/types';
 import { AchievementApi } from './achievement';
 import { ContestApi, ContestData } from './contest';
+import { ContestProblemAssignment } from './contest-problem-assignment';
 import { ContestProblemAssignmentUserTackling } from './contest-problem-assignment-user-tackling';
 import { Evaluation, EvaluationApi, EvaluationStatus } from './evaluation';
 import { EvaluationEventApi } from './evaluation-event';
@@ -129,10 +130,7 @@ export class SubmissionApi extends ApiObject {
 
         return typed<ContestProblemAssignmentUserTackling>({
             __typename: 'ContestProblemAssignmentUserTackling',
-            assignment: {
-                __typename: 'ContestProblemAssignment',
-                problem: { __typename: 'Problem', contest, name: problemName },
-            },
+            assignment: new ContestProblemAssignment({ __typename: 'Problem', contest, name: problemName }),
             user: new User(contest, username),
         });
     }
