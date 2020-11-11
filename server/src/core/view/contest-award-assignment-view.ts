@@ -81,4 +81,3 @@ export class ContestAwardAssignmentViewApi extends ApiObject {
         throw new Error(`unexpected grade domain ${domain}`);
     }
 }
-
