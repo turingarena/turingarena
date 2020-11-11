@@ -8,6 +8,7 @@ import {
     ContestProblemAssignmentUserTackling,
     ContestProblemAssignmentUserTacklingApi,
 } from '../contest-problem-assignment-user-tackling';
+import { ContestProblemSet } from '../contest-problem-set';
 import { ScoreField } from '../feedback/score';
 import { ProblemMaterialApi } from '../material/problem-material';
 import { User } from '../user';
@@ -90,10 +91,7 @@ export class ContestProblemAssignmentViewApi extends ApiObject {
     async getProblemSetView({ user, assignment }: ContestProblemAssignmentView) {
         return typed<ContestProblemSetView>({
             __typename: 'ContestProblemSetView',
-            problemSet: {
-                __typename: 'ContestProblemSet',
-                contest: assignment.problem.contest,
-            },
+            problemSet: new ContestProblemSet(assignment.problem.contest),
             user,
         });
     }
