@@ -46,7 +46,7 @@ export class ContestProblemSetViewApi extends ApiObject {
     getTackling({ problemSet, user }: ContestProblemSetView) {
         if (user === null) return null;
 
-        return typed<ContestProblemSetUserTackling>({ __typename: 'ContestProblemSetUserTackling', problemSet, user });
+        return new ContestProblemSetUserTackling(problemSet, user);
     }
 
     async getTotalScoreField(v: ContestProblemSetView) {

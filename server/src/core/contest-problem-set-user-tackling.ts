@@ -25,10 +25,12 @@ export const contestProblemSetUserTacklingSchema = gql`
     }
 `;
 
-export interface ContestProblemSetUserTackling {
-    __typename: 'ContestProblemSetUserTackling';
-    problemSet: ContestProblemSet;
-    user: User;
+export class ContestProblemSetUserTackling {
+    constructor(readonly problemSet: ContestProblemSet, readonly user: User) {}
+    __typename = 'ContestProblemSetUserTackling';
+    view() {
+        return { __typename: 'ContestProblemSetView', problemset: this.problemSet, user: this.user };
+    }
 }
 
 export interface ContestProblemSetUserTacklingModelRecord {
@@ -51,10 +53,3 @@ export class ContestProblemSetUserTacklingApi extends ApiObject {
     }
 }
 
-export const contestAssignmentUserTacklingResolvers: Resolvers = {
-    ContestProblemSetUserTackling: {
-        problemSet: ({ problemSet }) => problemSet,
-        user: ({ user }) => user,
-        view: ({ problemSet, user }) => ({ __typename: 'ContestProblemSetView', problemSet, user }),
-    },
-};
