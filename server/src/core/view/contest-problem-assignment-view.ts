@@ -79,13 +79,7 @@ export class ContestProblemAssignmentViewApi extends ApiObject {
     async getAwardAssignmentViews({ assignment, user }: ContestProblemAssignmentView) {
         const { awards } = await this.ctx.api(ProblemMaterialApi).dataLoader.load(assignment.problem);
 
-        return awards.map(award =>
-            typed<ContestAwardAssignmentView>({
-                __typename: 'ContestAwardAssignmentView',
-                assignment: new ContestAwardAssignment(assignment, award),
-                user,
-            }),
-        );
+        return awards.map(award => new ContestAwardAssignmentView(new ContestAwardAssignment(assignment, award), user));
     }
 
     async getProblemSetView({ user, assignment }: ContestProblemAssignmentView) {

@@ -1,5 +1,6 @@
 import { gql } from 'apollo-server-core';
 import { ApiObject } from '../../main/api';
+import { ApiContext } from '../../main/api-context';
 import { Resolvers } from '../../main/resolver-types';
 import { typed } from '../../util/types';
 import { ContestAwardAssignment } from '../contest-award-assignment';
@@ -29,10 +30,19 @@ export const contestAwardAssignmentViewSchema = gql`
     }
 `;
 
-export interface ContestAwardAssignmentView {
-    __typename: 'ContestAwardAssignmentView';
-    assignment: ContestAwardAssignment;
-    user: User | null;
+export class ContestAwardAssignmentView {
+    constructor(readonly assignment: ContestAwardAssignment, readonly user: User | null) {}
+    __typename = 'ContestAwardAssignmentView';
+    async problemAssignmentView() {
+        return typed<ContestProblemAssignmentView>({
+            __typename: 'ContestProblemAssignmentView',
+            assignment: this.assignment.problemAssignment,
+            user: this.user,
+        });
+    }
+    gradeField({}, ctx: ApiContext) {
+        return ctx.api(ContestAwardAssignmentViewApi).getGradeField(this);
+    }
 }
 
 export interface ContestAwardAssignmentViewModelRecord {
@@ -72,16 +82,3 @@ export class ContestAwardAssignmentViewApi extends ApiObject {
     }
 }
 
-export const contestAwardAssignmentViewResolvers: Resolvers = {
-    ContestAwardAssignmentView: {
-        assignment: v => v.assignment,
-        user: v => v.user,
-        problemAssignmentView: async ({ assignment, user }) =>
-            typed<ContestProblemAssignmentView>({
-                __typename: 'ContestProblemAssignmentView',
-                assignment: assignment.problemAssignment,
-                user,
-            }),
-        gradeField: (v, {}, ctx) => ctx.api(ContestAwardAssignmentViewApi).getGradeField(v),
-    },
-};
