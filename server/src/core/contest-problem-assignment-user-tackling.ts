@@ -3,6 +3,7 @@ import { ApiObject } from '../main/api';
 import { Resolvers } from '../main/resolver-types';
 import { typed } from '../util/types';
 import { ContestApi } from './contest';
+import { ContestAwardAssignment } from './contest-award-assignment';
 import {
     ContestAwardAssignmentUserTackling,
     ContestAwardAssignmentUserTacklingApi,
@@ -59,7 +60,7 @@ export class ContestProblemAssignmentUserTacklingApi extends ApiObject {
         return material.awards.map(award =>
             typed<ContestAwardAssignmentUserTackling>({
                 __typename: 'ContestAwardAssignmentUserTackling',
-                assignment: { __typename: 'ContestAwardAssignment', problemAssignment: assignment, award },
+                assignment: new ContestAwardAssignment(assignment, award),
                 user,
             }),
         );

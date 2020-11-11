@@ -2,6 +2,7 @@ import { gql } from 'apollo-server-core';
 import { ApiObject } from '../../main/api';
 import { Resolvers } from '../../main/resolver-types';
 import { typed } from '../../util/types';
+import { ContestAwardAssignment } from '../contest-award-assignment';
 import { ContestProblemAssignment } from '../contest-problem-assignment';
 import {
     ContestProblemAssignmentUserTackling,
@@ -80,7 +81,7 @@ export class ContestProblemAssignmentViewApi extends ApiObject {
         return awards.map(award =>
             typed<ContestAwardAssignmentView>({
                 __typename: 'ContestAwardAssignmentView',
-                assignment: { __typename: 'ContestAwardAssignment', award, problemAssignment: assignment },
+                assignment: new ContestAwardAssignment(assignment, award),
                 user,
             }),
         );
