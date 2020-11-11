@@ -36,8 +36,7 @@ export const contestProblemSetViewResolvers: Resolvers = {
     ContestProblemSetView: {
         problemSet: v => v.problemSet,
         user: v => v.user,
-        contestView: ({ problemSet: { contest }, user }) =>
-            typed<ContestView>({ __typename: 'ContestView', contest, user }),
+        contestView: ({ problemSet: { contest }, user }) => new ContestView(contest, user),
         assignmentViews: async ({ problemSet, user }, {}, ctx) =>
             (await ctx.api(ContestApi).getProblemAssignments(problemSet.contest)).map(
                 assignment => new ContestProblemAssignmentView(assignment, user),
@@ -51,7 +50,7 @@ export class ContestProblemSetView {
     constructor(readonly problemSet: ContestProblemSet, readonly user: User | null) {}
     __typename = 'ContestProblemSetView';
     contestView() {
-        return typed<ContestView>({ __typename: 'ContestView', contest: this.problemSet.contest, user: this.user });
+        return new ContestView(this.problemSet.contest, this.user);
     }
     async assignmentViews({}, ctx: ApiContext) {
         return (await ctx.api(ContestApi).getProblemAssignments(this.problemSet.contest)).map(

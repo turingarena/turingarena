@@ -53,7 +53,7 @@ import {
     contestProblemSetViewResolvers,
     contestProblemSetViewSchema,
 } from './view/contest-problem-set-view';
-import { ContestViewModelRecord, contestViewResolvers, contestViewSchema } from './view/contest-view';
+import { ContestViewModelRecord, contestViewSchema } from './view/contest-view';
 import { MainViewModelRecord, mainViewResolvers, mainViewSchema } from './view/main-view';
 
 /** Full GraphQL schema document. Obtained combining schema parts from each components. */
@@ -150,7 +150,6 @@ export type ModelRecord = unknown &
 /** All GraphQL resolvers. Obtained combining resolvers from each components. */
 export const resolvers: Resolvers = {
     ...contestProblemSetViewResolvers,
-    ...contestViewResolvers,
     ...dateTimeResolvers,
     ...fileContentResolvers,
     ...gradeResolvers,
