@@ -32,19 +32,6 @@ export const contestProblemSetViewSchema = gql`
         totalScoreField: ScoreField!
     }
 `;
-export const contestProblemSetViewResolvers: Resolvers = {
-    ContestProblemSetView: {
-        problemSet: v => v.problemSet,
-        user: v => v.user,
-        contestView: ({ problemSet: { contest }, user }) => new ContestView(contest, user),
-        assignmentViews: async ({ problemSet, user }, {}, ctx) =>
-            (await ctx.api(ContestApi).getProblemAssignments(problemSet.contest)).map(
-                assignment => new ContestProblemAssignmentView(assignment, user),
-            ),
-        tackling: (v, {}, ctx) => ctx.api(ContestProblemSetViewApi).getTackling(v),
-        totalScoreField: async (v, {}, ctx) => ctx.api(ContestProblemSetViewApi).getTotalScoreField(v),
-    },
-};
 
 export class ContestProblemSetView {
     constructor(readonly problemSet: ContestProblemSet, readonly user: User | null) {}

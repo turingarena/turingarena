@@ -48,11 +48,7 @@ import {
     ContestProblemAssignmentViewModelRecord,
     contestProblemAssignmentViewSchema,
 } from './view/contest-problem-assignment-view';
-import {
-    ContestProblemSetViewModelRecord,
-    contestProblemSetViewResolvers,
-    contestProblemSetViewSchema,
-} from './view/contest-problem-set-view';
+import { ContestProblemSetViewModelRecord, contestProblemSetViewSchema } from './view/contest-problem-set-view';
 import { ContestViewModelRecord, contestViewSchema } from './view/contest-view';
 import { MainViewModelRecord, mainViewSchema } from './view/main-view';
 
@@ -149,7 +145,6 @@ export type ModelRecord = unknown &
 
 /** All GraphQL resolvers. Obtained combining resolvers from each components. */
 export const resolvers: Resolvers = {
-    ...contestProblemSetViewResolvers,
     ...dateTimeResolvers,
     ...fileContentResolvers,
     ...gradeResolvers,
