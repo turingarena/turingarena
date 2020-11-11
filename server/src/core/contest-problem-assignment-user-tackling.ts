@@ -57,12 +57,8 @@ export class ContestProblemAssignmentUserTacklingApi extends ApiObject {
     async getAwardTacklings({ assignment, user }: ContestProblemAssignmentUserTackling) {
         const material = await this.ctx.api(ProblemMaterialApi).dataLoader.load(assignment.problem);
 
-        return material.awards.map(award =>
-            typed<ContestAwardAssignmentUserTackling>({
-                __typename: 'ContestAwardAssignmentUserTackling',
-                assignment: new ContestAwardAssignment(assignment, award),
-                user,
-            }),
+        return material.awards.map(
+            award => new ContestAwardAssignmentUserTackling(new ContestAwardAssignment(assignment, award), user),
         );
     }
 

@@ -43,11 +43,7 @@ export class ContestAwardAssignmentViewApi extends ApiObject {
     getTackling({ assignment, user }: ContestAwardAssignmentView) {
         if (user === null) return null;
 
-        return typed<ContestAwardAssignmentUserTackling>({
-            __typename: 'ContestAwardAssignmentUserTackling',
-            assignment,
-            user,
-        });
+        return new ContestAwardAssignmentUserTackling(assignment, user);
     }
 
     async getGradeField(v: ContestAwardAssignmentView) {

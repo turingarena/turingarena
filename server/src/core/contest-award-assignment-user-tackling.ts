@@ -6,10 +6,9 @@ import { FulfillmentGrade, FulfillmentGradeDomain } from './feedback/fulfillment
 import { ScoreGrade, ScoreGradeDomain } from './feedback/score';
 import { User } from './user';
 
-export interface ContestAwardAssignmentUserTackling {
-    __typename: 'ContestAwardAssignmentUserTackling';
-    assignment: ContestAwardAssignment;
-    user: User;
+export class ContestAwardAssignmentUserTackling {
+    constructor(readonly assignment: ContestAwardAssignment, readonly user: User) {}
+    __typename = 'ContestAwardAssignmentUserTackling';
 }
 
 export class ContestAwardAssignmentUserTacklingApi extends ApiObject {
