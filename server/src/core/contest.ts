@@ -8,8 +8,6 @@ import { __generated_ContestStatus } from '../generated/graphql-types';
 import { ApiObject } from '../main/api';
 import { ApiContext } from '../main/api-context';
 import { createSimpleLoader, UuidBaseModel } from '../main/base-model';
-import { Resolvers } from '../main/resolver-types';
-import { typed } from '../util/types';
 import { ContestMetadata } from './contest-metadata';
 import { ContestProblemAssignment } from './contest-problem-assignment';
 import { ContestProblemSet } from './contest-problem-set';
@@ -17,6 +15,7 @@ import { Archive } from './files/archive';
 import { FileContent } from './files/file-content';
 import { Media, MediaFile } from './material/media';
 import { ProblemMaterial, ProblemMaterialApi } from './material/problem-material';
+import { Problem } from './problem';
 
 export const contestSchema = gql`
     type Contest {
@@ -131,7 +130,7 @@ export class ContestApi extends ApiObject {
     async getProblemAssignments(contest: Contest) {
         const metadata = await this.getMetadata(contest);
 
-        return metadata.problems.map(name => new ContestProblemAssignment({ __typename: 'Problem', contest, name }));
+        return metadata.problems.map(name => new ContestProblemAssignment(new Problem(contest, name)));
     }
 
     async getProblemSetMaterial(c: Contest): Promise<ProblemMaterial[]> {

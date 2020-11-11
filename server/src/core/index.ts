@@ -34,7 +34,7 @@ import { TextModelRecord, textResolvers, textSchema } from './material/text';
 import { Message, messageSchema } from './message';
 import { MutationModelRecord, mutationResolvers, mutationSchema } from './mutation';
 import { ParticipationModelRecord, participationSchema } from './participation';
-import { ProblemModelRecord, problemResolvers, problemSchema } from './problem';
+import { ProblemModelRecord, problemSchema } from './problem';
 import { QueryModelRecord, queryResolvers, querySchema } from './query';
 import { SubmissionData, SubmissionModelRecord, submissionResolvers, submissionSchema } from './submission';
 import { SubmissionFile, submissionFileSchema } from './submission-file';
@@ -156,7 +156,6 @@ export const resolvers: Resolvers = {
     ...mainViewResolvers,
     ...mediaResolvers,
     ...mutationResolvers,
-    ...problemResolvers,
     ...queryResolvers,
     ...submissionResolvers,
     ...textResolvers,
