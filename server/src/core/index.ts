@@ -36,7 +36,7 @@ import { MutationModelRecord, mutationResolvers, mutationSchema } from './mutati
 import { ParticipationModelRecord, participationSchema } from './participation';
 import { ProblemModelRecord, problemSchema } from './problem';
 import { QueryModelRecord, queryResolvers, querySchema } from './query';
-import { SubmissionData, SubmissionModelRecord, submissionResolvers, submissionSchema } from './submission';
+import { SubmissionData, SubmissionModelRecord, submissionSchema } from './submission';
 import { SubmissionFile, submissionFileSchema } from './submission-file';
 import { UserModelRecord, userSchema } from './user';
 import { DateTimeModelRecord, dateTimeResolvers, dateTimeSchema } from './util/date-time';
@@ -157,7 +157,6 @@ export const resolvers: Resolvers = {
     ...mediaResolvers,
     ...mutationResolvers,
     ...queryResolvers,
-    ...submissionResolvers,
     ...textResolvers,
     ...archiveResolvers,
 };

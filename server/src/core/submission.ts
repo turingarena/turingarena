@@ -3,8 +3,8 @@ import * as path from 'path';
 import { AllowNull, Column, ForeignKey, Table } from 'sequelize-typescript';
 import { __generated_SubmissionInput } from '../generated/graphql-types';
 import { ApiObject } from '../main/api';
+import { ApiContext } from '../main/api-context';
 import { createSimpleLoader, UuidBaseModel } from '../main/base-model';
-import { Resolvers } from '../main/resolver-types';
 import { typed } from '../util/types';
 import { AchievementApi } from './achievement';
 import { ContestApi, ContestData } from './contest';
@@ -65,9 +65,48 @@ export class SubmissionData extends UuidBaseModel<SubmissionData> {
     username!: string;
 }
 
-export interface Submission {
-    __typename: 'Submission';
-    id: string;
+export class Submission {
+    constructor(readonly id: string) {}
+    __typename = 'Submission';
+    async contest({}, ctx: ApiContext) {
+        return (await ctx.api(SubmissionApi).getTackling(this)).assignment.problem.contest;
+    }
+    async user({}, ctx: ApiContext) {
+        return (await ctx.api(SubmissionApi).getTackling(this)).user;
+    }
+    async problem({}, ctx: ApiContext) {
+        return (await ctx.api(SubmissionApi).getTackling(this)).assignment.problem;
+    }
+    async participation({}, ctx: ApiContext) {
+        const tackling = await ctx.api(SubmissionApi).getTackling(this);
+
+        return typed<Participation>({
+            __typename: 'Participation',
+            contest: tackling.assignment.problem.contest,
+            user: tackling.user,
+        });
+    }
+    async contestProblemAssigment({}, ctx: ApiContext) {
+        return (await ctx.api(SubmissionApi).getTackling(this)).assignment;
+    }
+    officialEvaluation({}, ctx: ApiContext) {
+        return ctx.api(SubmissionApi).getOfficialEvaluation(this);
+    }
+    summaryRow({}, ctx: ApiContext) {
+        return ctx.api(SubmissionApi).getSummaryRow(this);
+    }
+    feedbackTable({}, ctx: ApiContext) {
+        return ctx.api(SubmissionApi).getFeedbackTable(this);
+    }
+    async createdAt({}, ctx: ApiContext) {
+        return (await ctx.api(SubmissionApi).dataLoader.load(this)).createdAt;
+    }
+    evaluations({}, ctx: ApiContext) {
+        return ctx.api(EvaluationApi).allBySubmissionId.load(this.id);
+    }
+    files({}, ctx: ApiContext) {
+        return ctx.api(SubmissionApi).getSubmissionFiles(this);
+    }
 }
 
 export interface SubmissionModelRecord {
@@ -78,7 +117,7 @@ export type SubmissionInput = __generated_SubmissionInput;
 
 export class SubmissionApi extends ApiObject {
     fromId(id: string) {
-        return typed<Submission>({ __typename: 'Submission', id });
+        return new Submission(id);
     }
 
     dataLoader = createSimpleLoader((s: Submission) => this.ctx.table(SubmissionData).findByPk(s.id));
@@ -351,31 +390,3 @@ export class SubmissionApi extends ApiObject {
         };
     }
 }
-
-export const submissionResolvers: Resolvers = {
-    Submission: {
-        id: s => s.id,
-
-        contest: async (s, {}, ctx) => (await ctx.api(SubmissionApi).getTackling(s)).assignment.problem.contest,
-        user: async (s, {}, ctx) => (await ctx.api(SubmissionApi).getTackling(s)).user,
-        problem: async (s, {}, ctx) => (await ctx.api(SubmissionApi).getTackling(s)).assignment.problem,
-        participation: async (s, {}, ctx) => {
-            const tackling = await ctx.api(SubmissionApi).getTackling(s);
-
-            return typed<Participation>({
-                __typename: 'Participation',
-                contest: tackling.assignment.problem.contest,
-                user: tackling.user,
-            });
-        },
-        contestProblemAssigment: async (s, {}, ctx) => (await ctx.api(SubmissionApi).getTackling(s)).assignment,
-
-        officialEvaluation: (s, {}, ctx) => ctx.api(SubmissionApi).getOfficialEvaluation(s),
-        summaryRow: (s, {}, ctx) => ctx.api(SubmissionApi).getSummaryRow(s),
-        feedbackTable: (s, {}, ctx) => ctx.api(SubmissionApi).getFeedbackTable(s),
-
-        createdAt: async (s, {}, ctx) => (await ctx.api(SubmissionApi).dataLoader.load(s)).createdAt,
-        evaluations: (s, {}, ctx) => ctx.api(EvaluationApi).allBySubmissionId.load(s.id),
-        files: (s, {}, ctx) => ctx.api(SubmissionApi).getSubmissionFiles(s),
-    },
-};
