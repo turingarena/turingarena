@@ -1,6 +1,5 @@
 import { gql } from 'apollo-server-core';
 import { ApiObject } from '../main/api';
-import { Resolvers } from '../main/resolver-types';
 import { ContestApi } from './contest';
 import {
     ContestProblemAssignmentUserTackling,
@@ -9,6 +8,7 @@ import {
 import { ContestProblemSet } from './contest-problem-set';
 import { ScoreGrade } from './feedback/score';
 import { User } from './user';
+import { ContestProblemSetView } from './view/contest-problem-set-view';
 
 export const contestProblemSetUserTacklingSchema = gql`
     """
@@ -29,7 +29,7 @@ export class ContestProblemSetUserTackling {
     constructor(readonly problemSet: ContestProblemSet, readonly user: User) {}
     __typename = 'ContestProblemSetUserTackling';
     view() {
-        return { __typename: 'ContestProblemSetView', problemset: this.problemSet, user: this.user };
+        return new ContestProblemSetView(this.problemSet, this.user);
     }
 }
 

@@ -1,7 +1,6 @@
 import { gql } from 'apollo-server-core';
 import { ApiObject } from '../../main/api';
 import { ApiContext } from '../../main/api-context';
-import { typed } from '../../util/types';
 import { ContestAwardAssignment } from '../contest-award-assignment';
 import { ContestProblemAssignment } from '../contest-problem-assignment';
 import {
@@ -88,10 +87,6 @@ export class ContestProblemAssignmentViewApi extends ApiObject {
     }
 
     async getProblemSetView({ user, assignment }: ContestProblemAssignmentView) {
-        return typed<ContestProblemSetView>({
-            __typename: 'ContestProblemSetView',
-            problemSet: new ContestProblemSet(assignment.problem.contest),
-            user,
-        });
+        return new ContestProblemSetView(new ContestProblemSet(assignment.problem.contest), user);
     }
 }

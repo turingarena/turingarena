@@ -1,5 +1,6 @@
 import { gql } from 'apollo-server-core';
 import { ApiObject } from '../../main/api';
+import { ApiContext } from '../../main/api-context';
 import { Resolvers } from '../../main/resolver-types';
 import { typed } from '../../util/types';
 import { ContestApi } from '../contest';
@@ -31,11 +32,38 @@ export const contestProblemSetViewSchema = gql`
         totalScoreField: ScoreField!
     }
 `;
+export const contestProblemSetViewResolvers: Resolvers = {
+    ContestProblemSetView: {
+        problemSet: v => v.problemSet,
+        user: v => v.user,
+        contestView: ({ problemSet: { contest }, user }) =>
+            typed<ContestView>({ __typename: 'ContestView', contest, user }),
+        assignmentViews: async ({ problemSet, user }, {}, ctx) =>
+            (await ctx.api(ContestApi).getProblemAssignments(problemSet.contest)).map(
+                assignment => new ContestProblemAssignmentView(assignment, user),
+            ),
+        tackling: (v, {}, ctx) => ctx.api(ContestProblemSetViewApi).getTackling(v),
+        totalScoreField: async (v, {}, ctx) => ctx.api(ContestProblemSetViewApi).getTotalScoreField(v),
+    },
+};
 
-export interface ContestProblemSetView {
-    __typename: 'ContestProblemSetView';
-    problemSet: ContestProblemSet;
-    user: User | null;
+export class ContestProblemSetView {
+    constructor(readonly problemSet: ContestProblemSet, readonly user: User | null) {}
+    __typename = 'ContestProblemSetView';
+    contestView() {
+        return typed<ContestView>({ __typename: 'ContestView', contest: this.problemSet.contest, user: this.user });
+    }
+    async assignmentViews({}, ctx: ApiContext) {
+        return (await ctx.api(ContestApi).getProblemAssignments(this.problemSet.contest)).map(
+            assignment => new ContestProblemAssignmentView(assignment, this.user),
+        );
+    }
+    tackling({}, ctx: ApiContext) {
+        return ctx.api(ContestProblemSetViewApi).getTackling(this);
+    }
+    async totalScoreField({}, ctx: ApiContext) {
+        return ctx.api(ContestProblemSetViewApi).getTotalScoreField(this);
+    }
 }
 
 export interface ContestProblemSetViewModelRecord {
@@ -59,18 +87,3 @@ export class ContestProblemSetViewApi extends ApiObject {
         return new ScoreField(scoreRange, scoreGrade?.score ?? null);
     }
 }
-
-export const contestProblemSetViewResolvers: Resolvers = {
-    ContestProblemSetView: {
-        problemSet: v => v.problemSet,
-        user: v => v.user,
-        contestView: ({ problemSet: { contest }, user }) =>
-            typed<ContestView>({ __typename: 'ContestView', contest, user }),
-        assignmentViews: async ({ problemSet, user }, {}, ctx) =>
-            (await ctx.api(ContestApi).getProblemAssignments(problemSet.contest)).map(
-                assignment => new ContestProblemAssignmentView(assignment, user),
-            ),
-        tackling: (v, {}, ctx) => ctx.api(ContestProblemSetViewApi).getTackling(v),
-        totalScoreField: async (v, {}, ctx) => ctx.api(ContestProblemSetViewApi).getTotalScoreField(v),
-    },
-};

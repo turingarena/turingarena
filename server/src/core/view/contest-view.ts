@@ -1,6 +1,5 @@
 import { gql } from 'apollo-server-core';
 import { Resolvers } from '../../main/resolver-types';
-import { typed } from '../../util/types';
 import { Contest, ContestApi } from '../contest';
 import { ContestProblemSet } from '../contest-problem-set';
 import { User } from '../user';
@@ -40,11 +39,7 @@ export const contestViewResolvers: Resolvers = {
             switch (status) {
                 case 'RUNNING':
                 case 'ENDED':
-                    return typed<ContestProblemSetView>({
-                        __typename: 'ContestProblemSetView',
-                        problemSet: new ContestProblemSet( contest ),
-                        user,
-                    });
+                    return new ContestProblemSetView(new ContestProblemSet(contest), user);
                 case 'NOT_STARTED':
                 default:
                     return null;
