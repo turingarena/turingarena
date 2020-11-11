@@ -3,28 +3,14 @@ import { Resolvers } from '../main/resolver-types';
 import { Achievement, AchievementModelRecord, achievementSchema } from './achievement';
 import { authSchema } from './auth';
 import { ContestData, ContestModelRecord, contestSchema } from './contest';
-import {
-    ContestAwardAssignmentModelRecord,
-    contestAwardAssignmentResolvers,
-    contestAwardAssignmentSchema,
-} from './contest-award-assignment';
-import {
-    ContestProblemAssignmentModelRecord,
-    contestProblemAssignmentResolvers,
-    contestProblemAssignmentSchema,
-} from './contest-problem-assignment';
+import { ContestAwardAssignmentModelRecord, contestAwardAssignmentSchema } from './contest-award-assignment';
+import { ContestProblemAssignmentModelRecord, contestProblemAssignmentSchema } from './contest-problem-assignment';
 import {
     ContestProblemAssignmentUserTacklingModelRecord,
-    contestProblemAssignmentUserTacklingResolvers,
     contestProblemAssignmentUserTacklingSchema,
 } from './contest-problem-assignment-user-tackling';
+import { ContestProblemSetModelRecord, contestProblemSetSchema } from './contest-problem-set';
 import {
-    ContestProblemSetModelRecord,
-    contestProblemSetResolvers,
-    contestProblemSetSchema,
-} from './contest-problem-set';
-import {
-    contestAssignmentUserTacklingResolvers,
     ContestProblemSetUserTacklingModelRecord,
     contestProblemSetUserTacklingSchema,
 } from './contest-problem-set-user-tackling';
@@ -56,12 +42,10 @@ import { UserModelRecord, userSchema } from './user';
 import { DateTimeModelRecord, dateTimeResolvers, dateTimeSchema } from './util/date-time';
 import {
     ContestAwardAssignmentViewModelRecord,
-    contestAwardAssignmentViewResolvers,
     contestAwardAssignmentViewSchema,
 } from './view/contest-award-assignment-view';
 import {
     ContestProblemAssignmentViewModelRecord,
-    contestProblemAssignmentViewResolvers,
     contestProblemAssignmentViewSchema,
 } from './view/contest-problem-assignment-view';
 import {
@@ -165,13 +149,6 @@ export type ModelRecord = unknown &
 
 /** All GraphQL resolvers. Obtained combining resolvers from each components. */
 export const resolvers: Resolvers = {
-    ...contestAssignmentUserTacklingResolvers,
-    ...contestAwardAssignmentResolvers,
-    ...contestAwardAssignmentViewResolvers,
-    ...contestProblemAssignmentResolvers,
-    ...contestProblemAssignmentUserTacklingResolvers,
-    ...contestProblemAssignmentViewResolvers,
-    ...contestProblemSetResolvers,
     ...contestProblemSetViewResolvers,
     ...contestViewResolvers,
     ...dateTimeResolvers,
