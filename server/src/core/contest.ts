@@ -130,12 +130,7 @@ export class ContestApi extends ApiObject {
     async getProblemAssignments(contest: Contest) {
         const metadata = await this.getMetadata(contest);
 
-        return metadata.problems.map(name =>
-            typed<ContestProblemAssignment>({
-                __typename: 'ContestProblemAssignment',
-                problem: { __typename: 'Problem', contest, name },
-            }),
-        );
+        return metadata.problems.map(name => new ContestProblemAssignment({ __typename: 'Problem', contest, name }));
     }
 
     async getProblemSetMaterial(c: Contest): Promise<ProblemMaterial[]> {

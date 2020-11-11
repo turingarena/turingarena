@@ -1,5 +1,4 @@
 import { gql } from 'apollo-server-core';
-import { Resolvers } from '../main/resolver-types';
 import { Problem } from './problem';
 
 export const contestProblemAssignmentSchema = gql`
@@ -11,19 +10,17 @@ export const contestProblemAssignmentSchema = gql`
     }
 `;
 
-export interface ContestProblemAssignment {
-    __typename: 'ContestProblemAssignment';
-    problem: Problem;
+export class ContestProblemAssignment {
+    constructor(readonly problem: Problem) {}
+    __typename = 'ContestProblemAssignment';
+    id() {
+        return `${this.problem.contest.id}/${this.problem.name}`;
+    }
+    contest() {
+        return this.problem.contest;
+    }
 }
 
 export interface ContestProblemAssignmentModelRecord {
     ContestProblemAssignment: ContestProblemAssignment;
 }
-
-export const contestProblemAssignmentResolvers: Resolvers = {
-    ContestProblemAssignment: {
-        id: a => `${a.problem.contest.id}/${a.problem.name}`,
-        contest: (a, {}, ctx) => a.problem.contest,
-        problem: (a, {}, ctx) => a.problem,
-    },
-};
