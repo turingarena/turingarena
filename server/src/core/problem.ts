@@ -50,10 +50,10 @@ export class Problem {
         return (await ctx.api(ProblemMaterialApi).dataLoader.load(this)).submissionListColumns;
     }
     async evaluationFeedbackColumns({}, ctx: ApiContext) {
-        (await ctx.api(ProblemMaterialApi).dataLoader.load(this)).evaluationFeedbackColumns;
+        return (await ctx.api(ProblemMaterialApi).dataLoader.load(this)).evaluationFeedbackColumns;
     }
     async totalScoreDomain({}, ctx: ApiContext) {
-        new ScoreGradeDomain((await ctx.api(ProblemMaterialApi).dataLoader.load(this)).scoreRange);
+        return new ScoreGradeDomain((await ctx.api(ProblemMaterialApi).dataLoader.load(this)).scoreRange);
     }
 }
 
