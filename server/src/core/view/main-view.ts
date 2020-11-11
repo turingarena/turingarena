@@ -1,4 +1,5 @@
 import { gql } from 'apollo-server-core';
+import { ApiContext } from '../../main/api-context';
 import { Resolvers } from '../../main/resolver-types';
 import { Contest, ContestApi } from '../contest';
 import { SubmissionApi } from '../submission';
@@ -29,25 +30,22 @@ export const mainViewSchema = gql`
 
 export class MainView {
     constructor(readonly contest: Contest, readonly user: User | null) {}
+    async title({}, ctx: ApiContext) {
+        return [{ value: (await ctx.api(ContestApi).getMetadata(this.contest)).title ?? 'TuringArena' }];
+    }
+    contestView() {
+        return new ContestView(this.contest, this.user);
+    }
+    async pendingSubmissions({}, ctx: ApiContext) {
+        return this.user !== null
+            ? ctx.api(SubmissionApi).pendingByContestAndUser.load({
+                  contestId: this.contest.id,
+                  username: this.user.username,
+              })
+            : [];
+    }
 }
 
 export interface MainViewModelRecord {
     MainView: MainView;
 }
-
-export const mainViewResolvers: Resolvers = {
-    MainView: {
-        user: ({ user }) => user,
-        title: async (v, {}, ctx) => [
-            { value: (await ctx.api(ContestApi).getMetadata(v.contest)).title ?? 'TuringArena' },
-        ],
-        contestView: ({ contest, user }) => new ContestView(contest, user),
-        pendingSubmissions: async (v, {}, ctx) =>
-            v.user !== null
-                ? ctx.api(SubmissionApi).pendingByContestAndUser.load({
-                      contestId: v.contest.id,
-                      username: v.user.username,
-                  })
-                : [],
-    },
-};
