@@ -1,7 +1,6 @@
 import { gql } from 'apollo-server-core';
 import { ApiObject } from '../main/api';
-import { Resolvers } from '../main/resolver-types';
-import { typed } from '../util/types';
+import { ApiContext } from '../main/api-context';
 import { ContestApi } from './contest';
 import { ContestAwardAssignment } from './contest-award-assignment';
 import {
@@ -37,10 +36,19 @@ export const contestProblemAssignmentUserTacklingSchema = gql`
     }
 `;
 
-export interface ContestProblemAssignmentUserTackling {
-    __typename: 'ContestProblemAssignmentUserTackling';
-    assignment: ContestProblemAssignment;
-    user: User;
+
+export class ContestProblemAssignmentUserTackling {
+    constructor(readonly assignment: ContestProblemAssignment, readonly user: User) {}
+    __typename = 'ContestProblemAssignmentUserTackling';
+    async canSubmit({}, ctx: ApiContext) {
+        return ctx.api(ContestProblemAssignmentUserTacklingApi).canSubmit(this);
+    }
+    async submissions({}, ctx: ApiContext) {
+        return ctx.api(SubmissionApi).allByTackling.load(this);
+    }
+    assignmentView() {
+        return new ContestProblemAssignmentView(this.assignment, this.user);
+    }
 }
 
 export interface ContestProblemAssignmentUserTacklingModelRecord {
@@ -71,12 +79,3 @@ export class ContestProblemAssignmentUserTacklingApi extends ApiObject {
         return ScoreGrade.total(awardGrades.filter((g): g is ScoreGrade => g instanceof ScoreGrade));
     }
 }
-
-export const contestProblemAssignmentUserTacklingResolvers: Resolvers = {
-    ContestProblemAssignmentUserTackling: {
-        canSubmit: async (t, {}, ctx) => ctx.api(ContestProblemAssignmentUserTacklingApi).canSubmit(t),
-        submissions: async (t, {}, ctx) => ctx.api(SubmissionApi).allByTackling.load(t),
-        assignmentView: ({ assignment, user }) => new ContestProblemAssignmentView(assignment, user),
-        user: ({ user }) => user,
-    },
-};

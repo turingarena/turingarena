@@ -66,13 +66,7 @@ export interface ContestProblemAssignmentViewModelRecord {
 
 export class ContestProblemAssignmentViewApi extends ApiObject {
     getTackling({ assignment, user }: ContestProblemAssignmentView) {
-        return user !== null
-            ? typed<ContestProblemAssignmentUserTackling>({
-                  __typename: 'ContestProblemAssignmentUserTackling',
-                  assignment,
-                  user,
-              })
-            : null;
+        return user !== null ? new ContestProblemAssignmentUserTackling(assignment, user) : null;
     }
 
     async getTotalScoreField(view: ContestProblemAssignmentView) {

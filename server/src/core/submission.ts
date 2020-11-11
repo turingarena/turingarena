@@ -128,11 +128,10 @@ export class SubmissionApi extends ApiObject {
 
         const contest = this.ctx.api(ContestApi).fromId(contestId);
 
-        return typed<ContestProblemAssignmentUserTackling>({
-            __typename: 'ContestProblemAssignmentUserTackling',
-            assignment: new ContestProblemAssignment({ __typename: 'Problem', contest, name: problemName }),
-            user: new User(contest, username),
-        });
+        return new ContestProblemAssignmentUserTackling(
+            new ContestProblemAssignment({ __typename: 'Problem', contest, name: problemName }),
+            new User(contest, username),
+        );
     }
 
     /**
@@ -310,10 +309,10 @@ export class SubmissionApi extends ApiObject {
                             timeUsage === null
                                 ? null
                                 : timeUsage <= warningWatermarkMultiplier * timeLimitSeconds
-                                ? 'NOMINAL'
-                                : timeUsage <= timeLimitSeconds
-                                ? 'WARNING'
-                                : 'FAILURE',
+                                    ? 'NOMINAL'
+                                    : timeUsage <= timeLimitSeconds
+                                        ? 'WARNING'
+                                        : 'FAILURE',
                     },
                     {
                         __typename: 'MemoryUsageField',
@@ -328,10 +327,10 @@ export class SubmissionApi extends ApiObject {
                             memoryUsage === null
                                 ? null
                                 : memoryUsage * memoryUnitBytes <= warningWatermarkMultiplier * memoryLimitBytes
-                                ? 'NOMINAL'
-                                : memoryUsage * memoryUnitBytes <= memoryLimitBytes
-                                ? 'WARNING'
-                                : 'FAILURE',
+                                    ? 'NOMINAL'
+                                    : memoryUsage * memoryUnitBytes <= memoryLimitBytes
+                                        ? 'WARNING'
+                                        : 'FAILURE',
                     },
                     {
                         __typename: 'MessageField',
@@ -356,10 +355,10 @@ export const submissionResolvers: Resolvers = {
     Submission: {
         id: s => s.id,
 
-        contest: async (s, {}, ctx) => (await ctx.api(SubmissionApi).getTackling(s)).assignment.problem.contest,
-        user: async (s, {}, ctx) => (await ctx.api(SubmissionApi).getTackling(s)).user,
-        problem: async (s, {}, ctx) => (await ctx.api(SubmissionApi).getTackling(s)).assignment.problem,
-        participation: async (s, {}, ctx) => {
+        contest: async (s, { }, ctx) => (await ctx.api(SubmissionApi).getTackling(s)).assignment.problem.contest,
+        user: async (s, { }, ctx) => (await ctx.api(SubmissionApi).getTackling(s)).user,
+        problem: async (s, { }, ctx) => (await ctx.api(SubmissionApi).getTackling(s)).assignment.problem,
+        participation: async (s, { }, ctx) => {
             const tackling = await ctx.api(SubmissionApi).getTackling(s);
 
             return typed<Participation>({
@@ -368,14 +367,14 @@ export const submissionResolvers: Resolvers = {
                 user: tackling.user,
             });
         },
-        contestProblemAssigment: async (s, {}, ctx) => (await ctx.api(SubmissionApi).getTackling(s)).assignment,
+        contestProblemAssigment: async (s, { }, ctx) => (await ctx.api(SubmissionApi).getTackling(s)).assignment,
 
-        officialEvaluation: (s, {}, ctx) => ctx.api(SubmissionApi).getOfficialEvaluation(s),
-        summaryRow: (s, {}, ctx) => ctx.api(SubmissionApi).getSummaryRow(s),
-        feedbackTable: (s, {}, ctx) => ctx.api(SubmissionApi).getFeedbackTable(s),
+        officialEvaluation: (s, { }, ctx) => ctx.api(SubmissionApi).getOfficialEvaluation(s),
+        summaryRow: (s, { }, ctx) => ctx.api(SubmissionApi).getSummaryRow(s),
+        feedbackTable: (s, { }, ctx) => ctx.api(SubmissionApi).getFeedbackTable(s),
 
-        createdAt: async (s, {}, ctx) => (await ctx.api(SubmissionApi).dataLoader.load(s)).createdAt,
-        evaluations: (s, {}, ctx) => ctx.api(EvaluationApi).allBySubmissionId.load(s.id),
-        files: (s, {}, ctx) => ctx.api(SubmissionApi).getSubmissionFiles(s),
+        createdAt: async (s, { }, ctx) => (await ctx.api(SubmissionApi).dataLoader.load(s)).createdAt,
+        evaluations: (s, { }, ctx) => ctx.api(EvaluationApi).allBySubmissionId.load(s.id),
+        files: (s, { }, ctx) => ctx.api(SubmissionApi).getSubmissionFiles(s),
     },
 };
