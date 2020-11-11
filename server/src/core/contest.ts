@@ -12,6 +12,7 @@ import { Resolvers } from '../main/resolver-types';
 import { typed } from '../util/types';
 import { ContestMetadata } from './contest-metadata';
 import { ContestProblemAssignment } from './contest-problem-assignment';
+import { ContestProblemSet } from './contest-problem-set';
 import { Archive } from './files/archive';
 import { FileContent } from './files/file-content';
 import { Media, MediaFile } from './material/media';
@@ -187,7 +188,7 @@ export class Contest {
         return ctx.api(ContestApi).getStatus(this);
     }
     problemSet() {
-        return { __typename: 'ContestProblemSet', contest: this };
+        return new ContestProblemSet(this);
     }
     async archive({}, ctx: ApiContext) {
         await ctx.authorizeAdmin();

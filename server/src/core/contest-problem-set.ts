@@ -1,5 +1,6 @@
 import { gql } from 'apollo-server-core';
 import { ApiObject } from '../main/api';
+import { ApiContext } from '../main/api-context';
 import { Resolvers } from '../main/resolver-types';
 import { Contest, ContestApi } from './contest';
 import { ScoreRange } from './feedback/score';
@@ -24,9 +25,12 @@ export const contestProblemSetSchema = gql`
     }
 `;
 
-export interface ContestProblemSet {
-    __typename: 'ContestProblemSet';
-    contest: Contest;
+export class ContestProblemSet {
+    constructor(readonly contest: Contest) {}
+    __typename = 'ContestProblemSet';
+    assignments({}, ctx: ApiContext) {
+        return ctx.api(ContestApi).getProblemAssignments(this.contest);
+    }
 }
 
 export interface ContestProblemSetModelRecord {
@@ -40,10 +44,3 @@ export class ContestProblemSetApi extends ApiObject {
         return ScoreRange.total(material.map(m => m.scoreRange));
     }
 }
-
-export const contestProblemSetResolvers: Resolvers = {
-    ContestProblemSet: {
-        contest: s => s.contest,
-        assignments: (s, {}, ctx) => ctx.api(ContestApi).getProblemAssignments(s.contest),
-    },
-};
