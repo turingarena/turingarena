@@ -1,11 +1,9 @@
 import { gql } from 'apollo-server-core';
 import { ApiObject } from '../../main/api';
 import { ApiContext } from '../../main/api-context';
-import { Resolvers } from '../../main/resolver-types';
-import { typed } from '../../util/types';
 import { ContestApi } from '../contest';
 import { ContestProblemSet, ContestProblemSetApi } from '../contest-problem-set';
-import { ContestProblemSetUserTackling, ContestProblemSetUserTacklingApi } from '../contest-problem-set-user-tackling';
+import { ContestProblemSetUserTackling } from '../contest-problem-set-user-tackling';
 import { ScoreField } from '../feedback/score';
 import { User } from '../user';
 import { ContestProblemAssignmentView } from './contest-problem-assignment-view';
@@ -67,8 +65,7 @@ export class ContestProblemSetViewApi extends ApiObject {
         const tackling = this.getTackling(v);
 
         const scoreRange = await this.ctx.api(ContestProblemSetApi).getScoreRange(v.problemSet);
-        const scoreGrade =
-            tackling !== null ? await this.ctx.api(ContestProblemSetUserTacklingApi).getScoreGrade(tackling) : null;
+        const scoreGrade = tackling !== null ? await tackling.getScoreGrade(this.ctx) : null;
 
         return new ScoreField(scoreRange, scoreGrade?.score ?? null);
     }

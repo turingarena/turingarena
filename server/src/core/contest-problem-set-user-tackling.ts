@@ -1,5 +1,6 @@
 import { gql } from 'apollo-server-core';
 import { ApiObject } from '../main/api';
+import { ApiContext } from '../main/api-context';
 import { ContestApi } from './contest';
 import {
     ContestProblemAssignmentUserTackling,
@@ -31,25 +32,22 @@ export class ContestProblemSetUserTackling {
     view() {
         return new ContestProblemSetView(this.problemSet, this.user);
     }
-}
 
-export interface ContestProblemSetUserTacklingModelRecord {
-    ContestProblemSetUserTackling: ContestProblemSetUserTackling;
-}
-
-export class ContestProblemSetUserTacklingApi extends ApiObject {
-    async getScoreGrade({ problemSet, user }: ContestProblemSetUserTackling) {
-        const assignments = await this.ctx.api(ContestApi).getProblemAssignments(problemSet.contest);
+    async getScoreGrade(ctx: ApiContext) {
+        const assignments = await ctx.api(ContestApi).getProblemAssignments(this.problemSet.contest);
 
         return ScoreGrade.total(
             await Promise.all(
                 assignments.map(async assignment =>
-                    this.ctx
+                    ctx
                         .api(ContestProblemAssignmentUserTacklingApi)
-                        .getScoreGrade(new ContestProblemAssignmentUserTackling(assignment, user)),
+                        .getScoreGrade(new ContestProblemAssignmentUserTackling(assignment, this.user)),
                 ),
             ),
         );
     }
 }
 
+export interface ContestProblemSetUserTacklingModelRecord {
+    ContestProblemSetUserTackling: ContestProblemSetUserTackling;
+}
