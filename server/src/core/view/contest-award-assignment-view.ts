@@ -30,34 +30,21 @@ export const contestAwardAssignmentViewSchema = gql`
 
 export class ContestAwardAssignmentView {
     constructor(readonly assignment: ContestAwardAssignment, readonly user: User | null) {}
+
     __typename = 'ContestAwardAssignmentView';
+
     async problemAssignmentView() {
         return new ContestProblemAssignmentView(this.assignment.problemAssignment, this.user);
     }
-    gradeField({}, ctx: ApiContext) {
-        return ctx.api(ContestAwardAssignmentViewApi).getGradeField(this);
-    }
-}
 
-export interface ContestAwardAssignmentViewModelRecord {
-    ContestAwardAssignmentView: ContestAwardAssignmentView;
-}
-
-export class ContestAwardAssignmentViewApi extends ApiObject {
-    getTackling({ assignment, user }: ContestAwardAssignmentView) {
-        if (user === null) return null;
-
-        return new ContestAwardAssignmentUserTackling(assignment, user);
-    }
-
-    async getGradeField(v: ContestAwardAssignmentView) {
-        const { gradeDomain: domain } = v.assignment.award;
-        const tackling = this.getTackling(v);
+    async gradeField({}, ctx: ApiContext) {
+        const { gradeDomain: domain } = this.assignment.award;
+        const tackling = this.getTackling();
 
         if (domain instanceof FulfillmentGradeDomain) {
             const grade =
                 tackling !== null
-                    ? await this.ctx.api(ContestAwardAssignmentUserTacklingApi).getFulfillmentGrade(tackling)
+                    ? await ctx.api(ContestAwardAssignmentUserTacklingApi).getFulfillmentGrade(tackling)
                     : null;
 
             return new FulfillmentField(grade?.fulfilled ?? null);
@@ -66,7 +53,7 @@ export class ContestAwardAssignmentViewApi extends ApiObject {
         if (domain instanceof ScoreGradeDomain) {
             const grade =
                 tackling !== null
-                    ? await this.ctx.api(ContestAwardAssignmentUserTacklingApi).getScoreGrade(tackling, domain)
+                    ? await ctx.api(ContestAwardAssignmentUserTacklingApi).getScoreGrade(tackling, domain)
                     : null;
 
             return new ScoreField(domain.scoreRange, grade?.score ?? null);
@@ -74,4 +61,14 @@ export class ContestAwardAssignmentViewApi extends ApiObject {
 
         throw new Error(`unexpected grade domain ${domain}`);
     }
+
+    getTackling() {
+        if (this.user === null) return null;
+
+        return new ContestAwardAssignmentUserTackling(this.assignment, this.user);
+    }
+}
+
+export interface ContestAwardAssignmentViewModelRecord {
+    ContestAwardAssignmentView: ContestAwardAssignmentView;
 }
