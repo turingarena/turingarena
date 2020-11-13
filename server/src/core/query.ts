@@ -2,8 +2,8 @@ import { gql } from 'apollo-server-core';
 import { Resolvers } from '../main/resolver-types';
 import { ContestApi, ContestData } from './contest';
 import { MessageApi } from './message';
-import { Submission, SubmissionApi} from './submission';
-import { User, UserApi } from './user';
+import { Submission, SubmissionApi } from './submission';
+import { User } from './user';
 import { MainView } from './view/main-view';
 export const querySchema = gql`
     type Query {
@@ -37,20 +37,18 @@ export const queryResolvers: Resolvers = {
 
             return new MainView(
                 contest,
-                username !== null && username !== undefined
-                    ? await ctx.api(UserApi).validate(new User(contest, username))
-                    : null,
+                username !== null && username !== undefined ? await new User(contest, username).validate(ctx) : null,
             );
         },
         contests: async ({}, {}, ctx) => {
             await ctx.authorizeAdmin();
 
-            return (await ctx.table(ContestData).findAll()).map(d => ctx.api(ContestApi).fromData(d))
+            return (await ctx.table(ContestData).findAll()).map(d => ctx.api(ContestApi).fromData(d));
         },
         archive: async (_, { uuid }, ctx) => {
             await ctx.authorizeAdmin();
 
-            return ({ uuid })
+            return { uuid };
         },
         submission: async ({}, { id }, ctx) => {
             const sub = await ctx.api(SubmissionApi).validate(new Submission(id));

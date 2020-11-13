@@ -39,6 +39,12 @@ export class User {
     async name({}, ctx: ApiContext) {
         return (await ctx.api(UserApi).metadataLoader.load(this)).name;
     }
+
+    async validate(ctx: ApiContext) {
+        await ctx.api(UserApi).metadataLoader.load(this);
+
+        return this;
+    }
 }
 
 export class UserApi extends ApiObject {
@@ -50,12 +56,6 @@ export class UserApi extends ApiObject {
             this.ctx.fail(`user ${username} does not exist in contest ${contest.id}`)
         );
     });
-
-    async validate(user: User) {
-        await this.metadataLoader.load(user);
-
-        return user;
-    }
 
     async getUserByToken(contest: Contest, token: string) {
         const contestMetadata = await this.ctx.api(ContestApi).getMetadata(contest);

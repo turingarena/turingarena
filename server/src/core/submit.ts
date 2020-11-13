@@ -5,7 +5,7 @@ import { EvaluateApi } from './evaluate';
 import { FileContentApi } from './files/file-content';
 import { SubmissionApi, SubmissionData, SubmissionInput } from './submission';
 import { SubmissionFile } from './submission-file';
-import { User, UserApi } from './user';
+import { User } from './user';
 
 export class SubmitApi extends ApiObject {
     async submit(
@@ -15,7 +15,7 @@ export class SubmitApi extends ApiObject {
         solutionPath?: string,
     ) {
         const contest = await this.ctx.api(ContestApi).validate(new Contest(contestId));
-        await this.ctx.api(UserApi).validate(new User(contest, username));
+        await new User(contest, username).validate(this.ctx);
 
         const submissionData = await this.ctx
             .table(SubmissionData)
