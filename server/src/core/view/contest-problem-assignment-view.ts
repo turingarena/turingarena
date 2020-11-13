@@ -3,10 +3,7 @@ import { ApiObject } from '../../main/api';
 import { ApiContext } from '../../main/api-context';
 import { ContestAwardAssignment } from '../contest-award-assignment';
 import { ContestProblemAssignment } from '../contest-problem-assignment';
-import {
-    ContestProblemAssignmentUserTackling,
-    ContestProblemAssignmentUserTacklingApi,
-} from '../contest-problem-assignment-user-tackling';
+import { ContestProblemAssignmentUserTackling } from '../contest-problem-assignment-user-tackling';
 import { ContestProblemSet } from '../contest-problem-set';
 import { ScoreField } from '../feedback/score';
 import { ProblemMaterialApi } from '../material/problem-material';
@@ -72,10 +69,7 @@ export class ContestProblemAssignmentViewApi extends ApiObject {
         const { scoreRange } = await this.ctx.api(ProblemMaterialApi).dataLoader.load(view.assignment.problem);
         const tackling = this.getTackling(view);
 
-        const scoreGrade =
-            tackling !== null
-                ? await this.ctx.api(ContestProblemAssignmentUserTacklingApi).getScoreGrade(tackling)
-                : null;
+        const scoreGrade = tackling !== null ? await tackling.getScoreGrade(this.ctx) : null;
 
         return new ScoreField(scoreRange, scoreGrade?.score ?? null);
     }

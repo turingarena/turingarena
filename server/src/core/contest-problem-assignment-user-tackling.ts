@@ -1,5 +1,4 @@
 import { gql } from 'apollo-server-core';
-import { ApiObject } from '../main/api';
 import { ApiContext } from '../main/api-context';
 import { ContestApi } from './contest';
 import { ContestAwardAssignment } from './contest-award-assignment';
@@ -36,46 +35,44 @@ export const contestProblemAssignmentUserTacklingSchema = gql`
     }
 `;
 
-
 export class ContestProblemAssignmentUserTackling {
     constructor(readonly assignment: ContestProblemAssignment, readonly user: User) {}
+
     __typename = 'ContestProblemAssignmentUserTackling';
+
     async canSubmit({}, ctx: ApiContext) {
-        return ctx.api(ContestProblemAssignmentUserTacklingApi).canSubmit(this);
+        const status = await ctx.api(ContestApi).getStatus(this.assignment.problem.contest);
+
+        return status === 'RUNNING';
     }
+
     async submissions({}, ctx: ApiContext) {
         return ctx.api(SubmissionApi).allByTackling.load(this);
     }
+
     assignmentView() {
         return new ContestProblemAssignmentView(this.assignment, this.user);
+    }
+
+    async getAwardTacklings(ctx: ApiContext) {
+        const material = await ctx.api(ProblemMaterialApi).dataLoader.load(this.assignment.problem);
+
+        return material.awards.map(
+            award =>
+                new ContestAwardAssignmentUserTackling(new ContestAwardAssignment(this.assignment, award), this.user),
+        );
+    }
+
+    async getScoreGrade(ctx: ApiContext) {
+        const awardTacklings = await this.getAwardTacklings(ctx);
+        const awardGrades = await Promise.all(
+            awardTacklings.map(t2 => ctx.api(ContestAwardAssignmentUserTacklingApi).getGrade(t2)),
+        );
+
+        return ScoreGrade.total(awardGrades.filter((g): g is ScoreGrade => g instanceof ScoreGrade));
     }
 }
 
 export interface ContestProblemAssignmentUserTacklingModelRecord {
     ContestProblemAssignmentUserTackling: ContestProblemAssignmentUserTackling;
-}
-
-export class ContestProblemAssignmentUserTacklingApi extends ApiObject {
-    async canSubmit(t: ContestProblemAssignmentUserTackling) {
-        const status = await this.ctx.api(ContestApi).getStatus(t.assignment.problem.contest);
-
-        return status === 'RUNNING';
-    }
-
-    async getAwardTacklings({ assignment, user }: ContestProblemAssignmentUserTackling) {
-        const material = await this.ctx.api(ProblemMaterialApi).dataLoader.load(assignment.problem);
-
-        return material.awards.map(
-            award => new ContestAwardAssignmentUserTackling(new ContestAwardAssignment(assignment, award), user),
-        );
-    }
-
-    async getScoreGrade(t: ContestProblemAssignmentUserTackling) {
-        const awardTacklings = await this.getAwardTacklings(t);
-        const awardGrades = await Promise.all(
-            awardTacklings.map(t2 => this.ctx.api(ContestAwardAssignmentUserTacklingApi).getGrade(t2)),
-        );
-
-        return ScoreGrade.total(awardGrades.filter((g): g is ScoreGrade => g instanceof ScoreGrade));
-    }
 }

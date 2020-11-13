@@ -1,11 +1,7 @@
 import { gql } from 'apollo-server-core';
-import { ApiObject } from '../main/api';
 import { ApiContext } from '../main/api-context';
 import { ContestApi } from './contest';
-import {
-    ContestProblemAssignmentUserTackling,
-    ContestProblemAssignmentUserTacklingApi,
-} from './contest-problem-assignment-user-tackling';
+import { ContestProblemAssignmentUserTackling } from './contest-problem-assignment-user-tackling';
 import { ContestProblemSet } from './contest-problem-set';
 import { ScoreGrade } from './feedback/score';
 import { User } from './user';
@@ -28,7 +24,9 @@ export const contestProblemSetUserTacklingSchema = gql`
 
 export class ContestProblemSetUserTackling {
     constructor(readonly problemSet: ContestProblemSet, readonly user: User) {}
+
     __typename = 'ContestProblemSetUserTackling';
+
     view() {
         return new ContestProblemSetView(this.problemSet, this.user);
     }
@@ -39,9 +37,7 @@ export class ContestProblemSetUserTackling {
         return ScoreGrade.total(
             await Promise.all(
                 assignments.map(async assignment =>
-                    ctx
-                        .api(ContestProblemAssignmentUserTacklingApi)
-                        .getScoreGrade(new ContestProblemAssignmentUserTackling(assignment, this.user)),
+                    new ContestProblemAssignmentUserTackling(assignment, this.user).getScoreGrade(ctx),
                 ),
             ),
         );
