@@ -1,11 +1,7 @@
 import { gql } from 'apollo-server-core';
-import { ApiObject } from '../../main/api';
 import { ApiContext } from '../../main/api-context';
 import { ContestAwardAssignment } from '../contest-award-assignment';
-import {
-    ContestAwardAssignmentUserTackling,
-    ContestAwardAssignmentUserTacklingApi,
-} from '../contest-award-assignment-user-tackling';
+import { ContestAwardAssignmentUserTackling } from '../contest-award-assignment-user-tackling';
 import { FulfillmentField, FulfillmentGradeDomain } from '../feedback/fulfillment';
 import { ScoreField, ScoreGradeDomain } from '../feedback/score';
 import { User } from '../user';
@@ -42,19 +38,13 @@ export class ContestAwardAssignmentView {
         const tackling = this.getTackling();
 
         if (domain instanceof FulfillmentGradeDomain) {
-            const grade =
-                tackling !== null
-                    ? await ctx.api(ContestAwardAssignmentUserTacklingApi).getFulfillmentGrade(tackling)
-                    : null;
+            const grade = tackling !== null ? await tackling.getFulfillmentGrade(ctx) : null;
 
             return new FulfillmentField(grade?.fulfilled ?? null);
         }
 
         if (domain instanceof ScoreGradeDomain) {
-            const grade =
-                tackling !== null
-                    ? await ctx.api(ContestAwardAssignmentUserTacklingApi).getScoreGrade(tackling, domain)
-                    : null;
+            const grade = tackling !== null ? await tackling.getScoreGrade(ctx, domain) : null;
 
             return new ScoreField(domain.scoreRange, grade?.score ?? null);
         }

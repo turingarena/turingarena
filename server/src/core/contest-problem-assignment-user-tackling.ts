@@ -2,10 +2,7 @@ import { gql } from 'apollo-server-core';
 import { ApiContext } from '../main/api-context';
 import { ContestApi } from './contest';
 import { ContestAwardAssignment } from './contest-award-assignment';
-import {
-    ContestAwardAssignmentUserTackling,
-    ContestAwardAssignmentUserTacklingApi,
-} from './contest-award-assignment-user-tackling';
+import { ContestAwardAssignmentUserTackling } from './contest-award-assignment-user-tackling';
 import { ContestProblemAssignment } from './contest-problem-assignment';
 import { ScoreGrade } from './feedback/score';
 import { ProblemMaterialApi } from './material/problem-material';
@@ -65,9 +62,7 @@ export class ContestProblemAssignmentUserTackling {
 
     async getScoreGrade(ctx: ApiContext) {
         const awardTacklings = await this.getAwardTacklings(ctx);
-        const awardGrades = await Promise.all(
-            awardTacklings.map(t2 => ctx.api(ContestAwardAssignmentUserTacklingApi).getGrade(t2)),
-        );
+        const awardGrades = await Promise.all(awardTacklings.map(t2 => t2.getGrade(ctx)));
 
         return ScoreGrade.total(awardGrades.filter((g): g is ScoreGrade => g instanceof ScoreGrade));
     }
