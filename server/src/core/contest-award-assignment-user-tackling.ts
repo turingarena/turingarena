@@ -1,6 +1,6 @@
 import { QueryTypes } from 'sequelize';
 import { ApiContext } from '../main/api-context';
-import { Achievement, AchievementApi } from './achievement';
+import { Achievement } from './achievement';
 import { ContestAwardAssignment } from './contest-award-assignment';
 import { FulfillmentGrade, FulfillmentGradeDomain } from './feedback/fulfillment';
 import { ScoreGrade, ScoreGradeDomain } from './feedback/score';
@@ -74,20 +74,16 @@ export class ContestAwardAssignmentUserTackling {
         return achievements.length > 0 ? achievements[0] : null;
     }
 
-    async getScoreGrade(ctx:ApiContext, domain: ScoreGradeDomain) {
+    async getScoreGrade(ctx: ApiContext, domain: ScoreGradeDomain) {
         const bestAchievement = await this.getBestAchievement(ctx);
 
-        return bestAchievement !== null
-            ? ctx.api(AchievementApi).getScoreGrade(bestAchievement, domain)
-            : new ScoreGrade(domain.scoreRange, 0);
+        return bestAchievement !== null ? bestAchievement.getScoreGrade(domain) : new ScoreGrade(domain.scoreRange, 0);
     }
 
     async getFulfillmentGrade(ctx: ApiContext) {
         const bestAchievement = await this.getBestAchievement(ctx);
 
-        return bestAchievement !== null
-            ? ctx.api(AchievementApi).getFulfillmentGrade(bestAchievement)
-            : new FulfillmentGrade(false);
+        return bestAchievement !== null ? bestAchievement.getFulfillmentGrade() : new FulfillmentGrade(false);
     }
 
     async getGrade(ctx: ApiContext) {

@@ -228,7 +228,7 @@ export class SubmissionApi extends ApiObject {
         return ScoreGrade.total(
             (await this.getAwardAchievements(s)).flatMap(({ achievement, award: { gradeDomain } }) => {
                 if (gradeDomain instanceof ScoreGradeDomain && achievement !== undefined) {
-                    return [this.ctx.api(AchievementApi).getScoreGrade(achievement, gradeDomain)];
+                    return [achievement.getScoreGrade(gradeDomain)];
                 }
 
                 return [];
@@ -249,20 +249,14 @@ export class SubmissionApi extends ApiObject {
                     if (gradeDomain instanceof ScoreGradeDomain) {
                         return {
                             __typename: 'ScoreField',
-                            score:
-                                achievement !== undefined
-                                    ? this.ctx.api(AchievementApi).getScoreGrade(achievement, gradeDomain).score
-                                    : null,
+                            score: achievement !== undefined ? achievement.getScoreGrade(gradeDomain).score : null,
                             scoreRange: gradeDomain.scoreRange,
                         };
                     }
                     if (gradeDomain instanceof FulfillmentGradeDomain) {
                         return {
                             __typename: 'FulfillmentField',
-                            fulfilled:
-                                achievement !== undefined
-                                    ? this.ctx.api(AchievementApi).getFulfillmentGrade(achievement).fulfilled
-                                    : null,
+                            fulfilled: achievement !== undefined ? achievement.getFulfillmentGrade.fulfilled : null,
                         };
                     }
                     throw new Error(`unexpected grade domain ${gradeDomain}`);
