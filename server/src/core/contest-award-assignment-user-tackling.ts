@@ -1,5 +1,4 @@
 import { QueryTypes } from 'sequelize';
-import { ApiObject } from '../main/api';
 import { ApiContext } from '../main/api-context';
 import { Achievement, AchievementApi } from './achievement';
 import { ContestAwardAssignment } from './contest-award-assignment';
