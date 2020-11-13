@@ -37,36 +37,38 @@ export class ContestProblemSetView {
     contestView() {
         return new ContestView(this.problemSet.contest, this.user);
     }
+
     async assignmentViews({}, ctx: ApiContext) {
         return (await ctx.api(ContestApi).getProblemAssignments(this.problemSet.contest)).map(
             assignment => new ContestProblemAssignmentView(assignment, this.user),
         );
     }
+
     tackling({}, ctx: ApiContext) {
-        return ctx.api(ContestProblemSetViewApi).getTackling(this);
+        return this.getTackling();
     }
+
     async totalScoreField({}, ctx: ApiContext) {
-        return ctx.api(ContestProblemSetViewApi).getTotalScoreField(this);
+        return this.getTotalScoreField(ctx);
     }
+
+    getTackling() {
+        if (this.user === null) return null;
+
+        return new ContestProblemSetUserTackling(this.problemSet, this.user);
+    }
+
+    async getTotalScoreField(ctx: ApiContext) {
+        const tackling = this.getTackling();
+
+        const scoreRange = await ctx.api(ContestProblemSetApi).getScoreRange(this.problemSet);
+        const scoreGrade = tackling !== null ? await tackling.getScoreGrade(ctx) : null;
+
+        return new ScoreField(scoreRange, scoreGrade?.score ?? null);
+    }
+
 }
 
 export interface ContestProblemSetViewModelRecord {
     ContestProblemSetView: ContestProblemSetView;
-}
-
-export class ContestProblemSetViewApi extends ApiObject {
-    getTackling({ problemSet, user }: ContestProblemSetView) {
-        if (user === null) return null;
-
-        return new ContestProblemSetUserTackling(problemSet, user);
-    }
-
-    async getTotalScoreField(v: ContestProblemSetView) {
-        const tackling = this.getTackling(v);
-
-        const scoreRange = await this.ctx.api(ContestProblemSetApi).getScoreRange(v.problemSet);
-        const scoreGrade = tackling !== null ? await tackling.getScoreGrade(this.ctx) : null;
-
-        return new ScoreField(scoreRange, scoreGrade?.score ?? null);
-    }
 }
