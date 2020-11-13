@@ -2,7 +2,7 @@ import { gql } from 'apollo-server-core';
 import { ApiObject } from '../main/api';
 import { ApiContext } from '../main/api-context';
 import { createSimpleLoader } from '../main/base-model';
-import { Contest, ContestApi } from './contest';
+import { Contest } from './contest';
 
 export const userSchema = gql`
     type User {
@@ -49,7 +49,7 @@ export class User {
 
 export class UserApi extends ApiObject {
     metadataLoader = createSimpleLoader(async ({ contest, username }: User) => {
-        const contestMetadata = await this.ctx.api(ContestApi).getMetadata(contest);
+        const contestMetadata = await contest.getMetadata(this.ctx);
 
         return (
             contestMetadata.users.find(data => data.username === username) ??
@@ -58,7 +58,7 @@ export class UserApi extends ApiObject {
     });
 
     async getUserByToken(contest: Contest, token: string) {
-        const contestMetadata = await this.ctx.api(ContestApi).getMetadata(contest);
+        const contestMetadata = await contest.getMetadata(this.ctx);
         const userMetadata = contestMetadata.users.find(data => data.token === token) ?? null;
 
         if (userMetadata === null) return null;

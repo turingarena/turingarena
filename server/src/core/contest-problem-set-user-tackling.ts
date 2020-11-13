@@ -1,6 +1,5 @@
 import { gql } from 'apollo-server-core';
 import { ApiContext } from '../main/api-context';
-import { ContestApi } from './contest';
 import { ContestProblemAssignmentUserTackling } from './contest-problem-assignment-user-tackling';
 import { ContestProblemSet } from './contest-problem-set';
 import { ScoreGrade } from './feedback/score';
@@ -32,7 +31,7 @@ export class ContestProblemSetUserTackling {
     }
 
     async getScoreGrade(ctx: ApiContext) {
-        const assignments = await ctx.api(ContestApi).getProblemAssignments(this.problemSet.contest);
+        const assignments = await this.problemSet.contest.getProblemAssignments(ctx);
 
         return ScoreGrade.total(
             await Promise.all(

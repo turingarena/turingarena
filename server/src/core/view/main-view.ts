@@ -1,7 +1,6 @@
 import { gql } from 'apollo-server-core';
 import { ApiContext } from '../../main/api-context';
-import { Resolvers } from '../../main/resolver-types';
-import { Contest, ContestApi } from '../contest';
+import { Contest } from '../contest';
 import { SubmissionApi } from '../submission';
 import { User } from '../user';
 import { ContestView } from './contest-view';
@@ -31,7 +30,7 @@ export const mainViewSchema = gql`
 export class MainView {
     constructor(readonly contest: Contest, readonly user: User | null) {}
     async title({}, ctx: ApiContext) {
-        return [{ value: (await ctx.api(ContestApi).getMetadata(this.contest)).title ?? 'TuringArena' }];
+        return [{ value: (await this.contest.getMetadata(ctx)).title ?? 'TuringArena' }];
     }
     contestView() {
         return new ContestView(this.contest, this.user);

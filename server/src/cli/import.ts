@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { ContestApi, ContestData } from '../core/contest';
+import { Contest, ContestData } from '../core/contest';
 import { ArchiveApi } from '../core/files/archive';
 import { ApiObject } from '../main/api';
 
@@ -18,11 +18,6 @@ export class ContestImportApi extends ApiObject {
             archiveId: contestArchiveId,
         });
 
-        console.log(
-            await this.ctx.api(ContestApi).getMetadata({
-                __typename: 'Contest',
-                id: contest.id,
-            }),
-        );
+        console.log(await new Contest(contest.id).getMetadata(this.ctx));
     }
 }

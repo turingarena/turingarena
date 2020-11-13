@@ -2,7 +2,7 @@ import { gql } from 'apollo-server-core';
 import { __generated_Field } from '../../generated/graphql-types';
 import { ApiObject } from '../../main/api';
 import { createSimpleLoader } from '../../main/base-model';
-import { ContestApi } from '../contest';
+import { Contest, ContestApi } from '../contest';
 import { FulfillmentGradeDomain } from '../feedback/fulfillment';
 import { ScoreGradeDomain, ScoreRange } from '../feedback/score';
 import { Archive } from '../files/archive';
@@ -283,7 +283,7 @@ export class ProblemMaterialApi extends ApiObject {
     );
 
     async loadContent(problem: Problem, path: string) {
-        const contest = this.ctx.api(ContestApi).fromId(problem.contest.id);
+        const contest = new Contest(problem.contest.id);
         const { archiveId } = await this.ctx.api(ContestApi).dataLoader.load(contest);
         const file = await this.ctx.table(Archive).findOne({
             where: { uuid: archiveId, path: `${problem.name}/${path}` },

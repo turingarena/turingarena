@@ -1,6 +1,6 @@
 import { gql } from 'apollo-server-core';
 import { ApiContext } from '../main/api-context';
-import { Contest, ContestApi } from './contest';
+import { Contest } from './contest';
 import { ScoreRange } from './feedback/score';
 
 export const contestProblemSetSchema = gql`
@@ -29,11 +29,11 @@ export class ContestProblemSet {
     __typename = 'ContestProblemSet';
 
     async assignments({}, ctx: ApiContext) {
-        return ctx.api(ContestApi).getProblemAssignments(this.contest);
+        return this.contest.getProblemAssignments(ctx);
     }
 
     async getScoreRange(ctx: ApiContext): Promise<ScoreRange> {
-        const material = await ctx.api(ContestApi).getProblemSetMaterial(this.contest);
+        const material = await this.contest.getProblemSetMaterial(ctx);
 
         return ScoreRange.total(material.map(m => m.scoreRange));
     }

@@ -7,7 +7,7 @@ import { ApiContext } from '../main/api-context';
 import { createSimpleLoader, UuidBaseModel } from '../main/base-model';
 import { typed } from '../util/types';
 import { AchievementApi } from './achievement';
-import { ContestApi, ContestData } from './contest';
+import { Contest, ContestData } from './contest';
 import { ContestProblemAssignment } from './contest-problem-assignment';
 import { ContestProblemAssignmentUserTackling } from './contest-problem-assignment-user-tackling';
 import { Evaluation, EvaluationApi, EvaluationStatus } from './evaluation';
@@ -166,7 +166,7 @@ export class SubmissionApi extends ApiObject {
     async getTackling(s: Submission) {
         const { contestId, problemName, username } = await this.dataLoader.load(s);
 
-        const contest = this.ctx.api(ContestApi).fromId(contestId);
+        const contest = new Contest(contestId);
 
         return new ContestProblemAssignmentUserTackling(
             new ContestProblemAssignment(new Problem(contest, problemName)),

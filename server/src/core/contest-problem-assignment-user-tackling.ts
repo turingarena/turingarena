@@ -1,6 +1,5 @@
 import { gql } from 'apollo-server-core';
 import { ApiContext } from '../main/api-context';
-import { ContestApi } from './contest';
 import { ContestAwardAssignment } from './contest-award-assignment';
 import { ContestAwardAssignmentUserTackling } from './contest-award-assignment-user-tackling';
 import { ContestProblemAssignment } from './contest-problem-assignment';
@@ -38,7 +37,7 @@ export class ContestProblemAssignmentUserTackling {
     __typename = 'ContestProblemAssignmentUserTackling';
 
     async canSubmit({}, ctx: ApiContext) {
-        const status = await ctx.api(ContestApi).getStatus(this.assignment.problem.contest);
+        const status = await this.assignment.problem.contest.getStatus(ctx);
 
         return status === 'RUNNING';
     }

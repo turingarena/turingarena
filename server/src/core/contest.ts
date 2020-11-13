@@ -61,14 +61,6 @@ export interface ContestModelRecord {
 }
 
 export class ContestApi extends ApiObject {
-    fromId(id: string): Contest {
-        return new Contest(id);
-    }
-
-    fromData(data: ContestData): Contest {
-        return this.fromId(data.id);
-    }
-
     dataLoader = createSimpleLoader(({ id }: Contest) => this.ctx.table(ContestData).findByPk(id));
 
     async validate(contest: Contest) {
@@ -81,7 +73,9 @@ export class ContestApi extends ApiObject {
         // FIXME: should contests be addressable by name anyway?
 
         const contests = await this.ctx.table(ContestData).findAll();
-        const metadata = await Promise.all(contests.map(d => this.fromData(d)).map(async c => this.getMetadata(c)));
+        const metadata = await Promise.all(
+            contests.map(d => new Contest(d.id)).map(async c => c.getMetadata(this.ctx)),
+        );
 
         return contests.find((c, i) => metadata[i].name === name) ?? null;
     });
@@ -92,53 +86,6 @@ export class ContestApi extends ApiObject {
         if (data === null) return null;
 
         return new Contest(data.id);
-    }
-
-    async getMetadata(c: Contest) {
-        const { archiveId } = await this.dataLoader.load(c);
-        const metadataPath = `turingarena.yaml`;
-        const metadataProblemFile = await this.ctx.table(Archive).findOne({
-            where: {
-                uuid: archiveId,
-                path: metadataPath,
-            },
-        });
-
-        if (metadataProblemFile === null) {
-            throw new Error(`Contest ${c.id} is missing metadata file ${metadataPath}`);
-        }
-
-        const metadataContent = await this.ctx
-            .table(FileContent)
-            .findOne({ where: { id: metadataProblemFile.contentId } });
-
-        return yaml.parse(metadataContent!.content.toString()) as ContestMetadata;
-    }
-
-    async getStatus(c: Contest): Promise<ContestStatus> {
-        const metadata = await this.getMetadata(c);
-
-        const start = DateTime.fromISO(metadata.start).valueOf();
-        const end = metadata.end !== undefined ? DateTime.fromISO(metadata.end).valueOf() : null;
-        const now = DateTime.local().valueOf();
-
-        if (now < start) return 'NOT_STARTED';
-        else if (end === null || now < end) return 'RUNNING';
-        else return 'ENDED';
-    }
-
-    async getProblemAssignments(contest: Contest) {
-        const metadata = await this.getMetadata(contest);
-
-        return metadata.problems.map(name => new ContestProblemAssignment(new Problem(contest, name)));
-    }
-
-    async getProblemSetMaterial(c: Contest): Promise<ProblemMaterial[]> {
-        const assignments = await this.getProblemAssignments(c);
-
-        return Promise.all(
-            assignments.map(async ({ problem }) => this.ctx.api(ProblemMaterialApi).dataLoader.load(problem)),
-        );
     }
 
     private statementVariantFromFile(archiveFile: Archive): MediaFile {
@@ -170,21 +117,22 @@ export class ContestApi extends ApiObject {
 
 export class Contest {
     constructor(readonly id: string) {}
+
     __typename = 'Contest';
     async name({}, ctx: ApiContext) {
-        return (await ctx.api(ContestApi).getMetadata(this)).name;
+        return (await this.getMetadata(ctx)).name;
     }
     async title({}, ctx: ApiContext) {
-        return [{ value: (await ctx.api(ContestApi).getMetadata(this)).title }];
+        return [{ value: (await this.getMetadata(ctx)).title }];
     }
     async start({}, ctx: ApiContext) {
-        return (await ctx.api(ContestApi).getMetadata(this)).start;
+        return (await this.getMetadata(ctx)).start;
     }
     async end({}, ctx: ApiContext) {
-        return (await ctx.api(ContestApi).getMetadata(this)).end ?? null;
+        return (await this.getMetadata(ctx)).end ?? null;
     }
-    status({}, ctx: ApiContext) {
-        return ctx.api(ContestApi).getStatus(this);
+    async status({}, ctx: ApiContext) {
+        return this.getStatus(ctx);
     }
     problemSet() {
         return new ContestProblemSet(this);
@@ -194,7 +142,52 @@ export class Contest {
 
         return { uuid: (await ctx.api(ContestApi).dataLoader.load(this)).archiveId };
     }
-    statement({}, ctx: ApiContext) {
+    async statement({}, ctx: ApiContext) {
         return ctx.api(ContestApi).getStatement(this);
+    }
+
+    async getMetadata(ctx: ApiContext) {
+        const { archiveId } = await ctx.api(ContestApi).dataLoader.load(this);
+        const metadataPath = `turingarena.yaml`;
+        const metadataProblemFile = await ctx.table(Archive).findOne({
+            where: {
+                uuid: archiveId,
+                path: metadataPath,
+            },
+        });
+
+        if (metadataProblemFile === null) {
+            throw new Error(`Contest ${this.id} is missing metadata file ${metadataPath}`);
+        }
+
+        const metadataContent = await ctx.table(FileContent).findOne({ where: { id: metadataProblemFile.contentId } });
+
+        return yaml.parse(metadataContent!.content.toString()) as ContestMetadata;
+    }
+
+    async getStatus(ctx: ApiContext): Promise<ContestStatus> {
+        const metadata = await this.getMetadata(ctx);
+
+        const start = DateTime.fromISO(metadata.start).valueOf();
+        const end = metadata.end !== undefined ? DateTime.fromISO(metadata.end).valueOf() : null;
+        const now = DateTime.local().valueOf();
+
+        if (now < start) return 'NOT_STARTED';
+        else if (end === null || now < end) return 'RUNNING';
+        else return 'ENDED';
+    }
+
+    async getProblemAssignments(ctx: ApiContext) {
+        const metadata = await this.getMetadata(ctx);
+
+        return metadata.problems.map(name => new ContestProblemAssignment(new Problem(this, name)));
+    }
+
+    async getProblemSetMaterial(ctx: ApiContext): Promise<ProblemMaterial[]> {
+        const assignments = await this.getProblemAssignments(ctx);
+
+        return Promise.all(
+            assignments.map(async ({ problem }) => ctx.api(ProblemMaterialApi).dataLoader.load(problem)),
+        );
     }
 }

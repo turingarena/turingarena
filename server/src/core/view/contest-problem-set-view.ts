@@ -1,6 +1,5 @@
 import { gql } from 'apollo-server-core';
 import { ApiContext } from '../../main/api-context';
-import { ContestApi } from '../contest';
 import { ContestProblemSet } from '../contest-problem-set';
 import { ContestProblemSetUserTackling } from '../contest-problem-set-user-tackling';
 import { ScoreField } from '../feedback/score';
@@ -40,7 +39,7 @@ export class ContestProblemSetView {
     }
 
     async assignmentViews({}, ctx: ApiContext) {
-        return (await ctx.api(ContestApi).getProblemAssignments(this.problemSet.contest)).map(
+        return (await this.problemSet.contest.getProblemAssignments(ctx)).map(
             assignment => new ContestProblemAssignmentView(assignment, this.user),
         );
     }

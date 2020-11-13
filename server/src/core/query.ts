@@ -1,6 +1,6 @@
 import { gql } from 'apollo-server-core';
 import { Resolvers } from '../main/resolver-types';
-import { ContestApi, ContestData } from './contest';
+import { Contest, ContestApi, ContestData } from './contest';
 import { MessageApi } from './message';
 import { Submission, SubmissionApi } from './submission';
 import { User } from './user';
@@ -43,7 +43,7 @@ export const queryResolvers: Resolvers = {
         contests: async ({}, {}, ctx) => {
             await ctx.authorizeAdmin();
 
-            return (await ctx.table(ContestData).findAll()).map(d => ctx.api(ContestApi).fromData(d));
+            return (await ctx.table(ContestData).findAll()).map(d => new Contest(d.id));
         },
         archive: async (_, { uuid }, ctx) => {
             await ctx.authorizeAdmin();
