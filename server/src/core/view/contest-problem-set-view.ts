@@ -1,8 +1,7 @@
 import { gql } from 'apollo-server-core';
-import { ApiObject } from '../../main/api';
 import { ApiContext } from '../../main/api-context';
 import { ContestApi } from '../contest';
-import { ContestProblemSet, ContestProblemSetApi } from '../contest-problem-set';
+import { ContestProblemSet, } from '../contest-problem-set';
 import { ContestProblemSetUserTackling } from '../contest-problem-set-user-tackling';
 import { ScoreField } from '../feedback/score';
 import { User } from '../user';
@@ -61,7 +60,7 @@ export class ContestProblemSetView {
     async getTotalScoreField(ctx: ApiContext) {
         const tackling = this.getTackling();
 
-        const scoreRange = await ctx.api(ContestProblemSetApi).getScoreRange(this.problemSet);
+        const scoreRange = await this.problemSet.getScoreRange(ctx);
         const scoreGrade = tackling !== null ? await tackling.getScoreGrade(ctx) : null;
 
         return new ScoreField(scoreRange, scoreGrade?.score ?? null);
