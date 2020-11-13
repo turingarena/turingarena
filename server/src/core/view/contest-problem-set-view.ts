@@ -1,7 +1,7 @@
 import { gql } from 'apollo-server-core';
 import { ApiContext } from '../../main/api-context';
 import { ContestApi } from '../contest';
-import { ContestProblemSet, } from '../contest-problem-set';
+import { ContestProblemSet } from '../contest-problem-set';
 import { ContestProblemSetUserTackling } from '../contest-problem-set-user-tackling';
 import { ScoreField } from '../feedback/score';
 import { User } from '../user';
@@ -32,7 +32,9 @@ export const contestProblemSetViewSchema = gql`
 
 export class ContestProblemSetView {
     constructor(readonly problemSet: ContestProblemSet, readonly user: User | null) {}
+
     __typename = 'ContestProblemSetView';
+
     contestView() {
         return new ContestView(this.problemSet.contest, this.user);
     }
@@ -43,29 +45,20 @@ export class ContestProblemSetView {
         );
     }
 
-    tackling({}, ctx: ApiContext) {
-        return this.getTackling();
-    }
-
-    async totalScoreField({}, ctx: ApiContext) {
-        return this.getTotalScoreField(ctx);
-    }
-
-    getTackling() {
+    tackling() {
         if (this.user === null) return null;
 
         return new ContestProblemSetUserTackling(this.problemSet, this.user);
     }
 
-    async getTotalScoreField(ctx: ApiContext) {
-        const tackling = this.getTackling();
+    async totalScoreField({}, ctx: ApiContext) {
+        const tackling = this.tackling();
 
         const scoreRange = await this.problemSet.getScoreRange(ctx);
         const scoreGrade = tackling !== null ? await tackling.getScoreGrade(ctx) : null;
 
         return new ScoreField(scoreRange, scoreGrade?.score ?? null);
     }
-
 }
 
 export interface ContestProblemSetViewModelRecord {
