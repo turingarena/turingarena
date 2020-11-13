@@ -1,6 +1,7 @@
 import { gql } from 'apollo-server-core';
 import { __generated_Field } from '../../generated/graphql-types';
 import { ApiObject } from '../../main/api';
+import { ApiContext } from '../../main/api-context';
 import { createSimpleLoader } from '../../main/base-model';
 import { Contest, ContestApi } from '../contest';
 import { FulfillmentGradeDomain } from '../feedback/fulfillment';
@@ -170,16 +171,14 @@ export class ProblemMaterial {
     statement = this.taskInfo.IOI.statements.map(
         ({ path, language, content_type: type }): MediaFile =>
             new MediaFile(path.slice(path.lastIndexOf('/') + 1), language, type, ctx =>
-                ctx.api(ProblemMaterialApi).loadContent(this.problem, path),
+                this.loadContent(ctx, this.problem, path),
             ),
     );
 
     attachments = this.taskInfo.IOI.attachments.map(
         ({ name, path, content_type: type }): ProblemAttachment => ({
             title: [{ value: name }],
-            media: [
-                new MediaFile(name, null, type, ctx => ctx.api(ProblemMaterialApi).loadContent(this.problem, path)),
-            ],
+            media: [new MediaFile(name, null, type, ctx => this.loadContent(ctx, this.problem, path))],
         }),
     );
 
@@ -270,6 +269,21 @@ export class ProblemMaterial {
             title: [{ value: 'Score' }],
         },
     ];
+
+    async loadContent(ctx: ApiContext, problem: Problem, path: string) {
+        const contest = new Contest(problem.contest.id);
+        const { archiveId } = await ctx.api(ContestApi).dataLoader.load(contest);
+        const file = await ctx.table(Archive).findOne({
+            where: { uuid: archiveId, path: `${problem.name}/${path}` },
+            include: [ctx.table(FileContent)],
+        });
+
+        if (file === null) {
+            throw ctx.fail(`file ${path} not found in problem ${problem.name} (referred from metadata)`);
+        }
+
+        return file.content;
+    }
 }
 
 export interface ProblemMaterialModelRecord {
@@ -281,19 +295,4 @@ export class ProblemMaterialApi extends ApiObject {
         async (problem: Problem) =>
             new ProblemMaterial(problem, await this.ctx.api(ProblemTaskInfoApi).getProblemTaskInfo(problem)),
     );
-
-    async loadContent(problem: Problem, path: string) {
-        const contest = new Contest(problem.contest.id);
-        const { archiveId } = await this.ctx.api(ContestApi).dataLoader.load(contest);
-        const file = await this.ctx.table(Archive).findOne({
-            where: { uuid: archiveId, path: `${problem.name}/${path}` },
-            include: [this.ctx.table(FileContent)],
-        });
-
-        if (file === null) {
-            throw this.ctx.fail(`file ${path} not found in problem ${problem.name} (referred from metadata)`);
-        }
-
-        return file.content;
-    }
 }
