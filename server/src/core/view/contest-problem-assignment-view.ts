@@ -1,5 +1,4 @@
 import { gql } from 'apollo-server-core';
-import { ApiObject } from '../../main/api';
 import { ApiContext } from '../../main/api-context';
 import { ContestAwardAssignment } from '../contest-award-assignment';
 import { ContestProblemAssignment } from '../contest-problem-assignment';
@@ -41,46 +40,35 @@ export const contestProblemAssignmentViewSchema = gql`
 
 export class ContestProblemAssignmentView {
     constructor(readonly assignment: ContestProblemAssignment, readonly user: User | null) {}
+
     __typename = 'ContestProblemAssignmentView';
+
     async problemSetView({}, ctx: ApiContext) {
-        return ctx.api(ContestProblemAssignmentViewApi).getProblemSetView(this);
+        return new ContestProblemSetView(new ContestProblemSet(this.assignment.problem.contest), this.user);
     }
-    async tackling({}, ctx: ApiContext) {
-        return ctx.api(ContestProblemAssignmentViewApi).getTackling(this);
+
+    async tackling() {
+        return this.user !== null ? new ContestProblemAssignmentUserTackling(this.assignment, this.user) : null;
     }
+
     async totalScoreField({}, ctx: ApiContext) {
-        return ctx.api(ContestProblemAssignmentViewApi).getTotalScoreField(this);
+        const { scoreRange } = await ctx.api(ProblemMaterialApi).dataLoader.load(this.assignment.problem);
+        const tackling = await this.tackling();
+
+        const scoreGrade = tackling !== null ? await tackling.getScoreGrade(ctx) : null;
+
+        return new ScoreField(scoreRange, scoreGrade?.score ?? null);
     }
+
     async awardAssignmentViews({}, ctx: ApiContext) {
-        return ctx.api(ContestProblemAssignmentViewApi).getAwardAssignmentViews(this);
+        const { awards } = await ctx.api(ProblemMaterialApi).dataLoader.load(this.assignment.problem);
+
+        return awards.map(
+            award => new ContestAwardAssignmentView(new ContestAwardAssignment(this.assignment, award), this.user),
+        );
     }
 }
 
 export interface ContestProblemAssignmentViewModelRecord {
     ContestProblemAssignmentView: ContestProblemAssignmentView;
-}
-
-export class ContestProblemAssignmentViewApi extends ApiObject {
-    getTackling({ assignment, user }: ContestProblemAssignmentView) {
-        return user !== null ? new ContestProblemAssignmentUserTackling(assignment, user) : null;
-    }
-
-    async getTotalScoreField(view: ContestProblemAssignmentView) {
-        const { scoreRange } = await this.ctx.api(ProblemMaterialApi).dataLoader.load(view.assignment.problem);
-        const tackling = this.getTackling(view);
-
-        const scoreGrade = tackling !== null ? await tackling.getScoreGrade(this.ctx) : null;
-
-        return new ScoreField(scoreRange, scoreGrade?.score ?? null);
-    }
-
-    async getAwardAssignmentViews({ assignment, user }: ContestProblemAssignmentView) {
-        const { awards } = await this.ctx.api(ProblemMaterialApi).dataLoader.load(assignment.problem);
-
-        return awards.map(award => new ContestAwardAssignmentView(new ContestAwardAssignment(assignment, award), user));
-    }
-
-    async getProblemSetView({ user, assignment }: ContestProblemAssignmentView) {
-        return new ContestProblemSetView(new ContestProblemSet(assignment.problem.contest), user);
-    }
 }
