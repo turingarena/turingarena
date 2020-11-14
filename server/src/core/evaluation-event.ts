@@ -2,6 +2,7 @@ import { UIMessage } from '@edomora97/task-maker';
 import { DataTypes } from 'sequelize';
 import { AllowNull, Column, ForeignKey, Table } from 'sequelize-typescript';
 import { ApiObject } from '../main/api';
+import { ApiContext } from '../main/api-context';
 import { createSimpleLoader, UuidBaseModel } from '../main/base-model';
 import { Achievement } from './achievement';
 import { Evaluation } from './evaluation';
@@ -20,6 +21,18 @@ export class EvaluationEvent extends UuidBaseModel<EvaluationEvent> {
     @AllowNull(false)
     @Column(DataTypes.JSON)
     data!: TaskMakerEvent;
+
+    async storeAchievements(ctx: ApiContext) {
+        if (typeof this.data === 'object' && 'IOISubtaskScore' in this.data) {
+            const { subtask, normalized_score, score } = this.data.IOISubtaskScore;
+            await ctx.table(Achievement).create({
+                evaluationId: this.evaluationId,
+                awardIndex: subtask,
+                // Store the normalized score if the max score is zero (FIXME: ugly hack)
+                grade: score === 0 ? normalized_score : score,
+            });
+        }
+    }
 }
 
 export class EvaluationEventApi extends ApiObject {
@@ -28,16 +41,4 @@ export class EvaluationEventApi extends ApiObject {
             where: { evaluationId },
         }),
     );
-
-    async storeAchievements(e: EvaluationEvent) {
-        if (typeof e.data === 'object' && 'IOISubtaskScore' in e.data) {
-            const { subtask, normalized_score, score } = e.data.IOISubtaskScore;
-            await this.ctx.table(Achievement).create({
-                evaluationId: e.evaluationId,
-                awardIndex: subtask,
-                // Store the normalized score if the max score is zero (FIXME: ugly hack)
-                grade: score === 0 ? normalized_score : score,
-            });
-        }
-    }
 }

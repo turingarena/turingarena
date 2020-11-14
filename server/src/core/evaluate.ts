@@ -80,7 +80,7 @@ export class EvaluateApi extends ApiObject {
 
         if (output.code === 0) {
             for (const event of events) {
-                await this.ctx.api(EvaluationEventApi).storeAchievements(event);
+                await event.storeAchievements(this.ctx);
             }
             await evaluation.update({
                 status: EvaluationStatus.SUCCESS,
