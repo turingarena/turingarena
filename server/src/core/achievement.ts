@@ -7,7 +7,7 @@ import { Evaluation, EvaluationApi } from './evaluation';
 import { FulfillmentGrade } from './feedback/fulfillment';
 import { ScoreGrade, ScoreGradeDomain } from './feedback/score';
 import { ProblemMaterialApi } from './material/problem-material';
-import { SubmissionApi } from './submission';
+import { Submission } from './submission';
 
 export const achievementSchema = gql`
     type Achievement {
@@ -40,8 +40,8 @@ export class Achievement extends BaseModel<Achievement> {
 
     async getAward(ctx: ApiContext) {
         const evaluation = await ctx.api(EvaluationApi).byId.load(this.evaluationId);
-        const submission = ctx.api(SubmissionApi).fromId(evaluation.submissionId);
-        const { assignment } = await ctx.api(SubmissionApi).getTackling(submission);
+        const submission = Submission.fromId(evaluation.submissionId);
+        const { assignment } = await submission.getTackling(ctx);
         const material = await ctx.api(ProblemMaterialApi).dataLoader.load(assignment.problem);
 
         return material.awards[this.awardIndex];

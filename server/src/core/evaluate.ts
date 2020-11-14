@@ -7,7 +7,7 @@ import { ContestApi } from './contest';
 import { Evaluation, EvaluationStatus } from './evaluation';
 import { EvaluationEvent, EvaluationEventApi } from './evaluation-event';
 import { ArchiveApi } from './files/archive';
-import { Submission, SubmissionApi } from './submission';
+import { Submission } from './submission';
 
 export class EvaluateApi extends ApiObject {
     /**
@@ -24,15 +24,16 @@ export class EvaluateApi extends ApiObject {
             status: EvaluationStatus.PENDING,
         });
 
-        const { assignment } = await this.ctx.api(SubmissionApi).getTackling(submission);
+        const { assignment } = await submission.getTackling(this.ctx);
         const { archiveId } = await this.ctx.api(ContestApi).dataLoader.load(assignment.problem.contest);
         const contestDir = await this.ctx.api(ArchiveApi).extractArchive(archiveId);
 
         const problemDir = path.join(contestDir, assignment.problem.name);
 
-        const submissionPath = await this.ctx
-            .api(SubmissionApi)
-            .extract(submission, path.join(this.ctx.environment.config.cachePath, 'submission'));
+        const submissionPath = await submission.extract(
+            path.join(this.ctx.environment.config.cachePath, 'submission'),
+            this.ctx,
+        );
 
         const filepath = fs.readdirSync(submissionPath)[0];
         const solutionPath = path.join(submissionPath, filepath);

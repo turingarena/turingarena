@@ -2,7 +2,7 @@ import { gql } from 'apollo-server-core';
 import { Resolvers } from '../main/resolver-types';
 import { Contest, ContestData } from './contest';
 import { MessageApi } from './message';
-import { Submission, SubmissionApi } from './submission';
+import { Submission } from './submission';
 import { User } from './user';
 import { MainView } from './view/main-view';
 export const querySchema = gql`
@@ -51,12 +51,12 @@ export const queryResolvers: Resolvers = {
             return { uuid };
         },
         submission: async ({}, { id }, ctx) => {
-            const sub = await ctx.api(SubmissionApi).validate(new Submission(id));
+            const sub = await new Submission(id).validate(ctx);
 
             // Get the username of who had made the submission and verify if
             // the current user has teh permission to made the query.
             // The query is valid if is made by the owner or by an admin user.
-            const username = (await ctx.api(SubmissionApi).getTackling(sub)).user.username;
+            const username = (await sub.getTackling(ctx)).user.username;
             await ctx.authorizeUser(username);
 
             return sub;

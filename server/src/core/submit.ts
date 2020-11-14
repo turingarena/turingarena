@@ -1,9 +1,9 @@
 import * as path from 'path';
 import { ApiObject } from '../main/api';
-import { Contest, ContestApi } from './contest';
+import { Contest } from './contest';
 import { EvaluateApi } from './evaluate';
 import { FileContentApi } from './files/file-content';
-import { SubmissionApi, SubmissionData, SubmissionInput } from './submission';
+import { Submission, SubmissionData, SubmissionInput } from './submission';
 import { SubmissionFile } from './submission-file';
 import { User } from './user';
 
@@ -20,7 +20,7 @@ export class SubmitApi extends ApiObject {
         const submissionData = await this.ctx
             .table(SubmissionData)
             .create({ contestId: contest.id, problemName, username });
-        const submission = this.ctx.api(SubmissionApi).fromId(submissionData.id);
+        const submission = Submission.fromId(submissionData.id);
 
         for (const { content, fieldName, fileName, fileTypeName } of files) {
             await this.ctx.table(SubmissionFile).create({
