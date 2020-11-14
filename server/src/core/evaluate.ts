@@ -5,7 +5,7 @@ import { bufferTime, concatAll, concatMap, toArray } from 'rxjs/operators';
 import { ApiObject } from '../main/api';
 import { ContestApi } from './contest';
 import { Evaluation, EvaluationStatus } from './evaluation';
-import { EvaluationEvent, EvaluationEventApi } from './evaluation-event';
+import { EvaluationEvent } from './evaluation-event';
 import { ArchiveApi } from './files/archive';
 import { Submission } from './submission';
 
