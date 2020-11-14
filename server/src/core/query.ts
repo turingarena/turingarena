@@ -1,6 +1,6 @@
 import { gql } from 'apollo-server-core';
 import { Resolvers } from '../main/resolver-types';
-import { Contest, ContestApi, ContestData } from './contest';
+import { Contest, ContestData } from './contest';
 import { MessageApi } from './message';
 import { Submission, SubmissionApi } from './submission';
 import { User } from './user';
@@ -31,7 +31,7 @@ export const queryResolvers: Resolvers = {
                 await ctx.authorizeUser(username);
             }
 
-            const contest = await ctx.api(ContestApi).getDefault();
+            const contest = await Contest.getDefault(ctx);
 
             if (contest === null) throw new Error(`missing 'default' contest (not supported right now)`);
 
@@ -43,7 +43,7 @@ export const queryResolvers: Resolvers = {
         contests: async ({}, {}, ctx) => {
             await ctx.authorizeAdmin();
 
-            return (await ctx.table(ContestData).findAll()).map(d => new Contest(d.id));
+            return (await ctx.table(ContestData).findAll()).map(d => d.getContest());
         },
         archive: async (_, { uuid }, ctx) => {
             await ctx.authorizeAdmin();

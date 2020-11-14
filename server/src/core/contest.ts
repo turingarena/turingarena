@@ -48,6 +48,10 @@ export class ContestData extends UuidBaseModel<ContestData> {
     @Column(DataType.UUIDV4)
     @ForeignKey(() => Archive)
     archiveId!: string;
+
+    getContest() {
+        return new Contest(this.id);
+    }
 }
 
 export type ContestStatus = __generated_ContestStatus;
@@ -63,30 +67,14 @@ export interface ContestModelRecord {
 export class ContestApi extends ApiObject {
     dataLoader = createSimpleLoader(({ id }: Contest) => this.ctx.table(ContestData).findByPk(id));
 
-    async validate(contest: Contest) {
-        await this.dataLoader.load(contest);
-
-        return contest;
-    }
-
     byNameLoader = createSimpleLoader(async (name: string) => {
         // FIXME: should contests be addressable by name anyway?
 
         const contests = await this.ctx.table(ContestData).findAll();
-        const metadata = await Promise.all(
-            contests.map(d => new Contest(d.id)).map(async c => c.getMetadata(this.ctx)),
-        );
+        const metadata = await Promise.all(contests.map(d => d.getContest()).map(async c => c.getMetadata(this.ctx)));
 
         return contests.find((c, i) => metadata[i].name === name) ?? null;
     });
-
-    async getDefault(): Promise<Contest | null> {
-        // FIXME: assumes there is only one contest
-        const data = await this.ctx.table(ContestData).findOne();
-        if (data === null) return null;
-
-        return new Contest(data.id);
-    }
 
     private statementVariantFromFile(archiveFile: Archive): MediaFile {
         const type = mime.lookup(archiveFile.path);
@@ -189,5 +177,19 @@ export class Contest {
         return Promise.all(
             assignments.map(async ({ problem }) => ctx.api(ProblemMaterialApi).dataLoader.load(problem)),
         );
+    }
+
+    async validate(ctx: ApiContext) {
+        await ctx.api(ContestApi).dataLoader.load(this);
+
+        return this;
+    }
+
+    static async getDefault(ctx: ApiContext): Promise<Contest | null> {
+        // FIXME: assumes there is only one contest
+        const data = await ctx.table(ContestData).findOne();
+        if (data === null) return null;
+
+        return data.getContest();
     }
 }

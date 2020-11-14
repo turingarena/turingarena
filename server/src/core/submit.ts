@@ -14,7 +14,7 @@ export class SubmitApi extends ApiObject {
         // FIXME: improve the CLI to support multiple fields/file-types
         solutionPath?: string,
     ) {
-        const contest = await this.ctx.api(ContestApi).validate(new Contest(contestId));
+        const contest = await new Contest(contestId).validate(this.ctx);
         await new User(contest, username).validate(this.ctx);
 
         const submissionData = await this.ctx
