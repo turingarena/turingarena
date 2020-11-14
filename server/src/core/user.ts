@@ -56,16 +56,6 @@ export class UserApi extends ApiObject {
             this.ctx.fail(`user ${username} does not exist in contest ${contest.id}`)
         );
     });
-
-    async getUserByToken(contest: Contest, token: string) {
-        const contestMetadata = await contest.getMetadata(this.ctx);
-        const userMetadata = contestMetadata.users.find(data => data.token === token) ?? null;
-
-        if (userMetadata === null) return null;
-        const { username } = userMetadata;
-
-        return new User(contest, username);
-    }
 }
 
 export interface UserModelRecord {

@@ -16,6 +16,7 @@ import { FileContent } from './files/file-content';
 import { Media, MediaFile } from './material/media';
 import { ProblemMaterial, ProblemMaterialApi } from './material/problem-material';
 import { Problem } from './problem';
+import { User } from './user';
 
 export const contestSchema = gql`
     type Contest {
@@ -101,6 +102,7 @@ export class ContestApi extends ApiObject {
 
         return statementFiles.map((archiveFile): MediaFile => this.statementVariantFromFile(archiveFile));
     }
+
 }
 
 export class Contest {
@@ -191,5 +193,15 @@ export class Contest {
         if (data === null) return null;
 
         return data.getContest();
+    }
+
+    async getUserByToken(ctx: ApiContext, token: string) {
+        const contestMetadata = await this.getMetadata(ctx);
+        const userMetadata = contestMetadata.users.find(data => data.token === token) ?? null;
+
+        if (userMetadata === null) return null;
+        const { username } = userMetadata;
+
+        return new User(this, username);
     }
 }
