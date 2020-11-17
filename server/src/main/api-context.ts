@@ -2,7 +2,7 @@ import { DocumentNode, execute } from 'graphql';
 import { Model, Sequelize } from 'sequelize-typescript';
 import { modelConstructors } from '../core';
 import { AuthService } from '../core/auth';
-import { User, UserApi } from '../core/user';
+import { User, UserCache } from '../core/user';
 import { ApiObject } from './api';
 import { Config, defaultConfig } from './config';
 import { createSchema } from './executable-schema';
@@ -90,7 +90,7 @@ export class RemoteApiContext extends ApiContext {
         if (this.environment.config.skipAuth) return true;
 
         if (this.user === undefined) return false;
-        const { role } = await this.api(UserApi).metadataLoader.load(this.user);
+        const { role } = await this.api(UserCache).metadataLoader.load(this.user);
 
         return role === 'admin';
     }

@@ -3,7 +3,7 @@ import { AllowNull, Column, ForeignKey, PrimaryKey, Table } from 'sequelize-type
 import { ApiObject } from '../main/api';
 import { ApiContext } from '../main/api-context';
 import { BaseModel, createSimpleLoader } from '../main/base-model';
-import { Evaluation, EvaluationApi } from './evaluation';
+import { Evaluation, EvaluationCache } from './evaluation';
 import { FulfillmentGrade } from './feedback/fulfillment';
 import { ScoreGrade, ScoreGradeDomain } from './feedback/score';
 import { ProblemMaterialApi } from './material/problem-material';
@@ -39,7 +39,7 @@ export class Achievement extends BaseModel<Achievement> {
     }
 
     async getAward(ctx: ApiContext) {
-        const evaluation = await ctx.api(EvaluationApi).byId.load(this.evaluationId);
+        const evaluation = await ctx.api(EvaluationCache).byId.load(this.evaluationId);
         const submission = Submission.fromId(evaluation.submissionId);
         const { assignment } = await submission.getTackling(ctx);
         const material = await ctx.api(ProblemMaterialApi).dataLoader.load(assignment.problem);
@@ -56,7 +56,7 @@ export interface AchievementModelRecord {
     Achievement: Achievement;
 }
 
-export class AchievementApi extends ApiObject {
+export class AchievementCache extends ApiObject {
     allByEvaluationId = createSimpleLoader((evaluationId: string) =>
         this.ctx.table(Achievement).findAll({
             where: { evaluationId },

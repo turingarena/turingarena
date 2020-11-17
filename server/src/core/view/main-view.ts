@@ -1,7 +1,7 @@
 import { gql } from 'apollo-server-core';
 import { ApiContext } from '../../main/api-context';
 import { Contest } from '../contest';
-import { SubmissionApi } from '../submission';
+import { SubmissionCache } from '../submission';
 import { User } from '../user';
 import { ContestView } from './contest-view';
 
@@ -37,7 +37,7 @@ export class MainView {
     }
     async pendingSubmissions({}, ctx: ApiContext) {
         return this.user !== null
-            ? ctx.api(SubmissionApi).pendingByContestAndUser.load({
+            ? ctx.api(SubmissionCache).pendingByContestAndUser.load({
                   contestId: this.contest.id,
                   username: this.user.username,
               })

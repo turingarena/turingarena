@@ -3,7 +3,7 @@ import { sign, verify } from 'jsonwebtoken';
 import { ApiEnvironment, LocalApiContext } from '../main/api-context';
 import { loadConfig } from '../main/config';
 import { Contest } from './contest';
-import { User, UserApi } from './user';
+import { User, UserCache } from './user';
 
 export const authSchema = gql`
     type AuthResult {
@@ -51,7 +51,7 @@ export class AuthService {
         const user = await contest.getUserByToken(this.ctx, token);
         if (user === null) return null;
         //Get the role of the user. If the role is undefined it will use 'user' isntread
-        let role = (await this.ctx.api(UserApi).metadataLoader.load(user)).role;
+        let role = (await this.ctx.api(UserCache).metadataLoader.load(user)).role;
         if (role === undefined) role = 'user';
         const payload: TokenPayload = { contestId: contest.id, username: user.username, role };
 

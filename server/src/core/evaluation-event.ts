@@ -35,7 +35,7 @@ export class EvaluationEvent extends UuidBaseModel<EvaluationEvent> {
     }
 }
 
-export class EvaluationEventApi extends ApiObject {
+export class EvaluationEventCache extends ApiObject {
     allByEvaluationId = createSimpleLoader((evaluationId: string) =>
         this.ctx.table(EvaluationEvent).findAll({
             where: { evaluationId },

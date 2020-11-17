@@ -5,7 +5,7 @@ import { ContestAwardAssignmentUserTackling } from './contest-award-assignment-u
 import { ContestProblemAssignment } from './contest-problem-assignment';
 import { ScoreGrade } from './feedback/score';
 import { ProblemMaterialApi } from './material/problem-material';
-import { SubmissionApi } from './submission';
+import { SubmissionCache } from './submission';
 import { User } from './user';
 import { ContestProblemAssignmentView } from './view/contest-problem-assignment-view';
 
@@ -43,7 +43,7 @@ export class ContestProblemAssignmentUserTackling {
     }
 
     async submissions({}, ctx: ApiContext) {
-        return ctx.api(SubmissionApi).allByTackling.load(this);
+        return ctx.api(SubmissionCache).allByTackling.load(this);
     }
 
     assignmentView() {

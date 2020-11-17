@@ -49,7 +49,7 @@ export class SubmissionFile extends BaseModel<SubmissionFile> {
     getContent!: (options?: FindOptions) => Promise<FileContent>;
 }
 
-export class SubmissionFileApi extends ApiObject {
+export class SubmissionFileCache extends ApiObject {
     allBySubmissionId = createSimpleLoader((submissionId: string) =>
         this.ctx.table(SubmissionFile).findAll({ where: { submissionId } }),
     );

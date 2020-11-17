@@ -6,19 +6,19 @@ import { ApiObject } from '../main/api';
 import { ApiContext } from '../main/api-context';
 import { createSimpleLoader, UuidBaseModel } from '../main/base-model';
 import { typed } from '../util/types';
-import { AchievementApi } from './achievement';
+import { AchievementCache } from './achievement';
 import { Contest, ContestData } from './contest';
 import { ContestProblemAssignment } from './contest-problem-assignment';
 import { ContestProblemAssignmentUserTackling } from './contest-problem-assignment-user-tackling';
-import { Evaluation, EvaluationApi, EvaluationStatus } from './evaluation';
-import { EvaluationEventApi } from './evaluation-event';
+import { Evaluation, EvaluationCache, EvaluationStatus } from './evaluation';
+import { EvaluationEventCache } from './evaluation-event';
 import { FulfillmentGradeDomain } from './feedback/fulfillment';
 import { ScoreGrade, ScoreGradeDomain } from './feedback/score';
 import { FileContentApi } from './files/file-content';
 import { ProblemMaterialApi } from './material/problem-material';
 import { Participation } from './participation';
 import { Problem } from './problem';
-import { SubmissionFileApi } from './submission-file';
+import { SubmissionFileCache } from './submission-file';
 import { User } from './user';
 
 export const submissionSchema = gql`
@@ -138,11 +138,11 @@ export class Submission {
     }
 
     async createdAt({}, ctx: ApiContext) {
-        return (await ctx.api(SubmissionApi).dataLoader.load(this)).createdAt;
+        return (await ctx.api(SubmissionCache).dataLoader.load(this)).createdAt;
     }
 
     evaluations({}, ctx: ApiContext) {
-        return ctx.api(EvaluationApi).allBySubmissionId.load(this.id);
+        return ctx.api(EvaluationCache).allBySubmissionId.load(this.id);
     }
 
     files({}, ctx: ApiContext) {
@@ -154,17 +154,17 @@ export class Submission {
     }
 
     async validate(ctx: ApiContext) {
-        await ctx.api(SubmissionApi).dataLoader.load(this);
+        await ctx.api(SubmissionCache).dataLoader.load(this);
 
         return this;
     }
 
     async getSubmissionFiles(ctx: ApiContext) {
-        return ctx.api(SubmissionFileApi).allBySubmissionId.load(this.id);
+        return ctx.api(SubmissionFileCache).allBySubmissionId.load(this.id);
     }
 
     async getTackling(ctx: ApiContext) {
-        const { contestId, problemName, username } = await ctx.api(SubmissionApi).dataLoader.load(this);
+        const { contestId, problemName, username } = await ctx.api(SubmissionCache).dataLoader.load(this);
 
         const contest = new Contest(contestId);
 
@@ -213,7 +213,7 @@ export class Submission {
     async getAwardAchievements(ctx: ApiContext) {
         const evaluation = await this.getOfficialEvaluation(ctx);
         const achievements =
-            evaluation !== null ? await ctx.api(AchievementApi).allByEvaluationId.load(evaluation.id) : [];
+            evaluation !== null ? await ctx.api(AchievementCache).allByEvaluationId.load(evaluation.id) : [];
         const material = await this.getMaterial(ctx);
 
         return material.awards.map((award, awardIndex) => ({
@@ -252,7 +252,7 @@ export class Submission {
 
         const evaluation = await this.getOfficialEvaluation(ctx);
         const events =
-            evaluation !== null ? await ctx.api(EvaluationEventApi).allByEvaluationId.load(evaluation.id) : [];
+            evaluation !== null ? await ctx.api(EvaluationEventCache).allByEvaluationId.load(evaluation.id) : [];
 
         const testCasesData = awards.flatMap((award, awardIndex) =>
             new Array(scoring.subtasks[awardIndex].testcases).fill(0).map(() => ({
@@ -357,7 +357,7 @@ export interface SubmissionModelRecord {
 
 export type SubmissionInput = __generated_SubmissionInput;
 
-export class SubmissionApi extends ApiObject {
+export class SubmissionCache extends ApiObject {
     dataLoader = createSimpleLoader((s: Submission) => this.ctx.table(SubmissionData).findByPk(s.id));
 
     allByTackling = createSimpleLoader(

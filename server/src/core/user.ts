@@ -37,17 +37,17 @@ export class User {
         return `${this.contest.id}/${this.username}`;
     }
     async name({}, ctx: ApiContext) {
-        return (await ctx.api(UserApi).metadataLoader.load(this)).name;
+        return (await ctx.api(UserCache).metadataLoader.load(this)).name;
     }
 
     async validate(ctx: ApiContext) {
-        await ctx.api(UserApi).metadataLoader.load(this);
+        await ctx.api(UserCache).metadataLoader.load(this);
 
         return this;
     }
 }
 
-export class UserApi extends ApiObject {
+export class UserCache extends ApiObject {
     metadataLoader = createSimpleLoader(async ({ contest, username }: User) => {
         const contestMetadata = await contest.getMetadata(this.ctx);
 
