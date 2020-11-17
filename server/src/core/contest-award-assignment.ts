@@ -1,5 +1,4 @@
 import { gql } from 'apollo-server-core';
-import { Resolvers } from '../main/resolver-types';
 import { ContestProblemAssignment } from './contest-problem-assignment';
 import { Award } from './material/award';
 
