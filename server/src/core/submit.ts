@@ -19,7 +19,7 @@ export class Submit {
         await new User(contest, username).validate(ctx);
 
         const submissionData = await ctx.table(SubmissionData).create({ contestId: contest.id, problemName, username });
-        const submission = Submission.fromId(submissionData.id);
+        const submission = Submission.fromId(submissionData.id, ctx);
 
         for (const { content, fieldName, fileName, fileTypeName } of files) {
             await ctx.table(SubmissionFile).create({

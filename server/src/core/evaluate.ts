@@ -24,7 +24,7 @@ export class EvaluateApi extends ApiObject {
             status: EvaluationStatus.PENDING,
         });
 
-        const { assignment } = await submission.getTackling(this.ctx);
+        const { assignment } = await submission.getTackling();
         const { archiveId } = await this.ctx.api(ContestApi).dataLoader.load(assignment.problem.contest);
         const contestDir = await this.ctx.api(ArchiveApi).extractArchive(archiveId);
 
@@ -32,7 +32,6 @@ export class EvaluateApi extends ApiObject {
 
         const submissionPath = await submission.extract(
             path.join(this.ctx.environment.config.cachePath, 'submission'),
-            this.ctx,
         );
 
         const filepath = fs.readdirSync(submissionPath)[0];

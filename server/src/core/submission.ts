@@ -66,23 +66,23 @@ export class SubmissionData extends UuidBaseModel<SubmissionData> {
 }
 
 export class Submission {
-    constructor(readonly id: string) {}
+    constructor(readonly id: string, readonly ctx: ApiContext) {}
     __typename = 'Submission';
 
-    async contest({}, ctx: ApiContext) {
-        return (await this.getTackling(ctx)).assignment.problem.contest;
+    async contest() {
+        return (await this.getTackling()).assignment.problem.contest;
     }
 
-    async user({}, ctx: ApiContext) {
-        return (await this.getTackling(ctx)).user;
+    async user() {
+        return (await this.getTackling()).user;
     }
 
-    async problem({}, ctx: ApiContext) {
-        return (await this.getTackling(ctx)).assignment.problem;
+    async problem() {
+        return (await this.getTackling()).assignment.problem;
     }
 
-    async participation({}, ctx: ApiContext) {
-        const tackling = await this.getTackling(ctx);
+    async participation() {
+        const tackling = await this.getTackling();
 
         return typed<Participation>({
             __typename: 'Participation',
@@ -91,24 +91,24 @@ export class Submission {
         });
     }
 
-    async contestProblemAssigment({}, ctx: ApiContext) {
-        return (await this.getTackling(ctx)).assignment;
+    async contestProblemAssigment() {
+        return (await this.getTackling()).assignment;
     }
 
-    async officialEvaluation({}, ctx: ApiContext) {
-        return this.getOfficialEvaluation(ctx);
+    async officialEvaluation() {
+        return this.getOfficialEvaluation();
     }
 
-    async summaryRow({}, ctx: ApiContext) {
-        const scoreRange = (await this.getMaterial(ctx)).scoreRange;
-        const score = (await this.getTotalScore(ctx))?.score;
+    async summaryRow() {
+        const scoreRange = (await this.getMaterial()).scoreRange;
+        const score = (await this.getTotalScore())?.score;
 
         return {
             __typename: 'Record',
             valence:
                 score !== undefined ? (score >= scoreRange.max ? 'SUCCESS' : score > 0 ? 'PARTIAL' : 'FAILURE') : null,
             fields: [
-                ...(await this.getAwardAchievements(ctx)).map(({ award: { gradeDomain }, achievement }) => {
+                ...(await this.getAwardAchievements()).map(({ award: { gradeDomain }, achievement }) => {
                     if (gradeDomain instanceof ScoreGradeDomain) {
                         return new ScoreField(
                             gradeDomain.scoreRange,
@@ -128,38 +128,38 @@ export class Submission {
         };
     }
 
-    async feedbackTable({}, ctx: ApiContext) {
-        return this.getFeedbackTable(ctx);
+    async feedbackTable() {
+        return this.getFeedbackTable();
     }
 
-    async createdAt({}, ctx: ApiContext) {
-        return (await ctx.api(SubmissionCache).dataLoader.load(this)).createdAt;
+    async createdAt() {
+        return (await this.ctx.api(SubmissionCache).dataLoader.load(this.id)).createdAt;
     }
 
-    async evaluations({}, ctx: ApiContext) {
-        return ctx.api(EvaluationCache).allBySubmissionId.load(this.id);
+    async evaluations() {
+        return this.ctx.api(EvaluationCache).allBySubmissionId.load(this.id);
     }
 
-    async files({}, ctx: ApiContext) {
-        return this.getSubmissionFiles(ctx);
+    async files() {
+        return this.getSubmissionFiles();
     }
 
-    static fromId(id: string): Submission {
-        return new Submission(id);
+    static fromId(id: string, ctx: ApiContext): Submission {
+        return new Submission(id, ctx);
     }
 
-    async validate(ctx: ApiContext) {
-        await ctx.api(SubmissionCache).dataLoader.load(this);
+    async validate() {
+        await this.ctx.api(SubmissionCache).dataLoader.load(this.id);
 
         return this;
     }
 
-    async getSubmissionFiles(ctx: ApiContext) {
-        return ctx.api(SubmissionFileCache).allBySubmissionId.load(this.id);
+    async getSubmissionFiles() {
+        return this.ctx.api(SubmissionFileCache).allBySubmissionId.load(this.id);
     }
 
-    async getTackling(ctx: ApiContext) {
-        const { contestId, problemName, username } = await ctx.api(SubmissionCache).dataLoader.load(this);
+    async getTackling() {
+        const { contestId, problemName, username } = await this.ctx.api(SubmissionCache).dataLoader.load(this.id);
 
         const contest = new Contest(contestId);
 
@@ -175,8 +175,8 @@ export class Submission {
      *
      * @param base base directory
      */
-    async extract(base: string, ctx: ApiContext) {
-        const submissionFiles = await this.getSubmissionFiles(ctx);
+    async extract(base: string) {
+        const submissionFiles = await this.getSubmissionFiles();
         const submissionPath = path.join(base, this.id);
 
         for (const submissionFile of submissionFiles) {
@@ -186,30 +186,30 @@ export class Submission {
             const extension = fileTypeName;
 
             const filePath = path.join(submissionPath, `${fieldName}.${fileTypeName}.${extension}`);
-            await ctx.api(FileContentApi).extract(content, filePath);
+            await this.ctx.api(FileContentApi).extract(content, filePath);
         }
 
         return submissionPath;
     }
 
-    async getOfficialEvaluation(ctx: ApiContext) {
-        return ctx.table(Evaluation).findOne({
+    async getOfficialEvaluation() {
+        return this.ctx.table(Evaluation).findOne({
             where: { submissionId: this.id },
             order: [['createdAt', 'DESC']],
         });
     }
 
-    async getMaterial(ctx: ApiContext) {
-        const { assignment } = await this.getTackling(ctx);
+    async getMaterial() {
+        const { assignment } = await this.getTackling();
 
-        return ctx.api(ProblemMaterialApi).dataLoader.load(assignment.problem);
+        return this.ctx.api(ProblemMaterialApi).dataLoader.load(assignment.problem);
     }
 
-    async getAwardAchievements(ctx: ApiContext) {
-        const evaluation = await this.getOfficialEvaluation(ctx);
+    async getAwardAchievements() {
+        const evaluation = await this.getOfficialEvaluation();
         const achievements =
-            evaluation !== null ? await ctx.api(AchievementCache).allByEvaluationId.load(evaluation.id) : [];
-        const material = await this.getMaterial(ctx);
+            evaluation !== null ? await this.ctx.api(AchievementCache).allByEvaluationId.load(evaluation.id) : [];
+        const material = await this.getMaterial();
 
         return material.awards.map((award, awardIndex) => ({
             award,
@@ -217,11 +217,11 @@ export class Submission {
         }));
     }
 
-    async getTotalScore(ctx: ApiContext) {
-        if ((await this.getOfficialEvaluation(ctx))?.status !== EvaluationStatus.SUCCESS) return undefined;
+    async getTotalScore() {
+        if ((await this.getOfficialEvaluation())?.status !== EvaluationStatus.SUCCESS) return undefined;
 
         return ScoreGrade.total(
-            (await this.getAwardAchievements(ctx)).flatMap(({ achievement, award: { gradeDomain } }) => {
+            (await this.getAwardAchievements()).flatMap(({ achievement, award: { gradeDomain } }) => {
                 if (gradeDomain instanceof ScoreGradeDomain && achievement !== undefined) {
                     return [achievement.getScoreGrade(gradeDomain)];
                 }
@@ -231,23 +231,23 @@ export class Submission {
         );
     }
 
-    async getFeedbackTable(ctx: ApiContext) {
+    async getFeedbackTable() {
         const {
             awards,
             taskInfo,
             evaluationFeedbackColumns,
             timeLimitSeconds,
             memoryLimitBytes,
-        } = await this.getMaterial(ctx);
+        } = await this.getMaterial();
         const { scoring } = taskInfo.IOI;
 
         const limitsMarginMultiplier = 2;
         const memoryUnitBytes = 1024;
         const warningWatermarkMultiplier = 0.2;
 
-        const evaluation = await this.getOfficialEvaluation(ctx);
+        const evaluation = await this.getOfficialEvaluation();
         const events =
-            evaluation !== null ? await ctx.api(EvaluationEventCache).allByEvaluationId.load(evaluation.id) : [];
+            evaluation !== null ? await this.ctx.api(EvaluationEventCache).allByEvaluationId.load(evaluation.id) : [];
 
         const testCasesData = awards.flatMap((award, awardIndex) =>
             new Array(scoring.subtasks[awardIndex].testcases).fill(0).map(() => ({
@@ -345,7 +345,7 @@ export interface SubmissionModelRecord {
 export type SubmissionInput = __generated_SubmissionInput;
 
 export class SubmissionCache extends ApiObject {
-    dataLoader = createSimpleLoader((s: Submission) => this.ctx.table(SubmissionData).findByPk(s.id));
+    dataLoader = createSimpleLoader((id: string) => this.ctx.table(SubmissionData).findByPk(id));
 
     allByTackling = createSimpleLoader(
         async ({
@@ -361,20 +361,20 @@ export class SubmissionCache extends ApiObject {
                 await this.ctx
                     .table(SubmissionData)
                     .findAll({ where: { problemName, contestId, username }, order: [['createdAt', 'DESC']] })
-            ).map(data => Submission.fromId(data.id)),
+            ).map(data => Submission.fromId(data.id, this.ctx)),
     );
 
     pendingByContestAndUser = createSimpleLoader(
         async ({ contestId, username }: { contestId: string; username: string }) => {
             // TODO: denormalize DB to make this code simpler and faster
             const submissions = await this.ctx.table(SubmissionData).findAll({ where: { username } });
-            const officalEvaluations = await Promise.all(
-                submissions.map(async s => Submission.fromId(s.id).getOfficialEvaluation(this.ctx)),
+            const officialEvaluations = await Promise.all(
+                submissions.map(async s => Submission.fromId(s.id, this.ctx).getOfficialEvaluation()),
             );
 
             return submissions
-                .filter((s, i) => officalEvaluations[i]?.status === 'PENDING')
-                .map(s => Submission.fromId(s.id));
+                .filter((s, i) => officialEvaluations[i]?.status === 'PENDING')
+                .map(s => Submission.fromId(s.id, this.ctx));
         },
     );
 }

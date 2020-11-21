@@ -51,12 +51,12 @@ export const queryResolvers: Resolvers = {
             return { uuid };
         },
         submission: async ({}, { id }, ctx) => {
-            const sub = await new Submission(id).validate(ctx);
+            const sub = await new Submission(id, ctx).validate();
 
             // Get the username of who had made the submission and verify if
             // the current user has teh permission to made the query.
             // The query is valid if is made by the owner or by an admin user.
-            const username = (await sub.getTackling(ctx)).user.username;
+            const username = (await sub.getTackling()).user.username;
             await ctx.authorizeUser(username);
 
             return sub;

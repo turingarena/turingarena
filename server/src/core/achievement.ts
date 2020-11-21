@@ -40,8 +40,8 @@ export class Achievement extends BaseModel<Achievement> {
 
     async getAward(ctx: ApiContext) {
         const evaluation = await ctx.api(EvaluationCache).byId.load(this.evaluationId);
-        const submission = Submission.fromId(evaluation.submissionId);
-        const { assignment } = await submission.getTackling(ctx);
+        const submission = Submission.fromId(evaluation.submissionId, ctx);
+        const { assignment } = await submission.getTackling();
         const material = await ctx.api(ProblemMaterialApi).dataLoader.load(assignment.problem);
 
         return material.awards[this.awardIndex];
