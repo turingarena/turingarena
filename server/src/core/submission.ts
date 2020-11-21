@@ -13,7 +13,7 @@ import { ContestProblemAssignmentUserTackling } from './contest-problem-assignme
 import { Evaluation, EvaluationCache, EvaluationStatus } from './evaluation';
 import { EvaluationEventCache } from './evaluation-event';
 import { FulfillmentGradeDomain } from './feedback/fulfillment';
-import { ScoreGrade, ScoreGradeDomain } from './feedback/score';
+import {ScoreField, ScoreGrade, ScoreGradeDomain, ScoreRange} from './feedback/score';
 import { FileContentApi } from './files/file-content';
 import { ProblemMaterialApi } from './material/problem-material';
 import { Participation } from './participation';
@@ -110,11 +110,10 @@ export class Submission {
             fields: [
                 ...(await this.getAwardAchievements(ctx)).map(({ award: { gradeDomain }, achievement }) => {
                     if (gradeDomain instanceof ScoreGradeDomain) {
-                        return {
-                            __typename: 'ScoreField',
-                            score: achievement !== undefined ? achievement.getScoreGrade(gradeDomain).score : null,
-                            scoreRange: gradeDomain.scoreRange,
-                        };
+                        return new ScoreField(
+                            gradeDomain.scoreRange,
+                            achievement !== undefined ? achievement.getScoreGrade(gradeDomain).score : null,
+                        );
                     }
                     if (gradeDomain instanceof FulfillmentGradeDomain) {
                         return {
@@ -124,11 +123,7 @@ export class Submission {
                     }
                     throw new Error(`unexpected grade domain ${gradeDomain}`);
                 }),
-                {
-                    __typename: 'ScoreField',
-                    score,
-                    scoreRange,
-                },
+                new ScoreField(scoreRange, score !== undefined ? score : null),
             ],
         };
     }
@@ -336,15 +331,7 @@ export class Submission {
                         __typename: 'MessageField',
                         message: message !== null ? [{ value: message }] : null,
                     },
-                    {
-                        __typename: 'ScoreField',
-                        score,
-                        scoreRange: {
-                            max: 1,
-                            decimalDigits: 2,
-                            allowPartial: true,
-                        },
-                    },
+                    new ScoreField(new ScoreRange(1, 2, true), score),
                 ],
             })),
         };

@@ -55,6 +55,7 @@ export class ScoreGrade {
 
 export class ScoreRange {
     constructor(readonly max: number, readonly decimalDigits: number, readonly allowPartial: boolean) {}
+    __typename = 'ScoreRange';
 
     static total(domains: ScoreRange[]) {
         return new ScoreRange(
@@ -71,6 +72,7 @@ export class ScoreGradeDomain {
 
 export class ScoreField {
     constructor(readonly scoreRange: ScoreRange, readonly score: number | null) {}
+    __typename = 'ScoreField';
 
     valence(): Valence | null {
         return this.score === null
