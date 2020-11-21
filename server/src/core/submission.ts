@@ -68,7 +68,7 @@ export class SubmissionData extends UuidBaseModel<SubmissionData> {
 export class Submission {
     constructor(readonly id: string) {}
     __typename = 'Submission';
-    
+
     async contest({}, ctx: ApiContext) {
         return (await this.getTackling(ctx)).assignment.problem.contest;
     }
@@ -119,7 +119,7 @@ export class Submission {
                     if (gradeDomain instanceof FulfillmentGradeDomain) {
                         return {
                             __typename: 'FulfillmentField',
-                            fulfilled: achievement !== undefined ? achievement.getFulfillmentGrade.fulfilled : null,
+                            fulfilled: achievement !== undefined ? achievement.getFulfillmentGrade().fulfilled : null,
                         };
                     }
                     throw new Error(`unexpected grade domain ${gradeDomain}`);
