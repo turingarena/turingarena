@@ -13,7 +13,7 @@ import { ContestProblemAssignmentUserTackling } from './contest-problem-assignme
 import { Evaluation, EvaluationCache, EvaluationStatus } from './evaluation';
 import { EvaluationEventCache } from './evaluation-event';
 import { FulfillmentGradeDomain } from './feedback/fulfillment';
-import {ScoreField, ScoreGrade, ScoreGradeDomain, ScoreRange} from './feedback/score';
+import { ScoreField, ScoreGrade, ScoreGradeDomain, ScoreRange } from './feedback/score';
 import { FileContentApi } from './files/file-content';
 import { ProblemMaterialApi } from './material/problem-material';
 import { Participation } from './participation';
@@ -95,7 +95,7 @@ export class Submission {
         return (await this.getTackling(ctx)).assignment;
     }
 
-    officialEvaluation({}, ctx: ApiContext) {
+    async officialEvaluation({}, ctx: ApiContext) {
         return this.getOfficialEvaluation(ctx);
     }
 
@@ -128,7 +128,7 @@ export class Submission {
         };
     }
 
-    feedbackTable({}, ctx: ApiContext) {
+    async feedbackTable({}, ctx: ApiContext) {
         return this.getFeedbackTable(ctx);
     }
 
@@ -136,11 +136,11 @@ export class Submission {
         return (await ctx.api(SubmissionCache).dataLoader.load(this)).createdAt;
     }
 
-    evaluations({}, ctx: ApiContext) {
+    async evaluations({}, ctx: ApiContext) {
         return ctx.api(EvaluationCache).allBySubmissionId.load(this.id);
     }
 
-    files({}, ctx: ApiContext) {
+    async files({}, ctx: ApiContext) {
         return this.getSubmissionFiles(ctx);
     }
 
