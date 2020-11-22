@@ -51,7 +51,7 @@ export class AuthService {
         const user = await contest.getUserByToken(this.ctx, token);
         if (user === null) return null;
         //Get the role of the user. If the role is undefined it will use 'user' isntread
-        let role = (await this.ctx.api(UserCache).metadataLoader.load(user)).role;
+        let role = (await this.ctx.api(UserCache).metadataLoader.load(user.id())).role;
         if (role === undefined) role = 'user';
         const payload: TokenPayload = { contestId: contest.id, username: user.username, role };
 

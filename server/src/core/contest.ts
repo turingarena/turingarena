@@ -50,8 +50,8 @@ export class ContestData extends UuidBaseModel<ContestData> {
     @ForeignKey(() => Archive)
     archiveId!: string;
 
-    getContest() {
-        return new Contest(this.id);
+    getContest(ctx: ApiContext) {
+        return new Contest(this.id, ctx);
     }
 }
 
@@ -66,13 +66,15 @@ export interface ContestModelRecord {
 }
 
 export class ContestApi extends ApiObject {
-    dataLoader = createSimpleLoader(({ id }: Contest) => this.ctx.table(ContestData).findByPk(id));
+    dataLoader = createSimpleLoader((id: string) => this.ctx.table(ContestData).findByPk(id));
 
     byNameLoader = createSimpleLoader(async (name: string) => {
         // FIXME: should contests be addressable by name anyway?
 
         const contests = await this.ctx.table(ContestData).findAll();
-        const metadata = await Promise.all(contests.map(d => d.getContest()).map(async c => c.getMetadata(this.ctx)));
+        const metadata = await Promise.all(
+            contests.map(d => d.getContest(this.ctx)).map(async c => c.getMetadata(this.ctx)),
+        );
 
         return contests.find((c, i) => metadata[i].name === name) ?? null;
     });
@@ -90,7 +92,7 @@ export class ContestApi extends ApiObject {
     }
 
     async getStatement(c: Contest): Promise<Media> {
-        const { archiveId } = await this.dataLoader.load(c);
+        const { archiveId } = await this.dataLoader.load(c.id);
         const statementFiles = await this.ctx.table(Archive).findAll({
             where: {
                 uuid: archiveId,
@@ -106,7 +108,7 @@ export class ContestApi extends ApiObject {
 }
 
 export class Contest {
-    constructor(readonly id: string) {}
+    constructor(readonly id: string, readonly ctx: ApiContext) {}
 
     __typename = 'Contest';
     async name({}, ctx: ApiContext) {
@@ -130,14 +132,14 @@ export class Contest {
     async archive({}, ctx: ApiContext) {
         await ctx.authorizeAdmin();
 
-        return { uuid: (await ctx.api(ContestApi).dataLoader.load(this)).archiveId };
+        return { uuid: (await ctx.api(ContestApi).dataLoader.load(this.id)).archiveId };
     }
     async statement({}, ctx: ApiContext) {
         return ctx.api(ContestApi).getStatement(this);
     }
 
     async getMetadata(ctx: ApiContext) {
-        const { archiveId } = await ctx.api(ContestApi).dataLoader.load(this);
+        const { archiveId } = await ctx.api(ContestApi).dataLoader.load(this.id);
         const metadataPath = `turingarena.yaml`;
         const metadataProblemFile = await ctx.table(Archive).findOne({
             where: {
@@ -177,12 +179,12 @@ export class Contest {
         const assignments = await this.getProblemAssignments(ctx);
 
         return Promise.all(
-            assignments.map(async ({ problem }) => ctx.api(ProblemMaterialApi).dataLoader.load(problem)),
+            assignments.map(async ({ problem }) => ctx.api(ProblemMaterialApi).dataLoader.load(problem.id())),
         );
     }
 
     async validate(ctx: ApiContext) {
-        await ctx.api(ContestApi).dataLoader.load(this);
+        await ctx.api(ContestApi).dataLoader.load(this.id);
 
         return this;
     }
@@ -192,7 +194,7 @@ export class Contest {
         const data = await ctx.table(ContestData).findOne();
         if (data === null) return null;
 
-        return data.getContest();
+        return data.getContest(ctx);
     }
 
     async getUserByToken(ctx: ApiContext, token: string) {

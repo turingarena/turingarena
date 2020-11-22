@@ -90,7 +90,7 @@ export class RemoteApiContext extends ApiContext {
         if (this.environment.config.skipAuth) return true;
 
         if (this.user === undefined) return false;
-        const { role } = await this.api(UserCache).metadataLoader.load(this.user);
+        const { role } = await this.api(UserCache).metadataLoader.load(this.user.id());
 
         return role === 'admin';
     }

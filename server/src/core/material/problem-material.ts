@@ -271,8 +271,8 @@ export class ProblemMaterial {
     ];
 
     async loadContent(ctx: ApiContext, problem: Problem, path: string) {
-        const contest = new Contest(problem.contest.id);
-        const { archiveId } = await ctx.api(ContestApi).dataLoader.load(contest);
+        const contest = new Contest(problem.contest.id, ctx);
+        const { archiveId } = await ctx.api(ContestApi).dataLoader.load(contest.id);
         const file = await ctx.table(Archive).findOne({
             where: { uuid: archiveId, path: `${problem.name}/${path}` },
             include: [ctx.table(FileContent)],
@@ -292,7 +292,10 @@ export interface ProblemMaterialModelRecord {
 
 export class ProblemMaterialApi extends ApiObject {
     dataLoader = createSimpleLoader(
-        async (problem: Problem) =>
-            new ProblemMaterial(problem, await this.ctx.api(ProblemTaskInfoApi).getProblemTaskInfo(problem)),
+        async (id: string) =>
+            new ProblemMaterial(
+                Problem.fromId(id, this.ctx),
+                await this.ctx.api(ProblemTaskInfoApi).getProblemTaskInfo(Problem.fromId(id, this.ctx)),
+            ),
     );
 }

@@ -36,6 +36,23 @@ export class ContestProblemAssignmentUserTackling {
 
     __typename = 'ContestProblemAssignmentUserTackling';
 
+    id(): string {
+        return `${this.assignment.id()}/${this.user.id()}`;
+    }
+
+    static fromId(id: string, ctx: ApiContext): ContestProblemAssignmentUserTackling {
+        const assignmentId = id.split('/',2).join('/')
+        const userId = id
+            .split('/')
+            .slice(2, 4)
+            .join('/');
+
+        return new ContestProblemAssignmentUserTackling(
+            ContestProblemAssignment.fromId(assignmentId, ctx),
+            User.fromId(userId, ctx),
+        );
+    }
+
     async canSubmit({}, ctx: ApiContext) {
         const status = await this.assignment.problem.contest.getStatus(ctx);
 
@@ -43,7 +60,7 @@ export class ContestProblemAssignmentUserTackling {
     }
 
     async submissions({}, ctx: ApiContext) {
-        return ctx.api(SubmissionCache).allByTackling.load(this);
+        return ctx.api(SubmissionCache).allByTackling.load(this.id());
     }
 
     assignmentView() {
@@ -51,7 +68,7 @@ export class ContestProblemAssignmentUserTackling {
     }
 
     async getAwardTacklings(ctx: ApiContext) {
-        const material = await ctx.api(ProblemMaterialApi).dataLoader.load(this.assignment.problem);
+        const material = await ctx.api(ProblemMaterialApi).dataLoader.load(this.assignment.problem.id());
 
         return material.awards.map(
             award =>

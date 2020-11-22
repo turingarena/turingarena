@@ -1,5 +1,6 @@
 import { gql } from 'apollo-server-core';
 import { Problem } from './problem';
+import {ApiContext} from "../main/api-context";
 
 export const contestProblemAssignmentSchema = gql`
     type ContestProblemAssignment {
@@ -18,6 +19,9 @@ export class ContestProblemAssignment {
     }
     contest() {
         return this.problem.contest;
+    }
+    static fromId(id: string, ctx: ApiContext): ContestProblemAssignment {
+        return new ContestProblemAssignment(Problem.fromId(id, ctx));
     }
 }
 

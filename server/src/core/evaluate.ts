@@ -25,7 +25,7 @@ export class EvaluateApi extends ApiObject {
         });
 
         const { assignment } = await submission.getTackling();
-        const { archiveId } = await this.ctx.api(ContestApi).dataLoader.load(assignment.problem.contest);
+        const { archiveId } = await this.ctx.api(ContestApi).dataLoader.load(assignment.problem.contest.id);
         const contestDir = await this.ctx.api(ArchiveApi).extractArchive(archiveId);
 
         const problemDir = path.join(contestDir, assignment.problem.name);

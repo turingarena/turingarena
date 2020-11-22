@@ -161,7 +161,7 @@ export class Submission {
     async getTackling() {
         const { contestId, problemName, username } = await this.ctx.api(SubmissionCache).dataLoader.load(this.id);
 
-        const contest = new Contest(contestId);
+        const contest = new Contest(contestId, this.ctx);
 
         return new ContestProblemAssignmentUserTackling(
             new ContestProblemAssignment(new Problem(contest, problemName)),
@@ -202,7 +202,7 @@ export class Submission {
     async getMaterial() {
         const { assignment } = await this.getTackling();
 
-        return this.ctx.api(ProblemMaterialApi).dataLoader.load(assignment.problem);
+        return this.ctx.api(ProblemMaterialApi).dataLoader.load(assignment.problem.id());
     }
 
     async getAwardAchievements() {
@@ -347,22 +347,18 @@ export type SubmissionInput = __generated_SubmissionInput;
 export class SubmissionCache extends ApiObject {
     dataLoader = createSimpleLoader((id: string) => this.ctx.table(SubmissionData).findByPk(id));
 
-    allByTackling = createSimpleLoader(
-        async ({
-            assignment: {
-                problem: {
-                    contest: { id: contestId },
-                    name: problemName,
-                },
-            },
-            user: { username },
-        }: ContestProblemAssignmentUserTackling) =>
-            (
-                await this.ctx
-                    .table(SubmissionData)
-                    .findAll({ where: { problemName, contestId, username }, order: [['createdAt', 'DESC']] })
-            ).map(data => Submission.fromId(data.id, this.ctx)),
-    );
+    allByTackling = createSimpleLoader(async (id: string) => {
+        const cpaut = ContestProblemAssignmentUserTackling.fromId(id, this.ctx);
+        const problemName = cpaut.assignment.problem.name;
+        const contestId = cpaut.assignment.contest().id;
+        const username = cpaut.user.username;
+
+        return (
+            await this.ctx
+                .table(SubmissionData)
+                .findAll({ where: { problemName, contestId, username }, order: [['createdAt', 'DESC']] })
+        ).map(data => Submission.fromId(data.id, this.ctx));
+    });
 
     pendingByContestAndUser = createSimpleLoader(
         async ({ contestId, username }: { contestId: string; username: string }) => {

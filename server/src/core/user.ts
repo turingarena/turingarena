@@ -37,23 +37,30 @@ export class User {
         return `${this.contest.id}/${this.username}`;
     }
     async name({}, ctx: ApiContext) {
-        return (await ctx.api(UserCache).metadataLoader.load(this)).name;
+        return (await ctx.api(UserCache).metadataLoader.load(this.id())).name;
     }
 
     async validate(ctx: ApiContext) {
-        await ctx.api(UserCache).metadataLoader.load(this);
+        await ctx.api(UserCache).metadataLoader.load(this.id());
 
         return this;
+    }
+
+    static fromId(id: string, ctx: ApiContext): User {
+        const [contestId, username] = id.split('/');
+
+        return new User(new Contest(contestId, ctx), username);
     }
 }
 
 export class UserCache extends ApiObject {
-    metadataLoader = createSimpleLoader(async ({ contest, username }: User) => {
-        const contestMetadata = await contest.getMetadata(this.ctx);
+    metadataLoader = createSimpleLoader(async (id: string) => {
+        const user = User.fromId(id, this.ctx);
+        const contestMetadata = await user.contest.getMetadata(this.ctx);
 
         return (
-            contestMetadata.users.find(data => data.username === username) ??
-            this.ctx.fail(`user ${username} does not exist in contest ${contest.id}`)
+            contestMetadata.users.find(data => data.username === user.username) ??
+            this.ctx.fail(`user ${user.username} does not exist in contest ${user.contest.id}`)
         );
     });
 }

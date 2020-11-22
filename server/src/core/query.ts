@@ -43,7 +43,7 @@ export const queryResolvers: Resolvers = {
         contests: async ({}, {}, ctx) => {
             await ctx.authorizeAdmin();
 
-            return (await ctx.table(ContestData).findAll()).map(d => d.getContest());
+            return (await ctx.table(ContestData).findAll()).map(d => d.getContest(ctx));
         },
         archive: async (_, { uuid }, ctx) => {
             await ctx.authorizeAdmin();

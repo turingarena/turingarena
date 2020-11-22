@@ -42,7 +42,7 @@ export class Achievement extends BaseModel<Achievement> {
         const evaluation = await ctx.api(EvaluationCache).byId.load(this.evaluationId);
         const submission = Submission.fromId(evaluation.submissionId, ctx);
         const { assignment } = await submission.getTackling();
-        const material = await ctx.api(ProblemMaterialApi).dataLoader.load(assignment.problem);
+        const material = await ctx.api(ProblemMaterialApi).dataLoader.load(assignment.problem.id());
 
         return material.awards[this.awardIndex];
     }

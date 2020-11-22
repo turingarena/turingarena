@@ -15,7 +15,7 @@ export class Submit {
         // FIXME: improve the CLI to support multiple fields/file-types
         solutionPath?: string,
     ) {
-        const contest = await new Contest(contestId).validate(ctx);
+        const contest = await new Contest(contestId, ctx).validate(ctx);
         await new User(contest, username).validate(ctx);
 
         const submissionData = await ctx.table(SubmissionData).create({ contestId: contest.id, problemName, username });
