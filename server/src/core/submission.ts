@@ -164,7 +164,7 @@ export class Submission {
         const contest = new Contest(contestId, this.ctx);
 
         return new ContestProblemAssignmentUserTackling(
-            new ContestProblemAssignment(new Problem(contest, problemName)),
+            new ContestProblemAssignment(new Problem(contest, problemName, this.ctx)),
             new User(contest, username),
             this.ctx,
         );

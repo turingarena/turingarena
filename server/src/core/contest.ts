@@ -174,7 +174,7 @@ export class Contest {
     async getProblemAssignments() {
         const metadata = await this.getMetadata();
 
-        return metadata.problems.map(name => new ContestProblemAssignment(new Problem(this, name)));
+        return metadata.problems.map(name => new ContestProblemAssignment(new Problem(this, name, this.ctx)));
     }
 
     async getProblemSetMaterial(): Promise<ProblemMaterial[]> {

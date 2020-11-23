@@ -17,50 +17,50 @@ export const problemSchema = gql`
 `;
 
 export class Problem {
-    constructor(readonly contest: Contest, readonly name: string) {}
+    constructor(readonly contest: Contest, readonly name: string, readonly ctx: ApiContext) {}
     __typename = 'Problem';
 
     static fromId(id: string, ctx: ApiContext): Problem {
         const [contestId, problemName] = id.split('/');
 
-        return new Problem(new Contest(contestId, ctx), problemName);
+        return new Problem(new Contest(contestId, ctx), problemName, ctx);
     }
 
     id() {
         return `${this.contest.id}/${this.name}`;
     }
-    async title({}, ctx: ApiContext) {
-        return (await ctx.api(ProblemMaterialApi).dataLoader.load(this.id())).title;
+    async title() {
+        return (await this.ctx.api(ProblemMaterialApi).dataLoader.load(this.id())).title;
     }
-    async statement({}, ctx: ApiContext) {
-        return (await ctx.api(ProblemMaterialApi).dataLoader.load(this.id())).statement;
+    async statement() {
+        return (await this.ctx.api(ProblemMaterialApi).dataLoader.load(this.id())).statement;
     }
-    async attachments({}, ctx: ApiContext) {
-        return (await ctx.api(ProblemMaterialApi).dataLoader.load(this.id())).attachments;
+    async attachments() {
+        return (await this.ctx.api(ProblemMaterialApi).dataLoader.load(this.id())).attachments;
     }
-    async attributes({}, ctx: ApiContext) {
-        return (await ctx.api(ProblemMaterialApi).dataLoader.load(this.id())).attributes;
+    async attributes() {
+        return (await this.ctx.api(ProblemMaterialApi).dataLoader.load(this.id())).attributes;
     }
-    async awards({}, ctx: ApiContext) {
-        return (await ctx.api(ProblemMaterialApi).dataLoader.load(this.id())).awards;
+    async awards() {
+        return (await this.ctx.api(ProblemMaterialApi).dataLoader.load(this.id())).awards;
     }
-    async submissionFields({}, ctx: ApiContext) {
-        return (await ctx.api(ProblemMaterialApi).dataLoader.load(this.id())).submissionFields;
+    async submissionFields() {
+        return (await this.ctx.api(ProblemMaterialApi).dataLoader.load(this.id())).submissionFields;
     }
-    async submissionFileTypes({}, ctx: ApiContext) {
-        return (await ctx.api(ProblemMaterialApi).dataLoader.load(this.id())).submissionFileTypes;
+    async submissionFileTypes() {
+        return (await this.ctx.api(ProblemMaterialApi).dataLoader.load(this.id())).submissionFileTypes;
     }
-    async submissionFileTypeRules({}, ctx: ApiContext) {
-        return (await ctx.api(ProblemMaterialApi).dataLoader.load(this.id())).submissionFileTypeRules;
+    async submissionFileTypeRules() {
+        return (await this.ctx.api(ProblemMaterialApi).dataLoader.load(this.id())).submissionFileTypeRules;
     }
-    async submissionListColumns({}, ctx: ApiContext) {
-        return (await ctx.api(ProblemMaterialApi).dataLoader.load(this.id())).submissionListColumns;
+    async submissionListColumns() {
+        return (await this.ctx.api(ProblemMaterialApi).dataLoader.load(this.id())).submissionListColumns;
     }
-    async evaluationFeedbackColumns({}, ctx: ApiContext) {
-        return (await ctx.api(ProblemMaterialApi).dataLoader.load(this.id())).evaluationFeedbackColumns;
+    async evaluationFeedbackColumns() {
+        return (await this.ctx.api(ProblemMaterialApi).dataLoader.load(this.id())).evaluationFeedbackColumns;
     }
-    async totalScoreDomain({}, ctx: ApiContext) {
-        return new ScoreGradeDomain((await ctx.api(ProblemMaterialApi).dataLoader.load(this.id())).scoreRange);
+    async totalScoreDomain() {
+        return new ScoreGradeDomain((await this.ctx.api(ProblemMaterialApi).dataLoader.load(this.id())).scoreRange);
     }
 }
 
