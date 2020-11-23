@@ -30,7 +30,7 @@ export const mainViewSchema = gql`
 export class MainView {
     constructor(readonly contest: Contest, readonly user: User | null) {}
     async title({}, ctx: ApiContext) {
-        return [{ value: (await this.contest.getMetadata(ctx)).title ?? 'TuringArena' }];
+        return [{ value: (await this.contest.getMetadata()).title ?? 'TuringArena' }];
     }
     contestView() {
         return new ContestView(this.contest, this.user);

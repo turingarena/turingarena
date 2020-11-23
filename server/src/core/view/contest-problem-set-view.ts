@@ -38,8 +38,8 @@ export class ContestProblemSetView {
         return new ContestView(this.problemSet.contest, this.user);
     }
 
-    async assignmentViews({}, ctx: ApiContext) {
-        return (await this.problemSet.contest.getProblemAssignments(ctx)).map(
+    async assignmentViews() {
+        return (await this.problemSet.contest.getProblemAssignments()).map(
             assignment => new ContestProblemAssignmentView(assignment, this.user),
         );
     }
@@ -53,7 +53,7 @@ export class ContestProblemSetView {
     async totalScoreField({}, ctx: ApiContext) {
         const tackling = this.tackling();
 
-        const scoreRange = await this.problemSet.getScoreRange(ctx);
+        const scoreRange = await this.problemSet.getScoreRange();
         const scoreGrade = tackling !== null ? await tackling.getScoreGrade(ctx) : null;
 
         return new ScoreField(scoreRange, scoreGrade?.score ?? null);

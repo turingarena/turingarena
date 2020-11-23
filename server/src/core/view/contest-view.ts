@@ -1,5 +1,4 @@
 import { gql } from 'apollo-server-core';
-import { ApiContext } from '../../main/api-context';
 import { Contest } from '../contest';
 import { ContestProblemSet } from '../contest-problem-set';
 import { User } from '../user';
@@ -22,10 +21,10 @@ export const contestViewSchema = gql`
 
 
 export class ContestView {
-    constructor(readonly contest: Contest,readonly user: User | null){}
+    constructor(readonly contest: Contest, readonly user: User | null) {}
     __typename= 'ContestView';
-    async problemSetView({}, ctx: ApiContext) {
-        const status = await this.contest.getStatus(ctx);
+    async problemSetView() {
+        const status = await this.contest.getStatus();
         switch (status) {
             case 'RUNNING':
             case 'ENDED':

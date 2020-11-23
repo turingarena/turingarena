@@ -31,7 +31,7 @@ export class ContestProblemSetUserTackling {
     }
 
     async getScoreGrade(ctx: ApiContext) {
-        const assignments = await this.problemSet.contest.getProblemAssignments(ctx);
+        const assignments = await this.problemSet.contest.getProblemAssignments();
 
         return ScoreGrade.total(
             await Promise.all(

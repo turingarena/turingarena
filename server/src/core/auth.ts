@@ -48,7 +48,7 @@ export class AuthService {
         const contest = await Contest.getDefault(this.ctx);
         if (contest === null) return null;
 
-        const user = await contest.getUserByToken(this.ctx, token);
+        const user = await contest.getUserByToken(token);
         if (user === null) return null;
         //Get the role of the user. If the role is undefined it will use 'user' isntread
         let role = (await this.ctx.api(UserCache).metadataLoader.load(user.id())).role;

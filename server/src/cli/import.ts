@@ -18,6 +18,6 @@ export class ContestImportApi extends ApiObject {
             archiveId: contestArchiveId,
         });
 
-        console.log(await new Contest(contest.id, this.ctx).getMetadata(this.ctx));
+        console.log(await new Contest(contest.id, this.ctx).getMetadata());
     }
 }

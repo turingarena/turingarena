@@ -56,7 +56,7 @@ export class User {
 export class UserCache extends ApiObject {
     metadataLoader = createSimpleLoader(async (id: string) => {
         const user = User.fromId(id, this.ctx);
-        const contestMetadata = await user.contest.getMetadata(this.ctx);
+        const contestMetadata = await user.contest.getMetadata();
 
         return (
             contestMetadata.users.find(data => data.username === user.username) ??

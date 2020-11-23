@@ -55,7 +55,7 @@ export class ContestProblemAssignmentUserTackling {
     }
 
     async canSubmit() {
-        const status = await this.assignment.problem.contest.getStatus(this.ctx);
+        const status = await this.assignment.problem.contest.getStatus();
 
         return status === 'RUNNING';
     }

@@ -29,11 +29,11 @@ export class ContestProblemSet {
     __typename = 'ContestProblemSet';
 
     async assignments({}, ctx: ApiContext) {
-        return this.contest.getProblemAssignments(ctx);
+        return this.contest.getProblemAssignments();
     }
 
-    async getScoreRange(ctx: ApiContext): Promise<ScoreRange> {
-        const material = await this.contest.getProblemSetMaterial(ctx);
+    async getScoreRange(): Promise<ScoreRange> {
+        const material = await this.contest.getProblemSetMaterial();
 
         return ScoreRange.total(material.map(m => m.scoreRange));
     }

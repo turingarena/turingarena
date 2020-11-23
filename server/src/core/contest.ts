@@ -73,7 +73,7 @@ export class ContestApi extends ApiObject {
 
         const contests = await this.ctx.table(ContestData).findAll();
         const metadata = await Promise.all(
-            contests.map(d => d.getContest(this.ctx)).map(async c => c.getMetadata(this.ctx)),
+            contests.map(d => d.getContest(this.ctx)).map(async c => c.getMetadata()),
         );
 
         return contests.find((c, i) => metadata[i].name === name) ?? null;
@@ -111,37 +111,37 @@ export class Contest {
     constructor(readonly id: string, readonly ctx: ApiContext) {}
 
     __typename = 'Contest';
-    async name({}, ctx: ApiContext) {
-        return (await this.getMetadata(ctx)).name;
+    async name() {
+        return (await this.getMetadata()).name;
     }
-    async title({}, ctx: ApiContext) {
-        return [{ value: (await this.getMetadata(ctx)).title }];
+    async title() {
+        return [{ value: (await this.getMetadata()).title }];
     }
-    async start({}, ctx: ApiContext) {
-        return (await this.getMetadata(ctx)).start;
+    async start() {
+        return (await this.getMetadata()).start;
     }
-    async end({}, ctx: ApiContext) {
-        return (await this.getMetadata(ctx)).end ?? null;
+    async end() {
+        return (await this.getMetadata()).end ?? null;
     }
-    async status({}, ctx: ApiContext) {
-        return this.getStatus(ctx);
+    async status() {
+        return this.getStatus();
     }
     problemSet() {
         return new ContestProblemSet(this);
     }
-    async archive({}, ctx: ApiContext) {
-        await ctx.authorizeAdmin();
+    async archive() {
+        await this.ctx.authorizeAdmin();
 
-        return { uuid: (await ctx.api(ContestApi).dataLoader.load(this.id)).archiveId };
+        return { uuid: (await this.ctx.api(ContestApi).dataLoader.load(this.id)).archiveId };
     }
-    async statement({}, ctx: ApiContext) {
-        return ctx.api(ContestApi).getStatement(this);
+    async statement() {
+        return this.ctx.api(ContestApi).getStatement(this);
     }
 
-    async getMetadata(ctx: ApiContext) {
-        const { archiveId } = await ctx.api(ContestApi).dataLoader.load(this.id);
+    async getMetadata() {
+        const { archiveId } = await this.ctx.api(ContestApi).dataLoader.load(this.id);
         const metadataPath = `turingarena.yaml`;
-        const metadataProblemFile = await ctx.table(Archive).findOne({
+        const metadataProblemFile = await this.ctx.table(Archive).findOne({
             where: {
                 uuid: archiveId,
                 path: metadataPath,
@@ -152,13 +152,15 @@ export class Contest {
             throw new Error(`Contest ${this.id} is missing metadata file ${metadataPath}`);
         }
 
-        const metadataContent = await ctx.table(FileContent).findOne({ where: { id: metadataProblemFile.contentId } });
+        const metadataContent = await this.ctx
+            .table(FileContent)
+            .findOne({ where: { id: metadataProblemFile.contentId } });
 
         return yaml.parse(metadataContent!.content.toString()) as ContestMetadata;
     }
 
-    async getStatus(ctx: ApiContext): Promise<ContestStatus> {
-        const metadata = await this.getMetadata(ctx);
+    async getStatus(): Promise<ContestStatus> {
+        const metadata = await this.getMetadata();
 
         const start = DateTime.fromISO(metadata.start).valueOf();
         const end = metadata.end !== undefined ? DateTime.fromISO(metadata.end).valueOf() : null;
@@ -169,22 +171,22 @@ export class Contest {
         else return 'ENDED';
     }
 
-    async getProblemAssignments(ctx: ApiContext) {
-        const metadata = await this.getMetadata(ctx);
+    async getProblemAssignments() {
+        const metadata = await this.getMetadata();
 
         return metadata.problems.map(name => new ContestProblemAssignment(new Problem(this, name)));
     }
 
-    async getProblemSetMaterial(ctx: ApiContext): Promise<ProblemMaterial[]> {
-        const assignments = await this.getProblemAssignments(ctx);
+    async getProblemSetMaterial(): Promise<ProblemMaterial[]> {
+        const assignments = await this.getProblemAssignments();
 
         return Promise.all(
-            assignments.map(async ({ problem }) => ctx.api(ProblemMaterialApi).dataLoader.load(problem.id())),
+            assignments.map(async ({ problem }) => this.ctx.api(ProblemMaterialApi).dataLoader.load(problem.id())),
         );
     }
 
-    async validate(ctx: ApiContext) {
-        await ctx.api(ContestApi).dataLoader.load(this.id);
+    async validate() {
+        await this.ctx.api(ContestApi).dataLoader.load(this.id);
 
         return this;
     }
@@ -197,8 +199,8 @@ export class Contest {
         return data.getContest(ctx);
     }
 
-    async getUserByToken(ctx: ApiContext, token: string) {
-        const contestMetadata = await this.getMetadata(ctx);
+    async getUserByToken(token: string) {
+        const contestMetadata = await this.getMetadata();
         const userMetadata = contestMetadata.users.find(data => data.token === token) ?? null;
 
         if (userMetadata === null) return null;
