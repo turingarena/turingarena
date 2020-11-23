@@ -39,32 +39,32 @@ export const contestProblemAssignmentViewSchema = gql`
 `;
 
 export class ContestProblemAssignmentView {
-    constructor(readonly assignment: ContestProblemAssignment, readonly user: User | null) {}
+    constructor(readonly assignment: ContestProblemAssignment, readonly user: User | null, readonly ctx: ApiContext) {}
 
     __typename = 'ContestProblemAssignmentView';
 
-    async problemSetView({}, ctx: ApiContext) {
-        return new ContestProblemSetView(new ContestProblemSet(this.assignment.problem.contest), this.user, ctx);
+    async problemSetView() {
+        return new ContestProblemSetView(new ContestProblemSet(this.assignment.problem.contest), this.user, this.ctx);
     }
 
-    async tackling({}, ctx: ApiContext) {
-        return this.user !== null ? new ContestProblemAssignmentUserTackling(this.assignment, this.user, ctx) : null;
+    async tackling() {
+        return this.user !== null ? new ContestProblemAssignmentUserTackling(this.assignment, this.user, this.ctx) : null;
     }
 
-    async totalScoreField({}, ctx: ApiContext) {
-        const { scoreRange } = await ctx.api(ProblemMaterialApi).dataLoader.load(this.assignment.problem.id());
-        const tackling = await this.tackling({}, ctx);
+    async totalScoreField() {
+        const { scoreRange } = await this.ctx.api(ProblemMaterialApi).dataLoader.load(this.assignment.problem.id());
+        const tackling = await this.tackling();
 
         const scoreGrade = tackling !== null ? await tackling.getScoreGrade() : null;
 
         return new ScoreField(scoreRange, scoreGrade?.score ?? null);
     }
 
-    async awardAssignmentViews({}, ctx: ApiContext) {
-        const { awards } = await ctx.api(ProblemMaterialApi).dataLoader.load(this.assignment.problem.id());
+    async awardAssignmentViews() {
+        const { awards } = await this.ctx.api(ProblemMaterialApi).dataLoader.load(this.assignment.problem.id());
 
         return awards.map(
-            award => new ContestAwardAssignmentView(new ContestAwardAssignment(this.assignment, award), this.user, ctx),
+            award => new ContestAwardAssignmentView(new ContestAwardAssignment(this.assignment, award), this.user, this.ctx),
         );
     }
 }

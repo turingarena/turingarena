@@ -65,7 +65,7 @@ export class ContestProblemAssignmentUserTackling {
     }
 
     assignmentView() {
-        return new ContestProblemAssignmentView(this.assignment, this.user);
+        return new ContestProblemAssignmentView(this.assignment, this.user, this.ctx);
     }
 
     async getAwardTacklings() {

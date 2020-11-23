@@ -30,7 +30,7 @@ export class ContestAwardAssignmentView {
     __typename = 'ContestAwardAssignmentView';
 
     async problemAssignmentView() {
-        return new ContestProblemAssignmentView(this.assignment.problemAssignment, this.user);
+        return new ContestProblemAssignmentView(this.assignment.problemAssignment, this.user, this.ctx);
     }
 
     async gradeField() {

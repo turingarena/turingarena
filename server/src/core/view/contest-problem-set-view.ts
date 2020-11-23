@@ -40,7 +40,7 @@ export class ContestProblemSetView {
 
     async assignmentViews() {
         return (await this.problemSet.contest.getProblemAssignments()).map(
-            assignment => new ContestProblemAssignmentView(assignment, this.user),
+            assignment => new ContestProblemAssignmentView(assignment, this.user, this.ctx),
         );
     }
 
