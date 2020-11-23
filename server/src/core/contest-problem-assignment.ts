@@ -1,6 +1,6 @@
 import { gql } from 'apollo-server-core';
+import { ApiContext } from '../main/api-context';
 import { Problem } from './problem';
-import {ApiContext} from "../main/api-context";
 
 export const contestProblemAssignmentSchema = gql`
     type ContestProblemAssignment {
