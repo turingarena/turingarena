@@ -165,7 +165,7 @@ export class Submission {
 
         return new ContestProblemAssignmentUserTackling(
             new ContestProblemAssignment(new Problem(contest, problemName, this.ctx)),
-            new User(contest, username),
+            new User(contest, username, this.ctx),
             this.ctx,
         );
     }

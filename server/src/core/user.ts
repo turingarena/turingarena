@@ -31,17 +31,17 @@ export enum UserRole {
 }
 
 export class User {
-    constructor(readonly contest: Contest, readonly username: string) {}
+    constructor(readonly contest: Contest, readonly username: string, readonly  ctx : ApiContext) {}
     __typename = 'User';
     id() {
         return `${this.contest.id}/${this.username}`;
     }
-    async name({}, ctx: ApiContext) {
-        return (await ctx.api(UserCache).metadataLoader.load(this.id())).name;
+    async name() {
+        return (await this.ctx.api(UserCache).metadataLoader.load(this.id())).name;
     }
 
-    async validate(ctx: ApiContext) {
-        await ctx.api(UserCache).metadataLoader.load(this.id());
+    async validate() {
+        await this.ctx.api(UserCache).metadataLoader.load(this.id());
 
         return this;
     }
@@ -49,7 +49,7 @@ export class User {
     static fromId(id: string, ctx: ApiContext): User {
         const [contestId, username] = id.split('/');
 
-        return new User(new Contest(contestId, ctx), username);
+        return new User(new Contest(contestId, ctx), username, ctx);
     }
 }
 

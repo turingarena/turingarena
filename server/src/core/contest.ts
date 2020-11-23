@@ -206,6 +206,6 @@ export class Contest {
         if (userMetadata === null) return null;
         const { username } = userMetadata;
 
-        return new User(this, username);
+        return new User(this, username, this.ctx);
     }
 }

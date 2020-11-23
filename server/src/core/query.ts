@@ -37,7 +37,7 @@ export const queryResolvers: Resolvers = {
 
             return new MainView(
                 contest,
-                username !== null && username !== undefined ? await new User(contest, username).validate(ctx) : null,
+                username !== null && username !== undefined ? await new User(contest, username, ctx).validate() : null,
                 ctx,
             );
         },

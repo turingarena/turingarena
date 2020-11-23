@@ -16,7 +16,7 @@ export class Submit {
         solutionPath?: string,
     ) {
         const contest = await new Contest(contestId, ctx).validate();
-        await new User(contest, username).validate(ctx);
+        await new User(contest, username, ctx).validate();
 
         const submissionData = await ctx.table(SubmissionData).create({ contestId: contest.id, problemName, username });
         const submission = Submission.fromId(submissionData.id, ctx);
