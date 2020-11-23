@@ -44,7 +44,7 @@ export class ContestProblemAssignmentView {
     __typename = 'ContestProblemAssignmentView';
 
     async problemSetView({}, ctx: ApiContext) {
-        return new ContestProblemSetView(new ContestProblemSet(this.assignment.problem.contest), this.user);
+        return new ContestProblemSetView(new ContestProblemSet(this.assignment.problem.contest), this.user, ctx);
     }
 
     async tackling({}, ctx: ApiContext) {

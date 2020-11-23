@@ -22,21 +22,21 @@ export const contestProblemSetUserTacklingSchema = gql`
 `;
 
 export class ContestProblemSetUserTackling {
-    constructor(readonly problemSet: ContestProblemSet, readonly user: User) {}
+    constructor(readonly problemSet: ContestProblemSet, readonly user: User, readonly ctx: ApiContext) {}
 
     __typename = 'ContestProblemSetUserTackling';
 
     view() {
-        return new ContestProblemSetView(this.problemSet, this.user);
+        return new ContestProblemSetView(this.problemSet, this.user, this.ctx);
     }
 
-    async getScoreGrade(ctx: ApiContext) {
+    async getScoreGrade() {
         const assignments = await this.problemSet.contest.getProblemAssignments();
 
         return ScoreGrade.total(
             await Promise.all(
                 assignments.map(async assignment =>
-                    new ContestProblemAssignmentUserTackling(assignment, this.user, ctx).getScoreGrade(),
+                    new ContestProblemAssignmentUserTackling(assignment, this.user, this.ctx).getScoreGrade(),
                 ),
             ),
         );

@@ -28,16 +28,16 @@ export const mainViewSchema = gql`
 `;
 
 export class MainView {
-    constructor(readonly contest: Contest, readonly user: User | null) {}
-    async title({}, ctx: ApiContext) {
+    constructor(readonly contest: Contest, readonly user: User | null, readonly ctx: ApiContext) {}
+    async title() {
         return [{ value: (await this.contest.getMetadata()).title ?? 'TuringArena' }];
     }
     contestView() {
-        return new ContestView(this.contest, this.user);
+        return new ContestView(this.contest, this.user, this.ctx);
     }
-    async pendingSubmissions({}, ctx: ApiContext) {
+    async pendingSubmissions() {
         return this.user !== null
-            ? ctx.api(SubmissionCache).pendingByContestAndUser.load({
+            ? this.ctx.api(SubmissionCache).pendingByContestAndUser.load({
                   contestId: this.contest.id,
                   username: this.user.username,
               })

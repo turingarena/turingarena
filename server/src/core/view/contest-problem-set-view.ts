@@ -30,12 +30,12 @@ export const contestProblemSetViewSchema = gql`
 `;
 
 export class ContestProblemSetView {
-    constructor(readonly problemSet: ContestProblemSet, readonly user: User | null) {}
+    constructor(readonly problemSet: ContestProblemSet, readonly user: User | null, readonly ctx: ApiContext) {}
 
     __typename = 'ContestProblemSetView';
 
     contestView() {
-        return new ContestView(this.problemSet.contest, this.user);
+        return new ContestView(this.problemSet.contest, this.user, this.ctx);
     }
 
     async assignmentViews() {
@@ -47,14 +47,14 @@ export class ContestProblemSetView {
     tackling() {
         if (this.user === null) return null;
 
-        return new ContestProblemSetUserTackling(this.problemSet, this.user);
+        return new ContestProblemSetUserTackling(this.problemSet, this.user, this.ctx);
     }
 
-    async totalScoreField({}, ctx: ApiContext) {
+    async totalScoreField() {
         const tackling = this.tackling();
 
         const scoreRange = await this.problemSet.getScoreRange();
-        const scoreGrade = tackling !== null ? await tackling.getScoreGrade(ctx) : null;
+        const scoreGrade = tackling !== null ? await tackling.getScoreGrade() : null;
 
         return new ScoreField(scoreRange, scoreGrade?.score ?? null);
     }
