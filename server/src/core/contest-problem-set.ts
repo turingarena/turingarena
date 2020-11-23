@@ -28,7 +28,7 @@ export class ContestProblemSet {
 
     __typename = 'ContestProblemSet';
 
-    async assignments({}, ctx: ApiContext) {
+    async assignments() {
         return this.contest.getProblemAssignments();
     }
 
