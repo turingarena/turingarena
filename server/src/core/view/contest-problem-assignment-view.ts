@@ -48,7 +48,9 @@ export class ContestProblemAssignmentView {
     }
 
     async tackling() {
-        return this.user !== null ? new ContestProblemAssignmentUserTackling(this.assignment, this.user, this.ctx) : null;
+        return this.user !== null
+            ? new ContestProblemAssignmentUserTackling(this.assignment, this.user, this.ctx)
+            : null;
     }
 
     async totalScoreField() {
@@ -64,7 +66,8 @@ export class ContestProblemAssignmentView {
         const { awards } = await this.ctx.api(ProblemMaterialApi).dataLoader.load(this.assignment.problem.id());
 
         return awards.map(
-            award => new ContestAwardAssignmentView(new ContestAwardAssignment(this.assignment, award), this.user, this.ctx),
+            award =>
+                new ContestAwardAssignmentView(new ContestAwardAssignment(this.assignment, award), this.user, this.ctx),
         );
     }
 }
