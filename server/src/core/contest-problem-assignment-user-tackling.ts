@@ -73,13 +73,17 @@ export class ContestProblemAssignmentUserTackling {
 
         return material.awards.map(
             award =>
-                new ContestAwardAssignmentUserTackling(new ContestAwardAssignment(this.assignment, award), this.user),
+                new ContestAwardAssignmentUserTackling(
+                    new ContestAwardAssignment(this.assignment, award),
+                    this.user,
+                    this.ctx,
+                ),
         );
     }
 
     async getScoreGrade() {
         const awardTacklings = await this.getAwardTacklings();
-        const awardGrades = await Promise.all(awardTacklings.map(t2 => t2.getGrade(this.ctx)));
+        const awardGrades = await Promise.all(awardTacklings.map(t2 => t2.getGrade()));
 
         return ScoreGrade.total(awardGrades.filter((g): g is ScoreGrade => g instanceof ScoreGrade));
     }

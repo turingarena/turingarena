@@ -64,7 +64,7 @@ export class ContestProblemAssignmentView {
         const { awards } = await ctx.api(ProblemMaterialApi).dataLoader.load(this.assignment.problem.id());
 
         return awards.map(
-            award => new ContestAwardAssignmentView(new ContestAwardAssignment(this.assignment, award), this.user),
+            award => new ContestAwardAssignmentView(new ContestAwardAssignment(this.assignment, award), this.user, ctx),
         );
     }
 }

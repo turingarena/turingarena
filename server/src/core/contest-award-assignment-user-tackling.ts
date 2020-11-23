@@ -7,12 +7,12 @@ import { ScoreGrade, ScoreGradeDomain } from './feedback/score';
 import { User } from './user';
 
 export class ContestAwardAssignmentUserTackling {
-    constructor(readonly assignment: ContestAwardAssignment, readonly user: User) {}
+    constructor(readonly assignment: ContestAwardAssignment, readonly user: User, readonly ctx: ApiContext) {}
 
     __typename = 'ContestAwardAssignmentUserTackling';
 
-    async getBestAchievement(ctx: ApiContext) {
-        const achievements = await ctx.environment.sequelize.query<Achievement>(
+    async getBestAchievement() {
+        const achievements = await this.ctx.environment.sequelize.query<Achievement>(
             `
                 WITH
                     successful_evaluations AS (
@@ -67,29 +67,29 @@ export class ContestAwardAssignmentUserTackling {
                 },
                 type: QueryTypes.SELECT,
                 mapToModel: true,
-                instance: ctx.table(Achievement).build(),
+                instance: this.ctx.table(Achievement).build(),
             },
         );
 
         return achievements.length > 0 ? achievements[0] : null;
     }
 
-    async getScoreGrade(ctx: ApiContext, domain: ScoreGradeDomain) {
-        const bestAchievement = await this.getBestAchievement(ctx);
+    async getScoreGrade(domain: ScoreGradeDomain) {
+        const bestAchievement = await this.getBestAchievement();
 
         return bestAchievement !== null ? bestAchievement.getScoreGrade(domain) : new ScoreGrade(domain.scoreRange, 0);
     }
 
-    async getFulfillmentGrade(ctx: ApiContext) {
-        const bestAchievement = await this.getBestAchievement(ctx);
+    async getFulfillmentGrade() {
+        const bestAchievement = await this.getBestAchievement();
 
         return bestAchievement !== null ? bestAchievement.getFulfillmentGrade() : new FulfillmentGrade(false);
     }
 
-    async getGrade(ctx: ApiContext) {
+    async getGrade() {
         const { gradeDomain: domain } = this.assignment.award;
-        if (domain instanceof FulfillmentGradeDomain) return (await this.getFulfillmentGrade(ctx)) ?? null;
-        if (domain instanceof ScoreGradeDomain) return (await this.getScoreGrade(ctx, domain)) ?? null;
+        if (domain instanceof FulfillmentGradeDomain) return (await this.getFulfillmentGrade()) ?? null;
+        if (domain instanceof ScoreGradeDomain) return (await this.getScoreGrade(domain)) ?? null;
         throw new Error(`unexpected grade domain ${domain}`);
     }
 }

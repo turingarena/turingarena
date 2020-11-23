@@ -25,7 +25,7 @@ export const contestAwardAssignmentViewSchema = gql`
 `;
 
 export class ContestAwardAssignmentView {
-    constructor(readonly assignment: ContestAwardAssignment, readonly user: User | null) {}
+    constructor(readonly assignment: ContestAwardAssignment, readonly user: User | null, readonly ctx: ApiContext) {}
 
     __typename = 'ContestAwardAssignmentView';
 
@@ -33,18 +33,18 @@ export class ContestAwardAssignmentView {
         return new ContestProblemAssignmentView(this.assignment.problemAssignment, this.user);
     }
 
-    async gradeField({}, ctx: ApiContext) {
+    async gradeField() {
         const { gradeDomain: domain } = this.assignment.award;
         const tackling = this.getTackling();
 
         if (domain instanceof FulfillmentGradeDomain) {
-            const grade = tackling !== null ? await tackling.getFulfillmentGrade(ctx) : null;
+            const grade = tackling !== null ? await tackling.getFulfillmentGrade() : null;
 
             return new FulfillmentField(grade?.fulfilled ?? null);
         }
 
         if (domain instanceof ScoreGradeDomain) {
-            const grade = tackling !== null ? await tackling.getScoreGrade(ctx, domain) : null;
+            const grade = tackling !== null ? await tackling.getScoreGrade(domain) : null;
 
             return new ScoreField(domain.scoreRange, grade?.score ?? null);
         }
@@ -55,7 +55,7 @@ export class ContestAwardAssignmentView {
     getTackling() {
         if (this.user === null) return null;
 
-        return new ContestAwardAssignmentUserTackling(this.assignment, this.user);
+        return new ContestAwardAssignmentUserTackling(this.assignment, this.user, this.ctx);
     }
 }
 
