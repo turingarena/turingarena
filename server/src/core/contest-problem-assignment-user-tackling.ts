@@ -32,7 +32,7 @@ export const contestProblemAssignmentUserTacklingSchema = gql`
 `;
 
 export class ContestProblemAssignmentUserTackling {
-    constructor(readonly assignment: ContestProblemAssignment, readonly user: User) {}
+    constructor(readonly assignment: ContestProblemAssignment, readonly user: User, readonly ctx: ApiContext) {}
 
     __typename = 'ContestProblemAssignmentUserTackling';
 
@@ -41,7 +41,7 @@ export class ContestProblemAssignmentUserTackling {
     }
 
     static fromId(id: string, ctx: ApiContext): ContestProblemAssignmentUserTackling {
-        const assignmentId = id.split('/',2).join('/')
+        const assignmentId = id.split('/', 2).join('/');
         const userId = id
             .split('/')
             .slice(2, 4)
@@ -50,25 +50,26 @@ export class ContestProblemAssignmentUserTackling {
         return new ContestProblemAssignmentUserTackling(
             ContestProblemAssignment.fromId(assignmentId, ctx),
             User.fromId(userId, ctx),
+            ctx,
         );
     }
 
-    async canSubmit({}, ctx: ApiContext) {
-        const status = await this.assignment.problem.contest.getStatus(ctx);
+    async canSubmit() {
+        const status = await this.assignment.problem.contest.getStatus(this.ctx);
 
         return status === 'RUNNING';
     }
 
-    async submissions({}, ctx: ApiContext) {
-        return ctx.api(SubmissionCache).allByTackling.load(this.id());
+    async submissions() {
+        return this.ctx.api(SubmissionCache).allByTackling.load(this.id());
     }
 
     assignmentView() {
         return new ContestProblemAssignmentView(this.assignment, this.user);
     }
 
-    async getAwardTacklings(ctx: ApiContext) {
-        const material = await ctx.api(ProblemMaterialApi).dataLoader.load(this.assignment.problem.id());
+    async getAwardTacklings() {
+        const material = await this.ctx.api(ProblemMaterialApi).dataLoader.load(this.assignment.problem.id());
 
         return material.awards.map(
             award =>
@@ -76,9 +77,9 @@ export class ContestProblemAssignmentUserTackling {
         );
     }
 
-    async getScoreGrade(ctx: ApiContext) {
-        const awardTacklings = await this.getAwardTacklings(ctx);
-        const awardGrades = await Promise.all(awardTacklings.map(t2 => t2.getGrade(ctx)));
+    async getScoreGrade() {
+        const awardTacklings = await this.getAwardTacklings();
+        const awardGrades = await Promise.all(awardTacklings.map(t2 => t2.getGrade(this.ctx)));
 
         return ScoreGrade.total(awardGrades.filter((g): g is ScoreGrade => g instanceof ScoreGrade));
     }

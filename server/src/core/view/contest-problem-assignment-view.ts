@@ -47,15 +47,15 @@ export class ContestProblemAssignmentView {
         return new ContestProblemSetView(new ContestProblemSet(this.assignment.problem.contest), this.user);
     }
 
-    async tackling() {
-        return this.user !== null ? new ContestProblemAssignmentUserTackling(this.assignment, this.user) : null;
+    async tackling({}, ctx: ApiContext) {
+        return this.user !== null ? new ContestProblemAssignmentUserTackling(this.assignment, this.user, ctx) : null;
     }
 
     async totalScoreField({}, ctx: ApiContext) {
         const { scoreRange } = await ctx.api(ProblemMaterialApi).dataLoader.load(this.assignment.problem.id());
-        const tackling = await this.tackling();
+        const tackling = await this.tackling({}, ctx);
 
-        const scoreGrade = tackling !== null ? await tackling.getScoreGrade(ctx) : null;
+        const scoreGrade = tackling !== null ? await tackling.getScoreGrade() : null;
 
         return new ScoreField(scoreRange, scoreGrade?.score ?? null);
     }

@@ -36,7 +36,7 @@ export class ContestProblemSetUserTackling {
         return ScoreGrade.total(
             await Promise.all(
                 assignments.map(async assignment =>
-                    new ContestProblemAssignmentUserTackling(assignment, this.user).getScoreGrade(ctx),
+                    new ContestProblemAssignmentUserTackling(assignment, this.user, ctx).getScoreGrade(),
                 ),
             ),
         );
