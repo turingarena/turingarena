@@ -1,5 +1,4 @@
 import { gql } from 'apollo-server-core';
-import { ApiContext } from '../main/api-context';
 import { Contest } from './contest';
 import { ScoreRange } from './feedback/score';
 
