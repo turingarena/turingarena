@@ -41,11 +41,9 @@ export class ContestProblemAssignmentUserTackling {
     }
 
     static fromId(id: string, ctx: ApiContext): ContestProblemAssignmentUserTackling {
-        const assignmentId = id.split('/', 2).join('/');
-        const userId = id
-            .split('/')
-            .slice(2, 4)
-            .join('/');
+        const ids = id.split('/');
+        const assignmentId = ids.splice(0, 2).join('/');
+        const userId = ids.join('/');
 
         return new ContestProblemAssignmentUserTackling(
             ContestProblemAssignment.fromId(assignmentId, ctx),
