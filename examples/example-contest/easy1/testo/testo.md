@@ -1,3 +1,5 @@
+![](logo.png)
+
 # Trova il massimo
 
 Topolino ha ricevuto in regalo una sequenza di $N$ numeri interi. Puoi aiutarlo
@@ -22,6 +24,7 @@ Nel file **output.txt** dovrai stampare un singolo numero intero, il valore mass
 della sequenza.
 
 ### Assunzioni
+
 - $1 \le N \le 1000$.
 - $|S_i| < 1000$, ovvero $-1000 < S_i < 1000$.
 

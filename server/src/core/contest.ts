@@ -72,9 +72,7 @@ export class ContestApi extends ApiObject {
         // FIXME: should contests be addressable by name anyway?
 
         const contests = await this.ctx.table(ContestData).findAll();
-        const metadata = await Promise.all(
-            contests.map(d => d.getContest(this.ctx)).map(async c => c.getMetadata()),
-        );
+        const metadata = await Promise.all(contests.map(d => d.getContest(this.ctx)).map(async c => c.getMetadata()));
 
         return contests.find((c, i) => metadata[i].name === name) ?? null;
     });
@@ -87,7 +85,8 @@ export class ContestApi extends ApiObject {
             pathParts[pathParts.length - 1],
             null,
             type !== false ? type : 'application/octet-stream',
-            () => archiveFile.getContent(),
+            archiveFile.getContent(),
+            this.ctx,
         );
     }
 
@@ -104,7 +103,6 @@ export class ContestApi extends ApiObject {
 
         return statementFiles.map((archiveFile): MediaFile => this.statementVariantFromFile(archiveFile));
     }
-
 }
 
 export class Contest {

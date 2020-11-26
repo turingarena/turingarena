@@ -165,20 +165,24 @@ const fileRules = [
 const memoryUnitBytes = 1024 * 1024;
 
 export class ProblemMaterial {
-    constructor(readonly problem: Problem, readonly taskInfo: ProblemTaskInfo) {}
+    constructor(readonly problem: Problem, readonly taskInfo: ProblemTaskInfo, readonly ctx: ApiContext) {}
 
     title = [{ value: this.taskInfo.IOI.title }];
     statement = this.taskInfo.IOI.statements.map(
         ({ path, language, content_type: type }): MediaFile =>
-            new MediaFile(path.slice(path.lastIndexOf('/') + 1), language, type, ctx =>
-                this.loadContent(ctx, this.problem, path),
+            new MediaFile(
+                path.slice(path.lastIndexOf('/') + 1),
+                language,
+                type,
+                this.loadContent(this.problem, path),
+                this.ctx,
             ),
     );
 
     attachments = this.taskInfo.IOI.attachments.map(
         ({ name, path, content_type: type }): ProblemAttachment => ({
             title: [{ value: name }],
-            media: [new MediaFile(name, null, type, ctx => this.loadContent(ctx, this.problem, path))],
+            media: [new MediaFile(name, null, type, this.loadContent(this.problem, path), this.ctx)],
         }),
     );
 
@@ -270,16 +274,16 @@ export class ProblemMaterial {
         },
     ];
 
-    async loadContent(ctx: ApiContext, problem: Problem, path: string) {
-        const contest = new Contest(problem.contest.id, ctx);
-        const { archiveId } = await ctx.api(ContestApi).dataLoader.load(contest.id);
-        const file = await ctx.table(Archive).findOne({
+    async loadContent(problem: Problem, path: string) {
+        const contest = new Contest(problem.contest.id, this.ctx);
+        const { archiveId } = await this.ctx.api(ContestApi).dataLoader.load(contest.id);
+        const file = await this.ctx.table(Archive).findOne({
             where: { uuid: archiveId, path: `${problem.name}/${path}` },
-            include: [ctx.table(FileContent)],
+            include: [this.ctx.table(FileContent)],
         });
 
         if (file === null) {
-            throw ctx.fail(`file ${path} not found in problem ${problem.name} (referred from metadata)`);
+            throw this.ctx.fail(`file ${path} not found in problem ${problem.name} (referred from metadata)`);
         }
 
         return file.content;
@@ -296,6 +300,7 @@ export class ProblemMaterialApi extends ApiObject {
             new ProblemMaterial(
                 Problem.fromId(id, this.ctx),
                 await this.ctx.api(ProblemTaskInfoApi).getProblemTaskInfo(Problem.fromId(id, this.ctx)),
+                this.ctx,
             ),
     );
 }

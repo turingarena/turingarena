@@ -43,10 +43,13 @@ export class MediaFile {
         readonly name: string,
         readonly language: string | null,
         readonly type: string,
-        readonly content: (ctx: ApiContext) => Promise<FileContent>,
+        readonly content: Promise<FileContent>,
+        readonly ctx: ApiContext,
     ) {}
 
-    async url({},ctx: ApiContext){return `/files/${(await this.content(ctx)).id}/${this.name}`;}
+    async url() {
+        return `/files/${(await this.content).id}/${this.name}`;
+    }
 }
 
 export const mediaResolvers: Resolvers = {
