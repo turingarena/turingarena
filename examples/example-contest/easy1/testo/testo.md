@@ -1,5 +1,3 @@
-![](logo.png)
-
 # Trova il massimo
 
 Topolino ha ricevuto in regalo una sequenza di $N$ numeri interi. Puoi aiutarlo
