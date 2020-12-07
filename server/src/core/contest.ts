@@ -15,6 +15,7 @@ import { Archive } from './files/archive';
 import { FileContent } from './files/file-content';
 import { Media, MediaFile } from './material/media';
 import { ProblemMaterial, ProblemMaterialApi } from './material/problem-material';
+import { Text } from './material/text';
 import { Problem } from './problem';
 import { User } from './user';
 
@@ -113,7 +114,7 @@ export class Contest {
         return (await this.getMetadata()).name;
     }
     async title() {
-        return [{ value: (await this.getMetadata()).title }];
+        return new Text([{ value: (await this.getMetadata()).title }]);
     }
     async start() {
         return (await this.getMetadata()).start;

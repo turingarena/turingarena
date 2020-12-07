@@ -30,7 +30,7 @@ import { FileContent, FileContentModelRecord, fileContentSchema } from './files/
 import { AwardModelRecord, awardSchema } from './material/award';
 import { MediaModelRecord, mediaResolvers, mediaSchema } from './material/media';
 import { ProblemMaterialModelRecord, problemMaterialSchema } from './material/problem-material';
-import { TextModelRecord, textResolvers, textSchema } from './material/text';
+import { TextModelRecord, textSchema } from './material/text';
 import { Message, messageSchema } from './message';
 import { MutationModelRecord, mutationResolvers, mutationSchema } from './mutation';
 import { ParticipationModelRecord, participationSchema } from './participation';
@@ -149,6 +149,5 @@ export const resolvers: Resolvers = {
     ...mediaResolvers,
     ...mutationResolvers,
     ...queryResolvers,
-    ...textResolvers,
     ...archiveResolvers,
 };

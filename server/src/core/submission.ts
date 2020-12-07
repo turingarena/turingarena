@@ -16,6 +16,7 @@ import { FulfillmentGradeDomain } from './feedback/fulfillment';
 import { ScoreField, ScoreGrade, ScoreGradeDomain, ScoreRange } from './feedback/score';
 import { FileContentApi } from './files/file-content';
 import { ProblemMaterialApi } from './material/problem-material';
+import { Text } from './material/text';
 import { Participation } from './participation';
 import { Problem } from './problem';
 import { SubmissionFileCache } from './submission-file';
@@ -289,12 +290,12 @@ export class Submission {
                     {
                         __typename: 'HeaderField',
                         index: awardIndex,
-                        title: [{ value: `Subtask ${awardIndex}` }],
+                        title: new Text([{ value: `Subtask ${awardIndex}` }]),
                     },
                     {
                         __typename: 'HeaderField',
                         index: testCaseIndex,
-                        title: [{ value: `Case ${testCaseIndex}` }],
+                        title: new Text([{ value: `Case ${testCaseIndex}` }]),
                     },
                     {
                         __typename: 'TimeUsageField',

@@ -2,6 +2,7 @@ import { gql } from 'apollo-server-core';
 import { FulfillmentGradeDomain } from '../feedback/fulfillment';
 import { ScoreGradeDomain, ScoreRange } from '../feedback/score';
 import { ProblemMaterial } from './problem-material';
+import { Text } from './text';
 
 export const awardSchema = gql`
     """
@@ -29,7 +30,7 @@ export class Award {
     private readonly subtaskInfo = this.material.taskInfo.IOI.scoring.subtasks[this.index];
 
     name = `subtask.${this.index}`;
-    title = [{ value: `Subtask ${this.index}` }];
+    title = new Text([{ value: `Subtask ${this.index}` }]);
 
     gradeDomain =
         this.subtaskInfo.max_score > 0

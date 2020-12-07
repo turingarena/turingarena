@@ -105,27 +105,27 @@ export interface ProblemAttribute {
 const languages = {
     python2: {
         name: 'python2',
-        title: [{ value: 'Python 2 (cpython)' }],
+        title: new Text([{ value: 'Python 2 (cpython)' }]),
     },
     python3: {
         name: 'py',
-        title: [{ value: 'Python 3 (cpython)' }],
+        title: new Text([{ value: 'Python 3 (cpython)' }]),
     },
     c: {
         name: 'c',
-        title: [{ value: 'C (c11)' }],
+        title: new Text([{ value: 'C (c11)' }]),
     },
     cpp: {
         name: 'cpp',
-        title: [{ value: 'C++ (c++17)' }],
+        title: new Text([{ value: 'C++ (c++17)' }]),
     },
     rust: {
         name: 'rust',
-        title: [{ value: 'Rust' }],
+        title: new Text([{ value: 'Rust' }]),
     },
     java: {
         name: 'java',
-        title: [{ value: 'Java 8 (JDK)' }],
+        title: new Text([{ value: 'Java 8 (JDK)' }]),
     },
 };
 
@@ -165,9 +165,9 @@ const fileRules = [
 const memoryUnitBytes = 1024 * 1024;
 
 export class ProblemMaterial {
-    constructor(readonly problem: Problem, readonly taskInfo: ProblemTaskInfo, readonly ctx: ApiContext) {}
+    constructor(readonly problem: Problem, readonly taskInfo: ProblemTaskInfo, readonly ctx: ApiContext) { }
 
-    title = [{ value: this.taskInfo.IOI.title }];
+    title = new Text([{ value: this.taskInfo.IOI.title }]);
     statement = this.taskInfo.IOI.statements.map(
         ({ path, language, content_type: type }): MediaFile =>
             new MediaFile(
@@ -181,7 +181,7 @@ export class ProblemMaterial {
 
     attachments = this.taskInfo.IOI.attachments.map(
         ({ name, path, content_type: type }): ProblemAttachment => ({
-            title: [{ value: name }],
+            title: new Text([{ value: name }]),
             media: [new MediaFile(name, null, type, this.loadContent(this.problem, path), this.ctx)],
         }),
     );
@@ -191,7 +191,7 @@ export class ProblemMaterial {
 
     attributes: ProblemAttribute[] = [
         {
-            title: [{ value: 'Time limit' }],
+            title: new Text([{ value: 'Time limit' }]),
             field: {
                 __typename: 'TimeUsageField',
                 timeUsageMaxRelevant: {
@@ -206,7 +206,7 @@ export class ProblemMaterial {
             icon: 'stopwatch',
         },
         {
-            title: [{ value: 'Memory limit' }],
+            title: new Text([{ value: 'Memory limit' }]),
             field: {
                 __typename: 'MemoryUsageField',
                 memoryUsageMaxRelevant: {
@@ -224,7 +224,7 @@ export class ProblemMaterial {
 
     awards = this.taskInfo.IOI.scoring.subtasks.map((subtask, index): Award => new Award(this, index));
 
-    submissionFields = [{ name: 'solution', title: [{ value: 'Solution' }] }];
+    submissionFields = [{ name: 'solution', title: new Text([{ value: 'Solution' }]) }];
     submissionFileTypes = Object.values(languages);
     submissionFileTypeRules = fileRules;
 
@@ -243,34 +243,34 @@ export class ProblemMaterial {
         }),
         {
             __typename: 'ScoreColumn',
-            title: [{ value: 'Total score' }],
+            title: new Text([{ value: 'Total score' }]),
         },
     ];
 
     evaluationFeedbackColumns = [
         {
             __typename: 'HeaderColumn',
-            title: [{ value: 'Subtask' }],
+            title: new Text([{ value: 'Subtask' }]),
         },
         {
             __typename: 'HeaderColumn',
-            title: [{ value: 'Case' }],
+            title: new Text([{ value: 'Case' }]),
         },
         {
             __typename: 'TimeUsageColumn',
-            title: [{ value: 'Time usage' }],
+            title: new Text([{ value: 'Time usage' }]),
         },
         {
             __typename: 'MemoryUsageColumn',
-            title: [{ value: 'Memory usage' }],
+            title: new Text([{ value: 'Memory usage' }]),
         },
         {
             __typename: 'MessageColumn',
-            title: [{ value: 'Message' }],
+            title: new Text([{ value: 'Message' }]),
         },
         {
             __typename: 'ScoreColumn',
-            title: [{ value: 'Score' }],
+            title: new Text([{ value: 'Score' }]),
         },
     ];
 
