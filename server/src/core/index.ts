@@ -18,7 +18,7 @@ import { Evaluation, EvaluationModelRecord, evaluationSchema } from './evaluatio
 import { EvaluationEvent } from './evaluation-event';
 import { fieldSchema } from './feedback/field';
 import { FulfillmentModelRecord, fulfillmentSchema } from './feedback/fulfillment';
-import { gradeResolvers, gradeSchema } from './feedback/grade';
+import { gradeSchema } from './feedback/grade';
 import { headerSchema } from './feedback/header';
 import { memoryUsageSchema } from './feedback/memory-usage';
 import { messageFieldSchema } from './feedback/message';
@@ -146,7 +146,6 @@ export type ModelRecord = unknown &
 /** All GraphQL resolvers. Obtained combining resolvers from each components. */
 export const resolvers: Resolvers = {
     ...dateTimeResolvers,
-    ...gradeResolvers,
     ...mediaResolvers,
     ...mutationResolvers,
     ...queryResolvers,

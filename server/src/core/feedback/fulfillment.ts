@@ -29,6 +29,7 @@ export const fulfillmentSchema = gql`
 
 export class FulfillmentGrade {
     constructor(readonly fulfilled: boolean | null) {}
+    __typename = 'FulfillmentGrade';
     valence() {
         return this.fulfilled === null ? null : this.fulfilled ? 'SUCCESS' : 'FAILURE';
     }
@@ -36,10 +37,12 @@ export class FulfillmentGrade {
 
 export class FulfillmentGradeDomain {
     _: (() => true) | undefined;
+    __typename = 'FulfillmentGradeDomain';
 }
 
 export class FulfillmentField {
     constructor(readonly fulfilled: boolean | null) {}
+    __typename = 'FulfillmentField';
 }
 
 export interface FulfillmentModelRecord {
