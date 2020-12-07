@@ -165,24 +165,27 @@ const fileRules = [
 const memoryUnitBytes = 1024 * 1024;
 
 export class ProblemMaterial {
-    constructor(readonly problem: Problem, readonly taskInfo: ProblemTaskInfo, readonly ctx: ApiContext) { }
+    constructor(readonly problem: Problem, readonly taskInfo: ProblemTaskInfo, readonly ctx: ApiContext) {}
 
     title = new Text([{ value: this.taskInfo.IOI.title }]);
-    statement = this.taskInfo.IOI.statements.map(
-        ({ path, language, content_type: type }): MediaFile =>
-            new MediaFile(
-                path.slice(path.lastIndexOf('/') + 1),
-                language,
-                type,
-                this.loadContent(this.problem, path),
-                this.ctx,
-            ),
+
+    statement = new Media(
+        this.taskInfo.IOI.statements.map(
+            ({ path, language, content_type: type }): MediaFile =>
+                new MediaFile(
+                    path.slice(path.lastIndexOf('/') + 1),
+                    language,
+                    type,
+                    this.loadContent(this.problem, path),
+                    this.ctx,
+                ),
+        ),
     );
 
     attachments = this.taskInfo.IOI.attachments.map(
         ({ name, path, content_type: type }): ProblemAttachment => ({
             title: new Text([{ value: name }]),
-            media: [new MediaFile(name, null, type, this.loadContent(this.problem, path), this.ctx)],
+            media: new Media([new MediaFile(name, null, type, this.loadContent(this.problem, path), this.ctx)]),
         }),
     );
 

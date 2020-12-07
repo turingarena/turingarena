@@ -1,6 +1,5 @@
 import { gql } from 'apollo-server-core';
 import { ApiContext } from '../../main/api-context';
-import { Resolvers } from '../../main/resolver-types';
 import { FileContent } from '../files/file-content';
 
 export const mediaSchema = gql`
@@ -31,7 +30,13 @@ export const mediaSchema = gql`
     }
 `;
 
-export type Media = MediaFile[];
+export class Media {
+    constructor(readonly variants: MediaFile[]) {}
+
+    variant() {
+        return this.variants[0];
+    }
+}
 
 export interface MediaModelRecord {
     Media: Media;
@@ -51,9 +56,3 @@ export class MediaFile {
         return `/files/${(await this.content).id}/${this.name}`;
     }
 }
-
-export const mediaResolvers: Resolvers = {
-    Media: {
-        variant: media => media[0],
-    },
-};

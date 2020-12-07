@@ -102,7 +102,7 @@ export class ContestApi extends ApiObject {
             },
         });
 
-        return statementFiles.map((archiveFile): MediaFile => this.statementVariantFromFile(archiveFile));
+        return new Media(statementFiles.map((archiveFile): MediaFile => this.statementVariantFromFile(archiveFile)));
     }
 }
 

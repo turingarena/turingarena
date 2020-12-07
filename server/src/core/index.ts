@@ -28,7 +28,7 @@ import { valenceSchema } from './feedback/valence';
 import { Archive, ArchiveModelRecord, archiveResolvers, archiveSchema } from './files/archive';
 import { FileContent, FileContentModelRecord, fileContentSchema } from './files/file-content';
 import { AwardModelRecord, awardSchema } from './material/award';
-import { MediaModelRecord, mediaResolvers, mediaSchema } from './material/media';
+import { MediaModelRecord, mediaSchema } from './material/media';
 import { ProblemMaterialModelRecord, problemMaterialSchema } from './material/problem-material';
 import { TextModelRecord, textSchema } from './material/text';
 import { Message, messageSchema } from './message';
@@ -146,7 +146,6 @@ export type ModelRecord = unknown &
 /** All GraphQL resolvers. Obtained combining resolvers from each components. */
 export const resolvers: Resolvers = {
     ...dateTimeResolvers,
-    ...mediaResolvers,
     ...mutationResolvers,
     ...queryResolvers,
     ...archiveResolvers,
