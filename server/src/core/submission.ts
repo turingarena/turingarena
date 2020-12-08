@@ -331,7 +331,7 @@ export class Submission {
                     },
                     {
                         __typename: 'MessageField',
-                        message: message !== null ? [{ value: message }] : null,
+                        message: new Text([{ value: `${message ?? ``}` }]),
                     },
                     new ScoreField(new ScoreRange(1, 2, true), score),
                 ],
