@@ -30,9 +30,7 @@ export class EvaluateApi extends ApiObject {
 
         const problemDir = path.join(contestDir, assignment.problem.name);
 
-        const submissionPath = await submission.extract(
-            path.join(this.ctx.environment.config.cachePath, 'submission'),
-        );
+        const submissionPath = await submission.extract(path.join(this.ctx.environment.config.cachePath, 'submission'));
 
         const filepath = fs.readdirSync(submissionPath)[0];
         const solutionPath = path.join(submissionPath, filepath);
@@ -63,7 +61,20 @@ export class EvaluateApi extends ApiObject {
                 toArray(),
             )
             .toPromise();
-
+        const jsonEvents = await JSON.parse(await JSON.stringify(events));
+        let failedToCompile = false;
+        jsonEvents.forEach(
+            (jv: {
+                data: { Compilation: { status: string | { Done: { result: { status: string } } } } | undefined };
+            }) => {
+                if (jv.data.Compilation !== undefined && jv.data.Compilation.status !== 'Pending') {
+                    if (typeof jv.data.Compilation.status !== 'string') {
+                        failedToCompile =
+                            jv.data.Compilation.status.Done.result.status !== 'Success' ? true : failedToCompile;
+                    }
+                }
+            },
+        );
         let output;
         try {
             output = await child;
@@ -87,6 +98,11 @@ export class EvaluateApi extends ApiObject {
         } else {
             await evaluation.update({
                 status: EvaluationStatus.ERROR,
+            });
+        }
+        if (failedToCompile) {
+            await evaluation.update({
+                status: EvaluationStatus.COMPILEERROR,
             });
         }
     }

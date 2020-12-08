@@ -46,6 +46,18 @@ export function Submission({ data }: FragmentProps<SubmissionFragment>) {
 
   return (
     <>
+      {data.officialEvaluation?.status === 'COMPILEERROR' ? (
+        <div
+          className={css`
+            background-color: rgba(0, 0, 0, 0.1);
+            text-align: center;
+          `}
+        >
+          The system was unable to compile the file
+        </div>
+      ) : (
+        <div></div>
+      )}
       <div
         className={
           data.officialEvaluation?.status === 'PENDING'

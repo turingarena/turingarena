@@ -26,6 +26,8 @@ export const evaluationSchema = gql`
         SUCCESS
         "There was an error in this evaluation"
         ERROR
+        "There was an error in the compilation"
+        COMPILEERROR
     }
 `;
 
@@ -51,6 +53,8 @@ export enum EvaluationStatus {
     SUCCESS = 'SUCCESS',
     /** There was an error in this evaluation */
     ERROR = 'ERROR',
+    /** There was an error in the compilation */
+    COMPILEERROR = 'COMPILEERROR',
 }
 
 export interface EvaluationModelRecord {
