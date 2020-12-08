@@ -1,9 +1,9 @@
 import { gql } from 'apollo-server-core';
 import { Resolvers } from '../main/resolver-types';
-import { ContestApi, ContestData } from './contest';
+import { Contest, ContestData } from './contest';
 import { MessageApi } from './message';
-import { SubmissionApi} from './submission';
-import { UserApi } from './user';
+import { Submission } from './submission';
+import { User } from './user';
 import { MainView } from './view/main-view';
 export const querySchema = gql`
     type Query {
@@ -31,34 +31,33 @@ export const queryResolvers: Resolvers = {
                 await ctx.authorizeUser(username);
             }
 
-            const contest = await ctx.api(ContestApi).getDefault();
+            const contest = await Contest.getDefault(ctx);
 
             if (contest === null) throw new Error(`missing 'default' contest (not supported right now)`);
 
             return new MainView(
                 contest,
-                username !== null && username !== undefined
-                    ? await ctx.api(UserApi).validate({ __typename: 'User', contest, username })
-                    : null,
+                username !== null && username !== undefined ? await new User(contest, username, ctx).validate() : null,
+                ctx,
             );
         },
         contests: async ({}, {}, ctx) => {
             await ctx.authorizeAdmin();
 
-            return (await ctx.table(ContestData).findAll()).map(d => ctx.api(ContestApi).fromData(d))
+            return (await ctx.table(ContestData).findAll()).map(d => d.getContest(ctx));
         },
         archive: async (_, { uuid }, ctx) => {
             await ctx.authorizeAdmin();
 
-            return ({ uuid })
+            return { uuid };
         },
         submission: async ({}, { id }, ctx) => {
-            const sub = await ctx.api(SubmissionApi).validate({ __typename: 'Submission', id });
+            const sub = await new Submission(id, ctx).validate();
 
-            // Get the username of who had made the submission and verify if 
+            // Get the username of who had made the submission and verify if
             // the current user has teh permission to made the query.
             // The query is valid if is made by the owner or by an admin user.
-            const username = (await ctx.api(SubmissionApi).getTackling(sub)).user.username;
+            const username = (await sub.getTackling()).user.username;
             await ctx.authorizeUser(username);
 
             return sub;

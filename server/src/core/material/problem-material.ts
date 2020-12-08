@@ -1,15 +1,16 @@
 import { gql } from 'apollo-server-core';
 import { __generated_Field } from '../../generated/graphql-types';
 import { ApiObject } from '../../main/api';
+import { ApiContext } from '../../main/api-context';
 import { createSimpleLoader } from '../../main/base-model';
-import { ContestApi } from '../contest';
+import { Contest, ContestApi } from '../contest';
 import { FulfillmentGradeDomain } from '../feedback/fulfillment';
 import { ScoreGradeDomain, ScoreRange } from '../feedback/score';
 import { Archive } from '../files/archive';
 import { FileContent } from '../files/file-content';
 import { Problem } from '../problem';
 import { Award } from './award';
-import { Media, MediaVariant } from './media';
+import { Media, MediaFile } from './media';
 import { ProblemTaskInfo, ProblemTaskInfoApi } from './problem-task-info';
 import { Text } from './text';
 
@@ -104,27 +105,27 @@ export interface ProblemAttribute {
 const languages = {
     python2: {
         name: 'python2',
-        title: [{ value: 'Python 2 (cpython)' }],
+        title: new Text([{ value: 'Python 2 (cpython)' }]),
     },
     python3: {
         name: 'py',
-        title: [{ value: 'Python 3 (cpython)' }],
+        title: new Text([{ value: 'Python 3 (cpython)' }]),
     },
     c: {
         name: 'c',
-        title: [{ value: 'C (c11)' }],
+        title: new Text([{ value: 'C (c11)' }]),
     },
     cpp: {
         name: 'cpp',
-        title: [{ value: 'C++ (c++17)' }],
+        title: new Text([{ value: 'C++ (c++17)' }]),
     },
     rust: {
         name: 'rust',
-        title: [{ value: 'Rust' }],
+        title: new Text([{ value: 'Rust' }]),
     },
     java: {
         name: 'java',
-        title: [{ value: 'Java 8 (JDK)' }],
+        title: new Text([{ value: 'Java 8 (JDK)' }]),
     },
 };
 
@@ -164,28 +165,27 @@ const fileRules = [
 const memoryUnitBytes = 1024 * 1024;
 
 export class ProblemMaterial {
-    constructor(readonly problem: Problem, readonly taskInfo: ProblemTaskInfo) {}
+    constructor(readonly problem: Problem, readonly taskInfo: ProblemTaskInfo, readonly ctx: ApiContext) {}
 
-    title = [{ value: this.taskInfo.IOI.title }];
-    statement = this.taskInfo.IOI.statements.map(
-        ({ path, language, content_type: type }): MediaVariant => ({
-            name: path.slice(path.lastIndexOf('/') + 1),
-            language,
-            type,
-            content: ctx => ctx.api(ProblemMaterialApi).loadContent(this.problem, path),
-        }),
+    title = new Text([{ value: this.taskInfo.IOI.title }]);
+
+    statement = new Media(
+        this.taskInfo.IOI.statements.map(
+            ({ path, language, content_type: type }): MediaFile =>
+                new MediaFile(
+                    path.slice(path.lastIndexOf('/') + 1),
+                    language,
+                    type,
+                    this.loadContent(this.problem, path),
+                    this.ctx,
+                ),
+        ),
     );
 
     attachments = this.taskInfo.IOI.attachments.map(
         ({ name, path, content_type: type }): ProblemAttachment => ({
-            title: [{ value: name }],
-            media: [
-                {
-                    name,
-                    type,
-                    content: ctx => ctx.api(ProblemMaterialApi).loadContent(this.problem, path),
-                },
-            ],
+            title: new Text([{ value: name }]),
+            media: new Media([new MediaFile(name, null, type, this.loadContent(this.problem, path), this.ctx)]),
         }),
     );
 
@@ -194,7 +194,7 @@ export class ProblemMaterial {
 
     attributes: ProblemAttribute[] = [
         {
-            title: [{ value: 'Time limit' }],
+            title: new Text([{ value: 'Time limit' }]),
             field: {
                 __typename: 'TimeUsageField',
                 timeUsageMaxRelevant: {
@@ -209,7 +209,7 @@ export class ProblemMaterial {
             icon: 'stopwatch',
         },
         {
-            title: [{ value: 'Memory limit' }],
+            title: new Text([{ value: 'Memory limit' }]),
             field: {
                 __typename: 'MemoryUsageField',
                 memoryUsageMaxRelevant: {
@@ -227,7 +227,7 @@ export class ProblemMaterial {
 
     awards = this.taskInfo.IOI.scoring.subtasks.map((subtask, index): Award => new Award(this, index));
 
-    submissionFields = [{ name: 'solution', title: [{ value: 'Solution' }] }];
+    submissionFields = [{ name: 'solution', title: new Text([{ value: 'Solution' }]) }];
     submissionFileTypes = Object.values(languages);
     submissionFileTypeRules = fileRules;
 
@@ -246,51 +246,40 @@ export class ProblemMaterial {
         }),
         {
             __typename: 'ScoreColumn',
-            title: [{ value: 'Total score' }],
+            title: new Text([{ value: 'Total score' }]),
         },
     ];
 
     evaluationFeedbackColumns = [
         {
             __typename: 'HeaderColumn',
-            title: [{ value: 'Subtask' }],
+            title: new Text([{ value: 'Subtask' }]),
         },
         {
             __typename: 'HeaderColumn',
-            title: [{ value: 'Case' }],
+            title: new Text([{ value: 'Case' }]),
         },
         {
             __typename: 'TimeUsageColumn',
-            title: [{ value: 'Time usage' }],
+            title: new Text([{ value: 'Time usage' }]),
         },
         {
             __typename: 'MemoryUsageColumn',
-            title: [{ value: 'Memory usage' }],
+            title: new Text([{ value: 'Memory usage' }]),
         },
         {
             __typename: 'MessageColumn',
-            title: [{ value: 'Message' }],
+            title: new Text([{ value: 'Message' }]),
         },
         {
             __typename: 'ScoreColumn',
-            title: [{ value: 'Score' }],
+            title: new Text([{ value: 'Score' }]),
         },
     ];
-}
-
-export interface ProblemMaterialModelRecord {
-    ProblemAttachment: ProblemAttachment;
-}
-
-export class ProblemMaterialApi extends ApiObject {
-    dataLoader = createSimpleLoader(
-        async (problem: Problem) =>
-            new ProblemMaterial(problem, await this.ctx.api(ProblemTaskInfoApi).getProblemTaskInfo(problem)),
-    );
 
     async loadContent(problem: Problem, path: string) {
-        const contest = this.ctx.api(ContestApi).fromId(problem.contest.id);
-        const { archiveId } = await this.ctx.api(ContestApi).dataLoader.load(contest);
+        const contest = new Contest(problem.contest.id, this.ctx);
+        const { archiveId } = await this.ctx.api(ContestApi).dataLoader.load(contest.id);
         const file = await this.ctx.table(Archive).findOne({
             where: { uuid: archiveId, path: `${problem.name}/${path}` },
             include: [this.ctx.table(FileContent)],
@@ -302,4 +291,19 @@ export class ProblemMaterialApi extends ApiObject {
 
         return file.content;
     }
+}
+
+export interface ProblemMaterialModelRecord {
+    ProblemAttachment: ProblemAttachment;
+}
+
+export class ProblemMaterialApi extends ApiObject {
+    dataLoader = createSimpleLoader(
+        async (id: string) =>
+            new ProblemMaterial(
+                Problem.fromId(id, this.ctx),
+                await this.ctx.api(ProblemTaskInfoApi).getProblemTaskInfo(Problem.fromId(id, this.ctx)),
+                this.ctx,
+            ),
+    );
 }

@@ -1,19 +1,17 @@
 import { QueryTypes } from 'sequelize';
-import { ApiObject } from '../main/api';
-import { Achievement, AchievementApi } from './achievement';
+import { ApiContext } from '../main/api-context';
+import { Achievement } from './achievement';
 import { ContestAwardAssignment } from './contest-award-assignment';
 import { FulfillmentGrade, FulfillmentGradeDomain } from './feedback/fulfillment';
 import { ScoreGrade, ScoreGradeDomain } from './feedback/score';
 import { User } from './user';
 
-export interface ContestAwardAssignmentUserTackling {
-    __typename: 'ContestAwardAssignmentUserTackling';
-    assignment: ContestAwardAssignment;
-    user: User;
-}
+export class ContestAwardAssignmentUserTackling {
+    constructor(readonly assignment: ContestAwardAssignment, readonly user: User, readonly ctx: ApiContext) {}
 
-export class ContestAwardAssignmentUserTacklingApi extends ApiObject {
-    async getBestAchievement(t: ContestAwardAssignmentUserTackling) {
+    __typename = 'ContestAwardAssignmentUserTackling';
+
+    async getBestAchievement() {
         const achievements = await this.ctx.environment.sequelize.query<Achievement>(
             `
                 WITH
@@ -62,10 +60,10 @@ export class ContestAwardAssignmentUserTacklingApi extends ApiObject {
             `,
             {
                 bind: {
-                    contestId: t.assignment.problemAssignment.problem.contest.id,
-                    problemName: t.assignment.problemAssignment.problem.name,
-                    username: t.user.username,
-                    awardIndex: t.assignment.award.index,
+                    contestId: this.assignment.problemAssignment.problem.contest.id,
+                    problemName: this.assignment.problemAssignment.problem.name,
+                    username: this.user.username,
+                    awardIndex: this.assignment.award.index,
                 },
                 type: QueryTypes.SELECT,
                 mapToModel: true,
@@ -76,26 +74,22 @@ export class ContestAwardAssignmentUserTacklingApi extends ApiObject {
         return achievements.length > 0 ? achievements[0] : null;
     }
 
-    async getScoreGrade(t: ContestAwardAssignmentUserTackling, domain: ScoreGradeDomain) {
-        const bestAchievement = await this.getBestAchievement(t);
+    async getScoreGrade(domain: ScoreGradeDomain) {
+        const bestAchievement = await this.getBestAchievement();
 
-        return bestAchievement !== null
-            ? this.ctx.api(AchievementApi).getScoreGrade(bestAchievement, domain)
-            : new ScoreGrade(domain.scoreRange, 0);
+        return bestAchievement !== null ? bestAchievement.getScoreGrade(domain) : new ScoreGrade(domain.scoreRange, 0);
     }
 
-    async getFulfillmentGrade(t: ContestAwardAssignmentUserTackling) {
-        const bestAchievement = await this.getBestAchievement(t);
+    async getFulfillmentGrade() {
+        const bestAchievement = await this.getBestAchievement();
 
-        return bestAchievement !== null
-            ? this.ctx.api(AchievementApi).getFulfillmentGrade(bestAchievement)
-            : new FulfillmentGrade(false);
+        return bestAchievement !== null ? bestAchievement.getFulfillmentGrade() : new FulfillmentGrade(false);
     }
 
-    async getGrade(t: ContestAwardAssignmentUserTackling) {
-        const { gradeDomain: domain } = t.assignment.award;
-        if (domain instanceof FulfillmentGradeDomain) return (await this.getFulfillmentGrade(t)) ?? null;
-        if (domain instanceof ScoreGradeDomain) return (await this.getScoreGrade(t, domain)) ?? null;
+    async getGrade() {
+        const { gradeDomain: domain } = this.assignment.award;
+        if (domain instanceof FulfillmentGradeDomain) return (await this.getFulfillmentGrade()) ?? null;
+        if (domain instanceof ScoreGradeDomain) return (await this.getScoreGrade(domain)) ?? null;
         throw new Error(`unexpected grade domain ${domain}`);
     }
 }

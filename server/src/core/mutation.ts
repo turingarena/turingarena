@@ -1,7 +1,7 @@
 import { gql } from 'apollo-server-core';
 import { Resolvers } from '../main/resolver-types';
 import { MessageApi } from './message';
-import { SubmitApi } from './submit';
+import { Submit } from './submit';
 
 export const mutationSchema = gql`
     type Mutation {
@@ -26,7 +26,7 @@ export const mutationResolvers: Resolvers = {
         submit: async ({}, { submission }, ctx) => {
             await ctx.authorizeUser(submission.username);
 
-            return ctx.api(SubmitApi).submit(submission);
+            return Submit.submit(submission, ctx);
         },
         logIn: ({}, { token }, ctx) => ctx.environment.authService.logIn(token),
         sendMessage: async ({}, { message }, ctx) => {

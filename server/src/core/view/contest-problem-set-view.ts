@@ -1,10 +1,7 @@
 import { gql } from 'apollo-server-core';
-import { ApiObject } from '../../main/api';
-import { Resolvers } from '../../main/resolver-types';
-import { typed } from '../../util/types';
-import { ContestApi } from '../contest';
-import { ContestProblemSet, ContestProblemSetApi } from '../contest-problem-set';
-import { ContestProblemSetUserTackling, ContestProblemSetUserTacklingApi } from '../contest-problem-set-user-tackling';
+import { ApiContext } from '../../main/api-context';
+import { ContestProblemSet } from '../contest-problem-set';
+import { ContestProblemSetUserTackling } from '../contest-problem-set-user-tackling';
 import { ScoreField } from '../feedback/score';
 import { User } from '../user';
 import { ContestProblemAssignmentView } from './contest-problem-assignment-view';
@@ -32,45 +29,37 @@ export const contestProblemSetViewSchema = gql`
     }
 `;
 
-export interface ContestProblemSetView {
-    __typename: 'ContestProblemSetView';
-    problemSet: ContestProblemSet;
-    user: User | null;
-}
+export class ContestProblemSetView {
+    constructor(readonly problemSet: ContestProblemSet, readonly user: User | null, readonly ctx: ApiContext) {}
 
-export interface ContestProblemSetViewModelRecord {
-    ContestProblemSetView: ContestProblemSetView;
-}
+    __typename = 'ContestProblemSetView';
 
-export class ContestProblemSetViewApi extends ApiObject {
-    getTackling({ problemSet, user }: ContestProblemSetView) {
-        if (user === null) return null;
-
-        return typed<ContestProblemSetUserTackling>({ __typename: 'ContestProblemSetUserTackling', problemSet, user });
+    contestView() {
+        return new ContestView(this.problemSet.contest, this.user, this.ctx);
     }
 
-    async getTotalScoreField(v: ContestProblemSetView) {
-        const tackling = this.getTackling(v);
+    async assignmentViews() {
+        return (await this.problemSet.contest.getProblemAssignments()).map(
+            assignment => new ContestProblemAssignmentView(assignment, this.user, this.ctx),
+        );
+    }
 
-        const scoreRange = await this.ctx.api(ContestProblemSetApi).getScoreRange(v.problemSet);
-        const scoreGrade =
-            tackling !== null ? await this.ctx.api(ContestProblemSetUserTacklingApi).getScoreGrade(tackling) : null;
+    tackling() {
+        if (this.user === null) return null;
+
+        return new ContestProblemSetUserTackling(this.problemSet, this.user, this.ctx);
+    }
+
+    async totalScoreField() {
+        const tackling = this.tackling();
+
+        const scoreRange = await this.problemSet.getScoreRange();
+        const scoreGrade = tackling !== null ? await tackling.getScoreGrade() : null;
 
         return new ScoreField(scoreRange, scoreGrade?.score ?? null);
     }
 }
 
-export const contestProblemSetViewResolvers: Resolvers = {
-    ContestProblemSetView: {
-        problemSet: v => v.problemSet,
-        user: v => v.user,
-        contestView: ({ problemSet: { contest }, user }) =>
-            typed<ContestView>({ __typename: 'ContestView', contest, user }),
-        assignmentViews: async ({ problemSet, user }, {}, ctx) =>
-            (await ctx.api(ContestApi).getProblemAssignments(problemSet.contest)).map(assignment =>
-                typed<ContestProblemAssignmentView>({ __typename: 'ContestProblemAssignmentView', assignment, user }),
-            ),
-        tackling: (v, {}, ctx) => ctx.api(ContestProblemSetViewApi).getTackling(v),
-        totalScoreField: async (v, {}, ctx) => ctx.api(ContestProblemSetViewApi).getTotalScoreField(v),
-    },
-};
+export interface ContestProblemSetViewModelRecord {
+    ContestProblemSetView: ContestProblemSetView;
+}

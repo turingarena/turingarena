@@ -5,9 +5,9 @@ import { bufferTime, concatAll, concatMap, toArray } from 'rxjs/operators';
 import { ApiObject } from '../main/api';
 import { ContestApi } from './contest';
 import { Evaluation, EvaluationStatus } from './evaluation';
-import { EvaluationEvent, EvaluationEventApi } from './evaluation-event';
+import { EvaluationEvent } from './evaluation-event';
 import { ArchiveApi } from './files/archive';
-import { Submission, SubmissionApi } from './submission';
+import { Submission } from './submission';
 
 export class EvaluateApi extends ApiObject {
     /**
@@ -24,15 +24,15 @@ export class EvaluateApi extends ApiObject {
             status: EvaluationStatus.PENDING,
         });
 
-        const { assignment } = await this.ctx.api(SubmissionApi).getTackling(submission);
-        const { archiveId } = await this.ctx.api(ContestApi).dataLoader.load(assignment.problem.contest);
+        const { assignment } = await submission.getTackling();
+        const { archiveId } = await this.ctx.api(ContestApi).dataLoader.load(assignment.problem.contest.id);
         const contestDir = await this.ctx.api(ArchiveApi).extractArchive(archiveId);
 
         const problemDir = path.join(contestDir, assignment.problem.name);
 
-        const submissionPath = await this.ctx
-            .api(SubmissionApi)
-            .extract(submission, path.join(this.ctx.environment.config.cachePath, 'submission'));
+        const submissionPath = await submission.extract(
+            path.join(this.ctx.environment.config.cachePath, 'submission'),
+        );
 
         const filepath = fs.readdirSync(submissionPath)[0];
         const solutionPath = path.join(submissionPath, filepath);
@@ -79,7 +79,7 @@ export class EvaluateApi extends ApiObject {
 
         if (output.code === 0) {
             for (const event of events) {
-                await this.ctx.api(EvaluationEventApi).storeAchievements(event);
+                await event.storeAchievements(this.ctx);
             }
             await evaluation.update({
                 status: EvaluationStatus.SUCCESS,

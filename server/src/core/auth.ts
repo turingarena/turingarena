@@ -2,8 +2,8 @@ import { gql } from 'apollo-server-core';
 import { sign, verify } from 'jsonwebtoken';
 import { ApiEnvironment, LocalApiContext } from '../main/api-context';
 import { loadConfig } from '../main/config';
-import { ContestApi } from './contest';
-import { User, UserApi } from './user';
+import { Contest } from './contest';
+import { User, UserCache } from './user';
 
 export const authSchema = gql`
     type AuthResult {
@@ -45,13 +45,13 @@ export class AuthService {
      */
     async logIn(token: string): Promise<AuthResult | null> {
         // FIXME: assuming only one contest here
-        const contest = await this.ctx.api(ContestApi).getDefault();
+        const contest = await Contest.getDefault(this.ctx);
         if (contest === null) return null;
 
-        const user = await this.ctx.api(UserApi).getUserByToken(contest, token);
+        const user = await contest.getUserByToken(token);
         if (user === null) return null;
         //Get the role of the user. If the role is undefined it will use 'user' isntread
-        let role = (await this.ctx.api(UserApi).metadataLoader.load(user)).role;
+        let role = (await this.ctx.api(UserCache).metadataLoader.load(user.id())).role;
         if (role === undefined) role = 'user';
         const payload: TokenPayload = { contestId: contest.id, username: user.username, role };
 
@@ -61,12 +61,12 @@ export class AuthService {
     async auth(token: string) {
         const payload = verify(token, this.ctx.environment.config.secret) as TokenPayload;
 
-        const contest = await this.ctx.api(ContestApi).getDefault();
+        const contest = await Contest.getDefault(this.ctx);
         if (contest === null || contest.id !== payload.contestId) {
             throw new Error(`token not valid for current contest`);
         }
 
-        const user = await this.ctx.api(UserApi).validate({ __typename: 'User', contest, username: payload.username });
+        const user = await new User(contest, payload.username, this.ctx).validate();
 
         return user;
     }

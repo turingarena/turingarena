@@ -1,7 +1,5 @@
 import { gql } from 'apollo-server-core';
-import { ApiObject } from '../main/api';
-import { Resolvers } from '../main/resolver-types';
-import { Contest, ContestApi } from './contest';
+import { Contest } from './contest';
 import { ScoreRange } from './feedback/score';
 
 export const contestProblemSetSchema = gql`
@@ -24,26 +22,22 @@ export const contestProblemSetSchema = gql`
     }
 `;
 
-export interface ContestProblemSet {
-    __typename: 'ContestProblemSet';
-    contest: Contest;
-}
+export class ContestProblemSet {
+    constructor(readonly contest: Contest) {}
 
-export interface ContestProblemSetModelRecord {
-    ContestProblemSet: ContestProblemSet;
-}
+    __typename = 'ContestProblemSet';
 
-export class ContestProblemSetApi extends ApiObject {
-    async getScoreRange(s: ContestProblemSet): Promise<ScoreRange> {
-        const material = await this.ctx.api(ContestApi).getProblemSetMaterial(s.contest);
+    async assignments() {
+        return this.contest.getProblemAssignments();
+    }
+
+    async getScoreRange(): Promise<ScoreRange> {
+        const material = await this.contest.getProblemSetMaterial();
 
         return ScoreRange.total(material.map(m => m.scoreRange));
     }
 }
 
-export const contestProblemSetResolvers: Resolvers = {
-    ContestProblemSet: {
-        contest: s => s.contest,
-        assignments: (s, {}, ctx) => ctx.api(ContestApi).getProblemAssignments(s.contest),
-    },
-};
+export interface ContestProblemSetModelRecord {
+    ContestProblemSet: ContestProblemSet;
+}

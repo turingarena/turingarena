@@ -57,7 +57,7 @@ export interface EvaluationModelRecord {
     Evaluation: Evaluation;
 }
 
-export class EvaluationApi extends ApiObject {
+export class EvaluationCache extends ApiObject {
     byId = createByIdDataLoader(this.ctx, Evaluation);
     allBySubmissionId = createSimpleLoader((submissionId: string) =>
         this.ctx.table(Evaluation).findAll({

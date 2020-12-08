@@ -1,5 +1,5 @@
 import { ContestApi } from '../core/contest';
-import { SubmitApi } from '../core/submit';
+import { Submit } from '../core/submit';
 import { ApiObject } from '../main/api';
 
 export class LocalSubmitApi extends ApiObject {
@@ -14,13 +14,14 @@ export class LocalSubmitApi extends ApiObject {
      */
     async submitLocalFile(username: string, contestName: string, problemName: string, solutionPath: string) {
         const contest = await this.ctx.api(ContestApi).byNameLoader.load(contestName);
-        await this.ctx.api(SubmitApi).submit(
+        await Submit.submit(
             {
                 username,
                 contestId: contest.id,
                 problemName,
                 files: [],
             },
+            this.ctx,
             solutionPath,
         );
     }

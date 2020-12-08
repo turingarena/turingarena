@@ -1,8 +1,10 @@
 import { gql } from 'apollo-server-core';
-import { Resolvers } from '../../main/resolver-types';
-import { Contest, ContestApi } from '../contest';
-import { SubmissionApi } from '../submission';
+import { ApiContext } from '../../main/api-context';
+import { Contest } from '../contest';
+import { Text } from '../material/text';
+import { SubmissionCache } from '../submission';
 import { User } from '../user';
+import { ContestView } from './contest-view';
 
 export const mainViewSchema = gql`
     """
@@ -27,26 +29,23 @@ export const mainViewSchema = gql`
 `;
 
 export class MainView {
-    constructor(readonly contest: Contest, readonly user: User | null) {}
+    constructor(readonly contest: Contest, readonly user: User | null, readonly ctx: ApiContext) {}
+    async title() {
+        return new Text([{ value: (await this.contest.getMetadata()).title ?? 'TuringArena' }]);
+    }
+    contestView() {
+        return new ContestView(this.contest, this.user, this.ctx);
+    }
+    async pendingSubmissions() {
+        return this.user !== null
+            ? this.ctx.api(SubmissionCache).pendingByContestAndUser.load({
+                  contestId: this.contest.id,
+                  username: this.user.username,
+              })
+            : [];
+    }
 }
 
 export interface MainViewModelRecord {
     MainView: MainView;
 }
-
-export const mainViewResolvers: Resolvers = {
-    MainView: {
-        user: ({ user }) => user,
-        title: async (v, {}, ctx) => [
-            { value: (await ctx.api(ContestApi).getMetadata(v.contest)).title ?? 'TuringArena' },
-        ],
-        contestView: ({ contest, user }) => ({ __typename: 'ContestView', contest, user }),
-        pendingSubmissions: async (v, {}, ctx) =>
-            v.user !== null
-                ? ctx.api(SubmissionApi).pendingByContestAndUser.load({
-                      contestId: v.contest.id,
-                      username: v.user.username,
-                  })
-                : [],
-    },
-};

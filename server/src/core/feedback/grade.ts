@@ -1,7 +1,4 @@
 import { gql } from 'apollo-server-core';
-import { Resolvers } from '../../main/resolver-types';
-import { FulfillmentField, FulfillmentGrade, FulfillmentGradeDomain } from './fulfillment';
-import { ScoreField, ScoreGrade, ScoreGradeDomain } from './score';
 
 export const gradeSchema = gql`
     """
@@ -17,27 +14,3 @@ export const gradeSchema = gql`
     "Field containing a grade."
     union GradeField = ScoreField | FulfillmentField
 `;
-
-export const gradeResolvers: Resolvers = {
-    Grade: {
-        __resolveType: grade => {
-            if (grade instanceof ScoreGrade) return 'ScoreGrade';
-            if (grade instanceof FulfillmentGrade) return 'FulfillmentGrade';
-            throw new Error(`Unknown grade domain ${grade}`);
-        },
-    },
-    GradeDomain: {
-        __resolveType: domain => {
-            if (domain instanceof ScoreGradeDomain) return 'ScoreGradeDomain';
-            if (domain instanceof FulfillmentGradeDomain) return 'FulfillmentGradeDomain';
-            throw new Error(`Unknown grade domain ${domain}`);
-        },
-    },
-    GradeField: {
-        __resolveType: field => {
-            if (field instanceof ScoreField) return 'ScoreField';
-            if (field instanceof FulfillmentField) return 'FulfillmentField';
-            throw new Error(`Unknown grade variable ${field}`);
-        },
-    },
-};

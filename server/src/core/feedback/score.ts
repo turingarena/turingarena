@@ -44,6 +44,7 @@ export const scoreSchema = gql`
 
 export class ScoreGrade {
     constructor(readonly scoreRange: ScoreRange, readonly score: number) {}
+    __typename = 'ScoreGrade';
 
     static total(values: ScoreGrade[]) {
         return new ScoreGrade(
@@ -55,6 +56,7 @@ export class ScoreGrade {
 
 export class ScoreRange {
     constructor(readonly max: number, readonly decimalDigits: number, readonly allowPartial: boolean) {}
+    __typename = 'ScoreRange';
 
     static total(domains: ScoreRange[]) {
         return new ScoreRange(
@@ -67,10 +69,12 @@ export class ScoreRange {
 
 export class ScoreGradeDomain {
     constructor(readonly scoreRange: ScoreRange) {}
+    __typename = 'ScoreGradeDomain';
 }
 
 export class ScoreField {
     constructor(readonly scoreRange: ScoreRange, readonly score: number | null) {}
+    __typename = 'ScoreField';
 
     valence(): Valence | null {
         return this.score === null

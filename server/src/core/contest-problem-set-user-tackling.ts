@@ -1,11 +1,10 @@
 import { gql } from 'apollo-server-core';
-import { ApiObject } from '../main/api';
-import { Resolvers } from '../main/resolver-types';
-import { ContestApi } from './contest';
-import { ContestProblemAssignmentUserTacklingApi } from './contest-problem-assignment-user-tackling';
+import { ApiContext } from '../main/api-context';
+import { ContestProblemAssignmentUserTackling } from './contest-problem-assignment-user-tackling';
 import { ContestProblemSet } from './contest-problem-set';
 import { ScoreGrade } from './feedback/score';
 import { User } from './user';
+import { ContestProblemSetView } from './view/contest-problem-set-view';
 
 export const contestProblemSetUserTacklingSchema = gql`
     """
@@ -22,38 +21,28 @@ export const contestProblemSetUserTacklingSchema = gql`
     }
 `;
 
-export interface ContestProblemSetUserTackling {
-    __typename: 'ContestProblemSetUserTackling';
-    problemSet: ContestProblemSet;
-    user: User;
-}
+export class ContestProblemSetUserTackling {
+    constructor(readonly problemSet: ContestProblemSet, readonly user: User, readonly ctx: ApiContext) {}
 
-export interface ContestProblemSetUserTacklingModelRecord {
-    ContestProblemSetUserTackling: ContestProblemSetUserTackling;
-}
+    __typename = 'ContestProblemSetUserTackling';
 
-export class ContestProblemSetUserTacklingApi extends ApiObject {
-    async getScoreGrade({ problemSet, user }: ContestProblemSetUserTackling) {
-        const assignments = await this.ctx.api(ContestApi).getProblemAssignments(problemSet.contest);
+    view() {
+        return new ContestProblemSetView(this.problemSet, this.user, this.ctx);
+    }
+
+    async getScoreGrade() {
+        const assignments = await this.problemSet.contest.getProblemAssignments();
 
         return ScoreGrade.total(
             await Promise.all(
                 assignments.map(async assignment =>
-                    this.ctx.api(ContestProblemAssignmentUserTacklingApi).getScoreGrade({
-                        __typename: 'ContestProblemAssignmentUserTackling',
-                        assignment,
-                        user,
-                    }),
+                    new ContestProblemAssignmentUserTackling(assignment, this.user, this.ctx).getScoreGrade(),
                 ),
             ),
         );
     }
 }
 
-export const contestAssignmentUserTacklingResolvers: Resolvers = {
-    ContestProblemSetUserTackling: {
-        problemSet: ({ problemSet }) => problemSet,
-        user: ({ user }) => user,
-        view: ({ problemSet, user }) => ({ __typename: 'ContestProblemSetView', problemSet, user }),
-    },
-};
+export interface ContestProblemSetUserTacklingModelRecord {
+    ContestProblemSetUserTackling: ContestProblemSetUserTackling;
+}

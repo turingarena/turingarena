@@ -1,5 +1,5 @@
 import { gql } from 'apollo-server-core';
-import { Resolvers } from '../main/resolver-types';
+import { ApiContext } from '../main/api-context';
 import { Contest } from './contest';
 import { ScoreGradeDomain } from './feedback/score';
 import { ProblemMaterialApi } from './material/problem-material';
@@ -16,36 +16,54 @@ export const problemSchema = gql`
     }
 `;
 
-export interface Problem {
-    __typename: 'Problem';
-    contest: Contest;
-    name: string;
+export class Problem {
+    constructor(readonly contest: Contest, readonly name: string, readonly ctx: ApiContext) {}
+    __typename = 'Problem';
+
+    static fromId(id: string, ctx: ApiContext): Problem {
+        const [contestId, problemName] = id.split('/');
+
+        return new Problem(new Contest(contestId, ctx), problemName, ctx);
+    }
+
+    id() {
+        return `${this.contest.id}/${this.name}`;
+    }
+    async title() {
+        return (await this.ctx.api(ProblemMaterialApi).dataLoader.load(this.id())).title;
+    }
+    async statement() {
+        return (await this.ctx.api(ProblemMaterialApi).dataLoader.load(this.id())).statement;
+    }
+    async attachments() {
+        return (await this.ctx.api(ProblemMaterialApi).dataLoader.load(this.id())).attachments;
+    }
+    async attributes() {
+        return (await this.ctx.api(ProblemMaterialApi).dataLoader.load(this.id())).attributes;
+    }
+    async awards() {
+        return (await this.ctx.api(ProblemMaterialApi).dataLoader.load(this.id())).awards;
+    }
+    async submissionFields() {
+        return (await this.ctx.api(ProblemMaterialApi).dataLoader.load(this.id())).submissionFields;
+    }
+    async submissionFileTypes() {
+        return (await this.ctx.api(ProblemMaterialApi).dataLoader.load(this.id())).submissionFileTypes;
+    }
+    async submissionFileTypeRules() {
+        return (await this.ctx.api(ProblemMaterialApi).dataLoader.load(this.id())).submissionFileTypeRules;
+    }
+    async submissionListColumns() {
+        return (await this.ctx.api(ProblemMaterialApi).dataLoader.load(this.id())).submissionListColumns;
+    }
+    async evaluationFeedbackColumns() {
+        return (await this.ctx.api(ProblemMaterialApi).dataLoader.load(this.id())).evaluationFeedbackColumns;
+    }
+    async totalScoreDomain() {
+        return new ScoreGradeDomain((await this.ctx.api(ProblemMaterialApi).dataLoader.load(this.id())).scoreRange);
+    }
 }
 
 export interface ProblemModelRecord {
     Problem: Problem;
 }
-
-export const problemResolvers: Resolvers = {
-    Problem: {
-        id: p => `${p.contest.id}/${p.name}`,
-        name: p => p.name,
-
-        title: async (p, {}, ctx) => (await ctx.api(ProblemMaterialApi).dataLoader.load(p)).title,
-        statement: async (p, {}, ctx) => (await ctx.api(ProblemMaterialApi).dataLoader.load(p)).statement,
-        attachments: async (p, {}, ctx) => (await ctx.api(ProblemMaterialApi).dataLoader.load(p)).attachments,
-        attributes: async (p, {}, ctx) => (await ctx.api(ProblemMaterialApi).dataLoader.load(p)).attributes,
-        awards: async (p, {}, ctx) => (await ctx.api(ProblemMaterialApi).dataLoader.load(p)).awards,
-        submissionFields: async (p, {}, ctx) => (await ctx.api(ProblemMaterialApi).dataLoader.load(p)).submissionFields,
-        submissionFileTypes: async (p, {}, ctx) =>
-            (await ctx.api(ProblemMaterialApi).dataLoader.load(p)).submissionFileTypes,
-        submissionFileTypeRules: async (p, {}, ctx) =>
-            (await ctx.api(ProblemMaterialApi).dataLoader.load(p)).submissionFileTypeRules,
-        submissionListColumns: async (p, {}, ctx) =>
-            (await ctx.api(ProblemMaterialApi).dataLoader.load(p)).submissionListColumns,
-        evaluationFeedbackColumns: async (p, {}, ctx) =>
-            (await ctx.api(ProblemMaterialApi).dataLoader.load(p)).evaluationFeedbackColumns,
-        totalScoreDomain: async (p, {}, ctx) =>
-            new ScoreGradeDomain((await ctx.api(ProblemMaterialApi).dataLoader.load(p)).scoreRange),
-    },
-};

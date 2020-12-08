@@ -5,7 +5,6 @@ import { AllowNull, Column, PrimaryKey, Table } from 'sequelize-typescript';
 import * as ssri from 'ssri';
 import { ApiObject } from '../../main/api';
 import { BaseModel, createByIdDataLoader } from '../../main/base-model';
-import { Resolvers } from '../../main/resolver-types';
 
 export const fileContentSchema = gql`
     type FileContent {
@@ -33,6 +32,13 @@ export class FileContent extends BaseModel<FileContent> {
     @AllowNull(false)
     @Column
     content!: Buffer;
+
+    base64() {
+        return this.content.toString('base64');
+    }
+    utf8() {
+        return this.content.toString('utf8');
+    }
 }
 
 export interface FileContentModelRecord {
@@ -69,11 +75,3 @@ export class FileContentApi extends ApiObject {
         return fs.promises.writeFile(filePath, fileContent.content);
     }
 }
-
-export const fileContentResolvers: Resolvers = {
-    FileContent: {
-        id: c => c.id,
-        base64: c => c.content.toString('base64'),
-        utf8: c => c.content.toString('utf8'),
-    },
-};

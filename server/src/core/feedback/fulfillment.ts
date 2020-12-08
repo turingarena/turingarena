@@ -1,6 +1,4 @@
 import { gql } from 'apollo-server-core';
-import { Resolvers } from '../../main/resolver-types';
-import { Valence } from './valence';
 
 export const fulfillmentSchema = gql`
     "A grade expressed as a boolean value: fulfilled or not."
@@ -30,13 +28,21 @@ export const fulfillmentSchema = gql`
 `;
 
 export class FulfillmentGrade {
-    constructor(readonly fulfilled: boolean) {}
+    constructor(readonly fulfilled: boolean | null) {}
+    __typename = 'FulfillmentGrade';
+    valence() {
+        return this.fulfilled === null ? null : this.fulfilled ? 'SUCCESS' : 'FAILURE';
+    }
 }
 
-export class FulfillmentGradeDomain {}
+export class FulfillmentGradeDomain {
+    _: (() => true) | undefined;
+    __typename = 'FulfillmentGradeDomain';
+}
 
 export class FulfillmentField {
     constructor(readonly fulfilled: boolean | null) {}
+    __typename = 'FulfillmentField';
 }
 
 export interface FulfillmentModelRecord {
@@ -44,13 +50,3 @@ export interface FulfillmentModelRecord {
     FulfillmentGradeDomain: FulfillmentGradeDomain;
     FulfillmentField: FulfillmentField;
 }
-
-export const fulfillmentResolvers: Resolvers = {
-    FulfillmentGradeDomain: {
-        _: () => true,
-    },
-    FulfillmentField: {
-        fulfilled: f => f.fulfilled,
-        valence: ({ fulfilled }): Valence | null => (fulfilled === null ? null : fulfilled ? 'SUCCESS' : 'FAILURE'),
-    },
-};
