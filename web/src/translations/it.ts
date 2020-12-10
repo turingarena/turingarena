@@ -21,6 +21,7 @@ export const it: TranslationObject = {
     lastSubmission: 'Ultima sottoposizione',
     allSubmissions: 'Tutte le sottoposizioni',
     submissionsFor: 'Sottoposizioni per',
+    compileError: 'Errore nella compilazione della sottomissione',
     close: 'Chiudi',
     logIn: 'Accedi',
     logOut: 'Esci',

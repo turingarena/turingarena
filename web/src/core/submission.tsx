@@ -53,7 +53,7 @@ export function Submission({ data }: FragmentProps<SubmissionFragment>) {
             text-align: center;
           `}
         >
-          The system was unable to compile the file
+          {t('compileError')}
         </div>
       ) : (
         <div></div>

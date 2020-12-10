@@ -19,6 +19,7 @@ export const en = {
     lastSubmission: 'Last submission',
     allSubmissions: 'All submissions',
     submissionsFor: 'Submissions for',
+    compileError: 'The system is unable to compile the submission',
     close: 'Close',
     logIn: 'Log In',
     logOut: 'Log Out',
