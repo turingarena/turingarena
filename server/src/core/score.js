@@ -8,7 +8,7 @@ const sqlite3 = require('sqlite3').verbose();
  *  the problem name and the score made
  */
 export const getUsersScore = async (req, res, next) =>{
-  
+
     if(!isLogged(req)){
       res.json([{}]);
       return;
@@ -32,7 +32,7 @@ export const getUsersScore = async (req, res, next) =>{
     SELECT username, problem_name, max(score) as score
   FROM(
     SELECT submissions.username, submissions.problem_name, sum (achievements.grade) as score
-      from submissions 
+      from submissions
       JOIN evaluations on submissions.id = evaluations.submission_id
       JOIN achievements on achievements.evaluation_id = evaluations.id
       GROUP by submissions.username, submissions.problem_name, submissions.id
@@ -49,5 +49,5 @@ export const getUsersScore = async (req, res, next) =>{
         res.json(rows);
     });
     db.close();
-  
+
 }

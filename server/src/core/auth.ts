@@ -86,10 +86,8 @@ export function isLogged(req): boolean {
         const bearerToken = bearerHeader.split(' ')[1];
 
         try {
-            const config = loadConfig();
-
             //if the JsonWebToken is correctly signed return true
-            verify(bearerToken, config.secret); //FIXME: fix the hardocded secret
+            verify(bearerToken, loadConfig('./turingarena.config.json').secret);
 
             return true;
         } catch (err) {
