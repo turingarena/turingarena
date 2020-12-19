@@ -54,7 +54,7 @@ export class ContestProblemSetView {
         const tackling = this.tackling();
 
         const scoreRange = await this.problemSet.getScoreRange();
-        const scoreGrade = tackling !== null ? await tackling.getScoreGrade() : null;
+        const scoreGrade = tackling !== null ? await tackling.totalScoreGrade() : null;
 
         return new ScoreField(scoreRange, scoreGrade?.score ?? null);
     }

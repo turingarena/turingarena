@@ -17,17 +17,23 @@ export const contestProblemAssignmentUserTacklingSchema = gql`
     is available only for non-anonymous users who are allowed to have submissions (e.g., only after the contest is started).
     """
     type ContestProblemAssignmentUserTackling {
-        "Same problem assigned in same contest as seen by same user"
-        assignmentView: ContestProblemAssignmentView!
-
         "User tackling the problem"
         user: User!
+
+        "Same problem assigned in same contest"
+        assignment: ContestProblemAssignment!
+
+        "Same problem assigned in same contest as seen by same user"
+        assignmentView: ContestProblemAssignmentView!
 
         "List of submissions for this problem in this contest from this user"
         submissions: [Submission!]!
 
         "Whether new submissions (see 'submissions') are accepted at the moment"
         canSubmit: Boolean!
+
+        "Whether new submissions (see 'submissions') are accepted at the moment"
+        scoreGrade: ScoreGrade!
     }
 `;
 
@@ -79,7 +85,7 @@ export class ContestProblemAssignmentUserTackling {
         );
     }
 
-    async getScoreGrade() {
+    async scoreGrade() {
         const awardTacklings = await this.getAwardTacklings();
         const awardGrades = await Promise.all(awardTacklings.map(t2 => t2.getGrade()));
 

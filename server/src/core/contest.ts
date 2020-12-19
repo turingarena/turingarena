@@ -107,7 +107,7 @@ export class ContestApi extends ApiObject {
 }
 
 export class Contest {
-    constructor(readonly id: string, readonly ctx: ApiContext) {}
+    constructor(readonly id: string, readonly ctx: ApiContext) { }
 
     __typename = 'Contest';
     async name() {
@@ -125,7 +125,9 @@ export class Contest {
     async status() {
         return this.getStatus();
     }
-    problemSet() {
+    async problemSet() {
+        await this.ctx.authorizeAdmin();
+
         return new ContestProblemSet(this);
     }
     async archive() {
@@ -206,5 +208,11 @@ export class Contest {
         const { username } = userMetadata;
 
         return new User(this, username, this.ctx);
+    }
+
+    async getParticipatingUsers() {
+        const metadata = await this.getMetadata();
+
+        return metadata.users.map(data => new User(this, data.username, this.ctx));
     }
 }

@@ -57,7 +57,7 @@ export class ContestProblemAssignmentView {
         const { scoreRange } = await this.ctx.api(ProblemMaterialApi).dataLoader.load(this.assignment.problem.id());
         const tackling = await this.tackling();
 
-        const scoreGrade = tackling !== null ? await tackling.getScoreGrade() : null;
+        const scoreGrade = tackling !== null ? await tackling.scoreGrade() : null;
 
         return new ScoreField(scoreRange, scoreGrade?.score ?? null);
     }
