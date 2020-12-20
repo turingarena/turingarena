@@ -40,6 +40,8 @@ export const submissionSchema = gql`
 
         summaryRow: Record!
         feedbackTable: FeedbackTable!
+
+        totalScore: ScoreGrade!
     }
 
     input SubmissionInput {
@@ -143,6 +145,10 @@ export class Submission {
 
     async files() {
         return this.getSubmissionFiles();
+    }
+
+    async totalScore() {
+        return this.getTotalScore();
     }
 
     static fromId(id: string, ctx: ApiContext): Submission {

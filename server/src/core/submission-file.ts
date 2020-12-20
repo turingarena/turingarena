@@ -8,8 +8,9 @@ import { SubmissionData } from './submission';
 
 export const submissionFileSchema = gql`
     type SubmissionFile {
-        fieldId: ID!
+        contentId: ID!
         content: FileContent!
+        fileName: String!
     }
 
     input SubmissionFileInput {

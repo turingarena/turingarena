@@ -40,7 +40,7 @@ interface PivotScore {
 /**
  * Returns a PivotTable filled with the scores of the users
  */
-export function Scores() {
+export function ScoresTable() {
   const [props, setProps] = useState(null);
 
   const { data, error, loading } = useQuery(SCORES_DATA);
@@ -58,7 +58,6 @@ export function Scores() {
         }),
       ),
     );
-    console.log(pivotScores.toString());
 
     return (
       <div>

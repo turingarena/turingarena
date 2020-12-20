@@ -1,11 +1,13 @@
 import React from 'react';
-import { Scores } from './scores';
+import { ScoresTable } from './scores-table';
+import { SubmissionsTable } from './submissions-table';
 
 export function Dashboard() {
   return (
     <>
       <div>
-        <Scores />
+        <ScoresTable />
+        <SubmissionsTable />
       </div>
     </>
   );
