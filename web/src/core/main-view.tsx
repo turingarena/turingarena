@@ -4,8 +4,8 @@ import React from 'react';
 import { BrowserRouter, Route, Switch } from 'react-router-dom';
 import { MainViewFragment } from '../generated/graphql-types';
 import { ContestView, contestViewFragment } from './contest-view';
-import { TopBar, topBarFragment } from './top-bar';
 import { Dashboard } from './dashboard';
+import { TopBar, topBarFragment } from './top-bar';
 export const mainViewFragment = gql`
   fragment MainView on MainView {
     ...TopBar
