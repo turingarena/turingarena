@@ -80,9 +80,7 @@ export function SubmissionsTable() {
         }
       }),
     );
-    console.log(pivotSubmission);
 
-    //sub.files[0].contentId,
     return (
       <div>
         <PivotTableUI
