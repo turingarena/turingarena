@@ -64,7 +64,6 @@ export class EvaluateApi extends ApiObject {
         let jsonEvents;
         try {
             jsonEvents = await JSON.parse(await JSON.stringify(events));
-            console.log(jsonEvents);
         } catch (e) {
             jsonEvents = await JSON.parse('');
             console.log(e);
