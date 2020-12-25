@@ -226,7 +226,12 @@ export class Submission {
     }
 
     async getTotalScore() {
-        if ((await this.getOfficialEvaluation())?.status !== EvaluationStatus.SUCCESS) return undefined;
+        if ((await this.getOfficialEvaluation())?.status !== EvaluationStatus.SUCCESS) {
+            let scoreRange = new ScoreRange(0, 0, false);
+            await this.problem().then(p => p.totalScoreDomain().then(s => (scoreRange = s.scoreRange)));
+
+            return new ScoreGrade(scoreRange, 0);
+        }
 
         return ScoreGrade.total(
             (await this.getAwardAchievements()).flatMap(({ achievement, award: { gradeDomain } }) => {

@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { css } from 'emotion';
 import React from 'react';
 import { Table } from 'react-bootstrap';
-import { SubmissionFragment } from '../generated/graphql-types';
+import { SubmissionFragment} from '../generated/graphql-types';
 import { useT } from '../translations/main';
 import { FragmentProps } from '../util/fragment-props';
 import { columnFragment, getTableClassByValence, recordFragment } from './field-table';

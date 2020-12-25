@@ -61,26 +61,47 @@ export class EvaluateApi extends ApiObject {
                 toArray(),
             )
             .toPromise();
-        const jsonEvents = await JSON.parse(await JSON.stringify(events));
+        let jsonEvents;
+        try {
+            jsonEvents = await JSON.parse(await JSON.stringify(events));
+            console.log(jsonEvents);
+        } catch (e) {
+            jsonEvents = await JSON.parse('');
+            console.log(e);
+        }
         let failedToCompile = false;
         jsonEvents.forEach(
-            (jv: {
-                data: { Compilation: { status: string | { Done: { result: { status: string } } } } | undefined };
+            (je: {
+                data: {
+                    Compilation:
+                        | { status: string | { Done: { result: { status: string | { ReturnCode: number } } } } }
+                        | undefined;
+                };
             }) => {
-                if (jv.data.Compilation !== undefined && jv.data.Compilation.status !== 'Pending') {
-                    if (typeof jv.data.Compilation.status !== 'string') {
-                        failedToCompile =
-                            jv.data.Compilation.status.Done.result.status !== 'Success' ? true : failedToCompile;
-                    }
+                if (
+                    je !== undefined &&
+                    typeof je?.data?.Compilation?.status !== 'string' &&
+                    typeof je?.data?.Compilation?.status?.Done?.result?.status !== 'string' &&
+                    je?.data?.Compilation?.status?.Done?.result?.status?.ReturnCode === 1
+                ) {
+                    failedToCompile = true;
                 }
             },
         );
+        /*if (failedToCompile) {
+            await evaluation.update({
+                status: EvaluationStatus.ERROR,
+            });
+
+            return;
+        }*/
+
         let output;
         try {
             output = await child;
         } catch (e) {
             await evaluation.update({
-                status: EvaluationStatus.ERROR,
+                status: failedToCompile ? EvaluationStatus.COMPILEERROR : EvaluationStatus.ERROR,
             });
             const stderrContent = await stderr;
             console.error('task-maker failed to evaluate task:', e, stderrContent);
@@ -93,16 +114,11 @@ export class EvaluateApi extends ApiObject {
                 await event.storeAchievements(this.ctx);
             }
             await evaluation.update({
-                status: EvaluationStatus.SUCCESS,
+                status: failedToCompile ? EvaluationStatus.COMPILEERROR : EvaluationStatus.SUCCESS,
             });
         } else {
             await evaluation.update({
-                status: EvaluationStatus.ERROR,
-            });
-        }
-        if (failedToCompile) {
-            await evaluation.update({
-                status: EvaluationStatus.COMPILEERROR,
+                status: failedToCompile ? EvaluationStatus.COMPILEERROR : EvaluationStatus.ERROR,
             });
         }
     }

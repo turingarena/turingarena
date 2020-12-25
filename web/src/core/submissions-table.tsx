@@ -1,5 +1,8 @@
 import { gql, useQuery } from '@apollo/client';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { css } from 'emotion';
 import React, { useState } from 'react';
+import { Button } from 'react-bootstrap';
 import PivotTableUI from 'react-pivottable/PivotTableUI';
 import { ContestProblemSetUserTackling } from '../generated/graphql-types';
 import './dashboard.css';
@@ -19,6 +22,9 @@ const SUBMISSIONS_DATA = gql`
               }
             }
             submissions {
+              createdAt {
+                millisFromEpochInteger
+              }
               files {
                 contentId
                 fileName
@@ -38,7 +44,9 @@ interface PivotSubmission {
   username: string;
   problem_name: string;
   score: number;
-  submission: any;
+  submission: string;
+  createdate: string;
+  download: any;
 }
 
 export function SubmissionsTable() {
@@ -58,14 +66,21 @@ export function SubmissionsTable() {
               username: ut.user.username,
               problem_name: at.assignment.problem.name,
               score: sub.totalScore.score,
-              submission: (
-                <a href={`files/${sub.files[0].contentId}/${sub.files[0].fileName}`}>{sub.files[0].fileName}</a>
+              submission: `${sub.files[0].fileName}`,
+              download: (
+                <Button variant="light" size="sm">
+                  <a href={`files/${sub.files[0].contentId}/${sub.files[0].fileName}`}>
+                    <FontAwesomeIcon icon="download" />
+                  </a>
+                </Button>
               ),
+              createdate: new Date(sub.createdAt.millisFromEpochInteger + 32400000).toLocaleString(), //TODO: fix timezone offset
             }),
           );
         }
       }),
     );
+    console.log(pivotSubmission);
 
     //sub.files[0].contentId,
     return (
@@ -73,7 +88,7 @@ export function SubmissionsTable() {
         <PivotTableUI
           data={pivotSubmission}
           vals={['score']}
-          rows={['username', 'problem_name', 'submission']}
+          rows={['username', 'problem_name', 'submission', 'createdate', 'download']}
           cols={[]}
           aggregatorName={'Maximum'}
           onChange={setProps}
