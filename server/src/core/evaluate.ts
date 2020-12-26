@@ -13,7 +13,6 @@ export class EvaluateApi extends ApiObject {
     /**
      * Evaluate a new submission
      *
-     * @param root model root
      * @param submission Submission to evaluate
      */
     async evaluate(submission: Submission) {
@@ -87,20 +86,13 @@ export class EvaluateApi extends ApiObject {
                 }
             },
         );
-        /*if (failedToCompile) {
-            await evaluation.update({
-                status: EvaluationStatus.ERROR,
-            });
-
-            return;
-        }*/
 
         let output;
         try {
             output = await child;
         } catch (e) {
             await evaluation.update({
-                status: failedToCompile ? EvaluationStatus.COMPILEERROR : EvaluationStatus.ERROR,
+                status: EvaluationStatus.ERROR,
             });
             const stderrContent = await stderr;
             console.error('task-maker failed to evaluate task:', e, stderrContent);
@@ -117,7 +109,7 @@ export class EvaluateApi extends ApiObject {
             });
         } else {
             await evaluation.update({
-                status: failedToCompile ? EvaluationStatus.COMPILEERROR : EvaluationStatus.ERROR,
+                status: EvaluationStatus.ERROR,
             });
         }
     }
