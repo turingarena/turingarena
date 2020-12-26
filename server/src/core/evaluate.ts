@@ -77,7 +77,6 @@ export class EvaluateApi extends ApiObject {
                 };
             }) => {
                 if (
-                    je !== undefined &&
                     typeof je?.data?.Compilation?.status !== 'string' &&
                     typeof je?.data?.Compilation?.status?.Done?.result?.status !== 'string' &&
                     je?.data?.Compilation?.status?.Done?.result?.status?.ReturnCode === 1
