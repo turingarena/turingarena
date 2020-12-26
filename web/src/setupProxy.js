@@ -20,6 +20,10 @@ module.exports = function(app) {
     createProxyMiddleware({
       target: 'http://localhost:3000',
       changeOrigin: true,
+      onError(err, req, res) {
+        console.log(err);
+        res.json({});
+      }
     })
   );
 };
