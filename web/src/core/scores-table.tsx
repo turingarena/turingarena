@@ -1,6 +1,8 @@
 import { gql, useQuery } from '@apollo/client';
-import React, { useState } from 'react';
-import PivotTableUI from 'react-pivottable/PivotTableUI';
+import 'ag-grid-community/dist/styles/ag-grid.css';
+import 'ag-grid-community/dist/styles/ag-theme-alpine.css';
+import { AgGridColumn, AgGridReact } from 'ag-grid-react';
+import React, { useEffect, useState } from 'react';
 import { ContestProblemSetUserTackling } from '../generated/graphql-types';
 import './dashboard.css';
 
@@ -8,9 +10,17 @@ const SCORES_DATA = gql`
   query GetScoresData {
     contests {
       problemSet {
+        assignments {
+          problem {
+            name
+          }
+        }
         userTacklings {
           user {
             username
+          }
+          totalScoreGrade {
+            score
           }
           assignmentTacklings {
             assignment {
@@ -20,9 +30,6 @@ const SCORES_DATA = gql`
             }
             scoreGrade {
               score
-              scoreRange {
-                max
-              }
             }
           }
         }
@@ -31,59 +38,64 @@ const SCORES_DATA = gql`
   }
 `;
 
-interface PivotScore {
-  username: string;
-  problem_name: string;
-  score: number;
-}
-
-/**
- * Returns a PivotTable filled with the scores of the users
- */
 export function ScoresTable() {
-  const [props, setProps] = useState(null);
-
   const { data, error, loading } = useQuery(SCORES_DATA);
-  const pivotScores: PivotScore[] = [];
-
-  if (loading) {
-    return <></>;
-  } else {
-    data?.contests[0].problemSet.userTacklings.map((ut: ContestProblemSetUserTackling) =>
-      ut.assignmentTacklings.map(at =>
-        pivotScores.push({
-          username: ut.user.username,
-          problem_name: at.assignment.problem.name,
-          score: at.scoreGrade.score,
-        }),
-      ),
-    );
-
-    return (
-      <div>
-        <PivotTableUI
-          data={pivotScores}
-          vals={['score']}
-          rows={['username']}
-          cols={['problem_name']}
-          aggregatorName={'Integer Sum'}
-          rendererName={'Table Heatmap'}
-          tableColorScaleGenerator={(values: number[]) => {
-            const min = Math.min.apply(Math, values);
-            const max = Math.max.apply(Math, values);
-
-            return (x: number) => {
-              const percentage = (x - min) / (max - min);
-              const red = Math.round(255 - percentage * 70);
-              const green = Math.round(percentage * 255);
-
-              return { backgroundColor: `rgb(${red},${green},0)` };
-            };
-          }}
-          onChange={setProps}
-          {...props}
-        />
-      </div>
-    );
+  const [pivotScores, setPivotScores] = useState<Scores[]>([]);
+  const [gridApi, setGridApi] = useState(null);
+  const [gridColumnApi, setGridColumnApi] = useState(null);
+  const [problemsNames, setProblemsNames] = useState<string[]>([]);
+  function onGridReady(params: any) {
+    setGridApi(params.api);
+    setGridColumnApi(params.columnApi);
   }
+
+  interface Scores {
+    username: string;
+    [key: string]: string;
+  }
+
+  const ragCellClassRules = {
+    'rag-green': (params: any) => {
+      return parseInt(params.value, 10) === 100
+    },
+    'rag-amber':(params: { value: string })=> {
+      return parseInt(params.value, 10) < 100 && parseInt(params.value, 10) > 50;
+    },
+    'rag-red':(params: { value: string })=> {
+      return parseInt(params.value, 10) <= 50;
+    },
+  };
+
+  useEffect(() => {
+    const tmpproblemnames: string[] = [];
+    data?.contests[0].problemSet.assignments.forEach((a: { problem: { name: any } }) =>
+      tmpproblemnames.push(a.problem.name),
+    );
+    setProblemsNames(tmpproblemnames);
+
+    const tmpScores: Scores[] = [];
+    data?.contests[0].problemSet.userTacklings.map((ut: ContestProblemSetUserTackling) => {
+      const toAdd: Scores = { username: '' };
+      toAdd.username = ut.user.username;
+      toAdd.totalScore = ut.totalScoreGrade.score.toString();
+      ut.assignmentTacklings.forEach((at, index) => {
+        toAdd[tmpproblemnames[index]] = at.scoreGrade.score.toString();
+        console.log(tmpproblemnames);
+      });
+      tmpScores.push(toAdd);
+    });
+    setPivotScores(tmpScores);
+  }, data);
+
+  return (
+    <div className="ag-theme-alpine">
+      <AgGridReact rowData={pivotScores} rowSelection="multiple" animateRows onGridReady={onGridReady}>
+        <AgGridColumn field="username" sortable={true} pinned={'left'} />
+        {problemsNames.map((pn: string) => (
+          <AgGridColumn field={pn} sortable={true} cellClassRules={ragCellClassRules} />
+        ))}
+        <AgGridColumn field="totalScore" sortable={true} pinned={'right'} />
+      </AgGridReact>
+    </div>
+  );
 }

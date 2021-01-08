@@ -1,9 +1,10 @@
 import { gql, useQuery } from '@apollo/client';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { css } from 'emotion';
-import React, { useState } from 'react';
-import { Button } from 'react-bootstrap';
-import PivotTableUI from 'react-pivottable/PivotTableUI';
+import { ICellRendererParams } from 'ag-grid-community';
+import 'ag-grid-community/dist/styles/ag-grid.css';
+import 'ag-grid-community/dist/styles/ag-theme-alpine.css';
+import { AgGridColumn, AgGridReact } from 'ag-grid-react';
+import React, { useEffect, useState } from 'react';
+import { Button, Col, Form } from 'react-bootstrap';
 import { ContestProblemSetUserTackling } from '../generated/graphql-types';
 import './dashboard.css';
 
@@ -50,49 +51,117 @@ interface PivotSubmission {
 }
 
 export function SubmissionsTable() {
-  const [props, setProps] = useState(null);
-
   const { data, error, loading } = useQuery(SUBMISSIONS_DATA);
-  const pivotSubmission: PivotSubmission[] = [];
+  const [pivotSubmission, setPivotSubmission] = useState<PivotSubmission[]>([]);
+  const [selectedData, setSelectedData] = useState<PivotSubmission[]>([]);
+  const [usernames, setUsernames] = useState(['']);
+  const [selectedUsername, setSelectedUsername] = useState('All');
+  const [problemsNames, setProblemsNames] = useState(['']);
+  const [selectedProblemName, setSelectedProblemName] = useState('All');
+  const [gridApi, setGridApi] = useState(null);
+  const [gridColumnApi, setGridColumnApi] = useState(null);
 
-  if (loading) {
-    return <></>;
-  } else {
+  function onGridReady(params: any) {
+    setGridApi(params.api);
+    setGridColumnApi(params.columnApi);
+  }
+
+  function LinkComponent(props: ICellRendererParams) {
+    return (
+      <a href={`files/${props.value.contentId}/${props.value.fileName}`} target="_blank">
+        <Button block>Download</Button>
+      </a>
+    );
+  }
+
+  function handleChange(event: any) {
+    if (event.target.id === 'username') {
+      setSelectedUsername(event.target.value);
+    }
+    if (event.target.id === 'problem') {
+      setSelectedProblemName(event.target.value);
+    }
+  }
+
+  useEffect(() => {
+    const ptmp: PivotSubmission[] = [];
     data?.contests[0].problemSet.userTacklings.map((ut: ContestProblemSetUserTackling) =>
       ut.assignmentTacklings.map(at => {
         if (at.submissions.length > 0) {
           at.submissions.map(sub =>
-            pivotSubmission.push({
+            ptmp.push({
               username: ut.user.username,
               problem_name: at.assignment.problem.name,
               score: sub.totalScore.score,
-              submission: `${sub.files[0].fileName}`,
-              download: (
-                <Button variant="light" size="sm">
-                  <a href={`files/${sub.files[0].contentId}/${sub.files[0].fileName}`}>
-                    <FontAwesomeIcon icon="download" />
-                  </a>
-                </Button>
-              ),
+              submission: sub.files[0].fileName,
+              download: sub.files[0],
               createdate: new Date(sub.createdAt.millisFromEpochInteger + 32400000).toLocaleString(), //TODO: fix timezone offset
             }),
           );
         }
       }),
     );
-
-    return (
-      <div>
-        <PivotTableUI
-          data={pivotSubmission}
-          vals={['score']}
-          rows={['username', 'problem_name', 'submission', 'createdate', 'download']}
-          cols={[]}
-          aggregatorName={'Maximum'}
-          onChange={setProps}
-          {...props}
-        />
-      </div>
+    setPivotSubmission(ptmp);
+    setSelectedData(ptmp);
+    setProblemsNames(
+      ptmp.map(entry => entry.problem_name).filter((value, index, self) => self.indexOf(value) === index),
     );
-  }
+    setUsernames(ptmp.map(entry => entry.username).filter((value, index, self) => self.indexOf(value) === index));
+  }, [data]);
+
+  useEffect(() => {
+    let tmp = pivotSubmission;
+    if (selectedUsername !== 'All') {
+      tmp = tmp.filter(value => value.username === selectedUsername);
+    }
+    if (selectedProblemName !== 'All') {
+      tmp = tmp.filter(value => value.problem_name === selectedProblemName);
+    }
+    setSelectedData(tmp);
+  }, [selectedProblemName, selectedUsername]);
+
+  return (
+    <>
+      <Form onChange={handleChange}>
+        <Form.Row>
+          <Form.Group as={Col} md="4">
+            <Form.Label>Username</Form.Label>
+            <Form.Control as="select" id="username">
+              <option>All</option>
+              {usernames.map(username => (
+                <option>{username}</option>
+              ))}
+            </Form.Control>
+          </Form.Group>
+          <Form.Group as={Col} md="4">
+            <Form.Label>Problem Name</Form.Label>
+            <Form.Control as="select" id="problem">
+              <option>All</option>
+              {problemsNames.map(problem => (
+                <option>{problem}</option>
+              ))}
+            </Form.Control>
+          </Form.Group>
+        </Form.Row>
+      </Form>
+      <div className="ag-theme-alpine">
+        <AgGridReact
+          rowData={selectedData}
+          rowSelection="multiple"
+          animateRows
+          onGridReady={onGridReady}
+          frameworkComponents={{
+            LinkComponent,
+          }}
+        >
+          <AgGridColumn field="username" sortable={true} headerName="Username" resizable={true} />
+          <AgGridColumn field="problem_name" sortable={true} headerName="Problem Name" resizable={true} />
+          <AgGridColumn field="createdate" sortable={true} headerName="Submission Date" resizable={true} />
+          <AgGridColumn field="score" sortable={true} resizable={true} />
+          <AgGridColumn field="submission" headerName="Submission File Name" resizable={true} />
+          <AgGridColumn field="download" cellRenderer="LinkComponent" headerName="Download Link" resizable={true} />
+        </AgGridReact>
+      </div>
+    </>
+  );
 }
