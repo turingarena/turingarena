@@ -12,7 +12,9 @@ export class ContestImportApi extends ApiObject {
      */
     async importContest(dir = process.cwd()) {
         if (!fs.existsSync(path.join(dir, 'turingarena.yaml'))) throw Error('Invalid contest directory');
-
+        if (fs.existsSync('db.sqlite3')) {
+            fs.copyFileSync('db.sqlite3', 'db.sqlite3.bak');
+        }
         const contestArchiveId = await this.ctx.api(ArchiveApi).createArchive(dir);
         const contest = await this.ctx.table(ContestData).create({
             archiveId: contestArchiveId,

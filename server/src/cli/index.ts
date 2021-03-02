@@ -5,6 +5,7 @@ import { ApiContext, ApiEnvironment, LocalApiContext } from '../main/api-context
 import { loadConfig } from '../main/config';
 import { serve } from '../main/server';
 import { ContestImportApi } from './import';
+import { restoreContest } from './restore';
 import { LocalSubmitApi } from './submit';
 
 const program = new commander.Command();
@@ -52,6 +53,11 @@ program
         const ctx = await ctxFromConfig(opts.parent.config);
         await ctx.api(LocalSubmitApi).submitLocalFile(user, contest, problem, solution);
     });
+
+program
+    .command('restore')
+    .description('restore a contest')
+    .action(restoreContest);
 
 program
     .command('export')
