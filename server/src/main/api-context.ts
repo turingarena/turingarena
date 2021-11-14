@@ -70,6 +70,9 @@ export class LocalApiContext extends ApiContext {
     }
 }
 
+/**
+ * Context for API requests made via network.
+ */
 export class RemoteApiContext extends ApiContext {
     constructor(readonly environment: ApiEnvironment, readonly user?: User) {
         super(environment);
