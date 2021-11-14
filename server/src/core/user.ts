@@ -2,6 +2,7 @@ import { gql } from 'apollo-server-core';
 import { ApiCache } from '../main/api-cache';
 import { ApiContext } from '../main/api-context';
 import { createSimpleLoader } from '../main/base-model';
+import { unreachable } from '../util/unreachable';
 import { Contest } from './contest';
 
 export const userSchema = gql`
@@ -60,7 +61,7 @@ export class UserCache extends ApiCache {
 
         return (
             contestMetadata.users.find(data => data.username === user.username) ??
-            this.ctx.fail(`user ${user.username} does not exist in contest ${user.contest.id}`)
+            unreachable(`user ${user.username} does not exist in contest ${user.contest.id}`)
         );
     });
 }

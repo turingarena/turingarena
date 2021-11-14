@@ -62,11 +62,6 @@ export abstract class ApiContext {
     table<M extends Model>(modelClass: new () => M) {
         return this.environment.sequelize.getRepository(modelClass);
     }
-
-    /** Convenience method to fail a request. */
-    fail(message?: string): never {
-        throw new Error(message);
-    }
 }
 
 /**

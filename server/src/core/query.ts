@@ -1,5 +1,6 @@
 import { gql } from 'apollo-server-core';
 import { ApiOutputValue } from '../main/graphql-types';
+import { unreachable } from '../util/unreachable';
 import { Contest, ContestData } from './contest';
 import { Archive } from './files/archive';
 import { MessageApi } from './message';
@@ -59,7 +60,7 @@ export const queryRoot: ApiOutputValue<'Query'> = {
 
         return submission;
     },
-    fileContent: async ({}, ctx) => ctx.fail(`not implemented`),
+    fileContent: async () => unreachable(`not implemented`),
     message: async ({ id }, ctx) => {
         //TODO: Add the possibility for who received and for who sended the message to use this query
         await ctx.authorizeAdmin();

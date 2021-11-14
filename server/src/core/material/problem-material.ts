@@ -3,6 +3,7 @@ import { ApiCache } from '../../main/api-cache';
 import { ApiContext } from '../../main/api-context';
 import { createSimpleLoader } from '../../main/base-model';
 import { ApiOutputValue } from '../../main/graphql-types';
+import { unreachable } from '../../util/unreachable';
 import { Contest, ContestCache } from '../contest';
 import { FulfillmentGradeDomain } from '../feedback/fulfillment';
 import { ScoreGradeDomain, ScoreRange } from '../feedback/score';
@@ -303,7 +304,7 @@ export class ProblemMaterial {
         });
 
         if (file === null) {
-            throw this.ctx.fail(`file ${path} not found in problem ${problem.name} (referred from metadata)`);
+            throw unreachable(`file ${path} not found in problem ${problem.name} (referred from metadata)`);
         }
 
         return file.content;
