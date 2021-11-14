@@ -12,7 +12,7 @@ export class ContestAwardAssignmentUserTackling {
     __typename = 'ContestAwardAssignmentUserTackling' as const;
 
     async getBestAchievement() {
-        const achievements = await this.ctx.environment.sequelize.query<Achievement>(
+        const achievements = await this.ctx.db.query<Achievement>(
             `
                 WITH
                     successful_evaluations AS (

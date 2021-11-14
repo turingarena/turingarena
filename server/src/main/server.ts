@@ -5,12 +5,15 @@ import { Duration } from 'luxon';
 import * as mime from 'mime-types';
 import * as path from 'path';
 import * as util from 'util';
+import { EvaluationService } from '../core/evaluate';
 import { FileContent } from '../core/files/file-content';
 import { mutationRoot } from '../core/mutation';
 import { queryRoot } from '../core/query';
-import { ApiEnvironment, RemoteApiContext } from './api-context';
+import { RemoteApiContext } from './api-context';
 import { Config } from './config';
 import { executableSchema } from './executable-schema';
+import { InstanceContext } from './instance-context';
+import { ServiceContext } from './service-context';
 
 // Needed to make Docker exit correctly on CTRL-C
 process.on('SIGINT', () => process.exit(0));
@@ -21,7 +24,8 @@ export function serve(config: Config) {
     app.use(cors());
     console.log(config);
 
-    const env = new ApiEnvironment(config);
+    const instanceContext = new InstanceContext(config);
+    const serviceContext = new ServiceContext(instanceContext, [EvaluationService]);
 
     const server = new ApolloServer({
         schema: executableSchema(),
@@ -29,10 +33,10 @@ export function serve(config: Config) {
             const token = req.headers.authorization ?? '';
             const nAuthParts = 2;
             const [authType, authPayload] = token.split(' ', nAuthParts);
-            const user = authType === 'Bearer' ? await env.authService.auth(authPayload) : undefined;
-            const api = new RemoteApiContext(env, user ?? undefined);
+            const user = authType === 'Bearer' ? await serviceContext.auth.auth(authPayload) : undefined;
+            const apiCtx = new RemoteApiContext(serviceContext, user ?? undefined);
 
-            return api;
+            return apiCtx;
         },
         rootValue: { ...mutationRoot, ...queryRoot },
         debug: true,
@@ -53,7 +57,7 @@ export function serve(config: Config) {
     app.get('/files/:contentId/:filename', async (req, res, next) => {
         try {
             const { contentId, filename } = req.params;
-            const apiContext = new RemoteApiContext(env);
+            const apiContext = new RemoteApiContext(serviceContext);
             const file = await apiContext
                 .table(FileContent)
                 .findOne({ where: { id: contentId }, attributes: ['content'] });
@@ -94,7 +98,9 @@ export function serve(config: Config) {
         res.sendFile(path.join(config.webRoot, 'index.html'));
     });
 
-    app.listen(config.port, () => {
+    const callback = serviceContext.runAll();
+    const server2 = app.listen(config.port, () => {
         console.log(`Server ready at: http://localhost:${config.port}${server.graphqlPath}`);
     });
+    server2.on('close', callback);
 }

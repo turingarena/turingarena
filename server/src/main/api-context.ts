@@ -1,11 +1,8 @@
 import { DocumentNode, execute } from 'graphql';
-import { Model, Sequelize } from 'sequelize-typescript';
-import { AuthService } from '../core/auth';
-import { modelConstructors } from '../core/model';
 import { User, UserCache } from '../core/user';
 import { ApiCache } from './api-cache';
-import { Config, defaultConfig } from './config';
 import { executableSchema } from './executable-schema';
+import { ServiceContext } from './service-context';
 
 export interface OperationRequest<V> {
     document: DocumentNode;
@@ -13,36 +10,23 @@ export interface OperationRequest<V> {
     variableValues?: V;
 }
 
-/** Contains the configuration of the server, but does not hold any resources */
-export class ApiEnvironment {
-    constructor(readonly config: Config = defaultConfig) {}
-
-    /** Instance of Sequelize to use in this API operation. */
-    readonly sequelize = new Sequelize({
-        ...this.config.db,
-        models: Object.values(modelConstructors),
-        benchmark: true,
-        repositoryMode: true,
-        define: {
-            underscored: true,
-        },
-    });
-
-    // TODO: load secret from environment
-    readonly authService = new AuthService(this);
-}
-
 /**
  * Entry point for the execution of an API operation.
  * Also, contains extra information associated with an API request (e.g., authentication data).
  */
 export abstract class ApiContext {
-    constructor(readonly environment: ApiEnvironment) {}
+    constructor(readonly serviceContext: ServiceContext) {}
 
     abstract authorizeUser(username: string): Promise<void>;
     abstract authorizeAdmin(): Promise<void>;
 
     readonly caches = new Map<unknown, unknown>();
+
+    config = this.serviceContext.config;
+    auth = this.serviceContext.auth;
+    db = this.serviceContext.db;
+    service = this.serviceContext.service;
+    table = this.serviceContext.table;
 
     cache<T extends ApiCache>(cacheClass: new (ctx: ApiContext) => T): T {
         if (!this.caches.has(cacheClass)) {
@@ -50,11 +34,6 @@ export abstract class ApiContext {
         }
 
         return this.caches.get(cacheClass) as T;
-    }
-
-    /** Shortcut for `this.sequelize.getRepository(modelClass)`. */
-    table<M extends Model>(modelClass: new () => M) {
-        return this.environment.sequelize.getRepository(modelClass);
     }
 }
 
@@ -74,12 +53,12 @@ export class LocalApiContext extends ApiContext {
  * Context for API requests made via network.
  */
 export class RemoteApiContext extends ApiContext {
-    constructor(readonly environment: ApiEnvironment, readonly user?: User) {
-        super(environment);
+    constructor(serviceContext: ServiceContext, readonly user?: User) {
+        super(serviceContext);
     }
 
     private async isAdmin() {
-        if (this.environment.config.skipAuth) return true;
+        if (this.config.skipAuth) return true;
 
         if (this.user === undefined) return false;
         const { role } = await this.cache(UserCache).byId.load(this.user.id);
@@ -88,7 +67,7 @@ export class RemoteApiContext extends ApiContext {
     }
 
     async authorizeUser(username: string) {
-        if (this.environment.config.skipAuth) return;
+        if (this.config.skipAuth) return;
 
         if (this.user?.username === username) return;
         if (await this.isAdmin()) return;
@@ -97,7 +76,7 @@ export class RemoteApiContext extends ApiContext {
     }
 
     async authorizeAdmin() {
-        if (this.environment.config.skipAuth) return;
+        if (this.config.skipAuth) return;
         if (await this.isAdmin()) return;
 
         throw new Error(`Not authorized`);

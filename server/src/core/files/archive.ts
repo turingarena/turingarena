@@ -88,7 +88,7 @@ export async function createArchive(ctx: ApiContext, directory: string) {
  * @param uuid UUID of the collection
  */
 export async function extractArchive(ctx: ApiContext, uuid: string) {
-    const tempDir = path.join(ctx.environment.config.cachePath, uuid);
+    const tempDir = path.join(ctx.config.cachePath, uuid);
 
     try {
         if ((await fs.promises.stat(tempDir)).isDirectory()) {

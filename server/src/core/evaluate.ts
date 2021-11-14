@@ -3,11 +3,22 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { bufferTime, concatAll, concatMap, toArray } from 'rxjs/operators';
 import { ApiContext } from '../main/api-context';
+import { Service } from '../main/service';
 import { ContestCache } from './contest';
 import { EvaluationData, EvaluationStatus } from './evaluation';
 import { EvaluationEvent } from './evaluation-event';
 import { extractArchive } from './files/archive';
 import { Submission } from './submission';
+
+export class EvaluationService extends Service {
+    run() {
+        console.log(`starting evaluation service`);
+
+        return () => {
+            console.log(`closing`);
+        };
+    }
+}
 
 /**
  * Evaluate a new submission
@@ -28,11 +39,11 @@ export async function evaluateSubmission(ctx: ApiContext, submission: Submission
 
     const problemDir = path.join(contestDir, assignment.problem.name);
 
-    const submissionPath = await submission.extract(path.join(ctx.environment.config.cachePath, 'submission'));
+    const submissionPath = await submission.extract(path.join(ctx.config.cachePath, 'submission'));
 
     const filepath = fs.readdirSync(submissionPath)[0];
     const solutionPath = path.join(submissionPath, filepath);
-    const taskMaker = new TaskMaker(ctx.environment.config.taskMaker);
+    const taskMaker = new TaskMaker(ctx.config.taskMaker);
 
     const { lines, child, stderr } = taskMaker.evaluate({
         taskDir: problemDir,

@@ -14,7 +14,7 @@ export const mutationSchema = gql`
 
 export const mutationRoot: ApiOutputValue<'Mutation'> = {
     init: async ({}, ctx) => {
-        await ctx.environment.sequelize.sync();
+        await ctx.db.sync();
 
         return true;
     },
@@ -24,7 +24,7 @@ export const mutationRoot: ApiOutputValue<'Mutation'> = {
 
         return (submissionOutput as unknown) as ApiOutputValue<'Submission'>; // FIXME: types
     },
-    logIn: ({ token }, ctx) => ctx.environment.authService.logIn(token),
+    logIn: ({ token }, ctx) => ctx.auth.logIn(token),
     sendMessage: async ({ message }, ctx) => {
         if (typeof message.from === 'string') await ctx.authorizeUser(message.from);
         else await ctx.authorizeAdmin();

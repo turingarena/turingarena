@@ -1,9 +1,11 @@
 #!/usr/bin/env node
 
 import * as commander from 'commander';
-import { ApiContext, ApiEnvironment, LocalApiContext } from '../main/api-context';
+import { ApiContext, LocalApiContext } from '../main/api-context';
 import { loadConfig } from '../main/config';
+import { InstanceContext } from '../main/instance-context';
 import { serve } from '../main/server';
+import { ServiceContext } from '../main/service-context';
 import { importContest } from './import';
 import { restoreContest } from './restore';
 import { submitLocalFile } from './submit';
@@ -17,9 +19,10 @@ function show() {}
 async function ctxFromConfig(configFile?: string): Promise<ApiContext> {
     const config = loadConfig(configFile);
     console.log(config);
-    const env = new ApiEnvironment(config);
-    const context = new LocalApiContext(env);
-    await env.sequelize.sync();
+    const instanceContext = new InstanceContext(config);
+    const serviceContext = new ServiceContext(instanceContext, []);
+    const context = new LocalApiContext(serviceContext);
+    await instanceContext.db.sync();
 
     return context;
 }
