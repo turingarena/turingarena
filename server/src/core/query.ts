@@ -64,11 +64,11 @@ export const queryRoot: ApiOutputValue<'Query'> = {
         //TODO: Add the possibility for who received and for who sended the message to use this query
         await ctx.authorizeAdmin();
 
-        return ctx.api(MessageApi).fromId(id);
+        return ctx.cache(MessageApi).fromId(id);
     },
     messages: async ({ id }, ctx) => {
         await ctx.authorizeUser(id);
 
-        return ctx.api(MessageApi).find(id);
+        return ctx.cache(MessageApi).find(id);
     },
 };

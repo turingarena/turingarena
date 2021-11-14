@@ -3,11 +3,10 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { AllowNull, BelongsTo, Column, DataType, ForeignKey, PrimaryKey, Table } from 'sequelize-typescript';
 import { v4 as UUIDv4 } from 'uuid';
-import { ApiObject } from '../../main/api';
 import { ApiContext } from '../../main/api-context';
 import { BaseModel } from '../../main/base-model';
 import { ApiOutputValue } from '../../main/graphql-types';
-import { FileContent, FileContentApi } from './file-content';
+import { createFileFromPath, extractFile, FileContent, FileContentApi } from './file-content';
 
 export const archiveSchema = gql`
     type ArchiveFile {
@@ -47,76 +46,74 @@ export class ArchiveFileData extends BaseModel<ArchiveFileData> {
     getContent!: () => Promise<FileContent>;
 }
 
-export class ArchiveApi extends ApiObject {
-    /**
-     * Create a new Archive from a directory
-     *
-     * @param directory directory that is the root of the collection
-     * @return UUID of the created collection
-     */
-    async createArchive(directory: string) {
-        const uuid = UUIDv4();
+/**
+ * Create a new Archive from a directory
+ *
+ * @param directory directory that is the root of the collection
+ * @return UUID of the created collection
+ */
+export async function createArchive(ctx: ApiContext, directory: string) {
+    const uuid = UUIDv4();
 
-        console.debug(`CREATING Archive uuid = ${uuid}, directory = ${directory}`);
+    console.debug(`CREATING Archive uuid = ${uuid}, directory = ${directory}`);
 
-        const addFiles = async (dir: string) => {
-            const files = fs.readdirSync(path.join(directory, dir));
-            for (const file of files) {
-                const relPath = path.join(dir, file);
-                if (fs.statSync(path.join(directory, relPath)).isDirectory()) {
-                    console.debug(`ADD DIRECTORY ${relPath}`);
-                    await addFiles(relPath);
-                } else {
-                    console.debug(`ADD FILE ${relPath}`);
-                    const content = await this.ctx.api(FileContentApi).createFromPath(path.join(directory, relPath));
-                    await this.ctx.table(ArchiveFileData).create({
-                        uuid,
-                        contentId: content.id,
-                        path: relPath,
-                    });
-                }
+    const addFiles = async (dir: string) => {
+        const files = fs.readdirSync(path.join(directory, dir));
+        for (const file of files) {
+            const relPath = path.join(dir, file);
+            if (fs.statSync(path.join(directory, relPath)).isDirectory()) {
+                console.debug(`ADD DIRECTORY ${relPath}`);
+                await addFiles(relPath);
+            } else {
+                console.debug(`ADD FILE ${relPath}`);
+                const content = await createFileFromPath(ctx, path.join(directory, relPath));
+                await ctx.table(ArchiveFileData).create({
+                    uuid,
+                    contentId: content.id,
+                    path: relPath,
+                });
             }
-        };
+        }
+    };
 
-        await addFiles('');
+    await addFiles('');
 
-        return uuid;
+    return uuid;
+}
+
+/**
+ * Extracts a file collection in a temporary directory.
+ * If the collection is already in cache, do nothing.
+ *
+ * @param uuid UUID of the collection
+ */
+export async function extractArchive(ctx: ApiContext, uuid: string) {
+    const tempDir = path.join(ctx.environment.config.cachePath, uuid);
+
+    try {
+        if ((await fs.promises.stat(tempDir)).isDirectory()) {
+            console.debug(`EXTRACT FILE COLLECTION uuid = ${uuid} RESOLVED BY CACHE`);
+
+            return tempDir;
+        }
+    } catch {
+        // Directory doesn't exist and thus stat fails
     }
 
-    /**
-     * Extracts a file collection in a temporary directory.
-     * If the collection is already in cache, do nothing.
-     *
-     * @param uuid UUID of the collection
-     */
-    async extractArchive(uuid: string) {
-        const tempDir = path.join(this.ctx.environment.config.cachePath, uuid);
+    console.debug(`EXTRACT FILE COLLECTION uuid = ${uuid} INTO ${tempDir}`);
 
-        try {
-            if ((await fs.promises.stat(tempDir)).isDirectory()) {
-                console.debug(`EXTRACT FILE COLLECTION uuid = ${uuid} RESOLVED BY CACHE`);
+    const collection = await ctx.table(ArchiveFileData).findAll({ where: { uuid } });
 
-                return tempDir;
-            }
-        } catch {
-            // Directory doesn't exist and thus stat fails
-        }
+    for (const file of collection) {
+        const filePath = path.join(tempDir, file.path);
 
-        console.debug(`EXTRACT FILE COLLECTION uuid = ${uuid} INTO ${tempDir}`);
+        console.debug(`EXTRACT FILE hash = ${file.contentId} IN ${filePath}`);
 
-        const collection = await this.ctx.table(ArchiveFileData).findAll({ where: { uuid } });
-
-        for (const file of collection) {
-            const filePath = path.join(tempDir, file.path);
-
-            console.debug(`EXTRACT FILE hash = ${file.contentId} IN ${filePath}`);
-
-            const content = await this.ctx.api(FileContentApi).byId.load(file.contentId);
-            await this.ctx.api(FileContentApi).extract(content, filePath);
-        }
-
-        return tempDir;
+        const content = await ctx.cache(FileContentApi).byId.load(file.contentId);
+        await extractFile(content, filePath);
     }
+
+    return tempDir;
 }
 
 export class Archive implements ApiOutputValue<'Archive'> {

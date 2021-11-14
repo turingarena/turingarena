@@ -2,7 +2,7 @@ import * as path from 'path';
 import { ApiContext } from '../main/api-context';
 import { Contest } from './contest';
 import { EvaluateApi } from './evaluate';
-import { FileContentApi } from './files/file-content';
+import { createFileFromContent, createFileFromPath } from './files/file-content';
 import { Submission, SubmissionData, SubmissionInput } from './submission';
 import { SubmissionFile } from './submission-file';
 import { User } from './user';
@@ -27,7 +27,7 @@ export class Submit {
                 fileName,
                 submissionId: submissionData.id,
                 fileTypeName,
-                contentId: (await ctx.api(FileContentApi).createFromContent(Buffer.from(content.base64, 'base64'))).id,
+                contentId: (await createFileFromContent(ctx, Buffer.from(content.base64, 'base64'))).id,
             });
         }
 
@@ -37,11 +37,11 @@ export class Submit {
                 fieldName: 'solution',
                 fileTypeName: path.extname(solutionPath),
                 fileName: path.basename(solutionPath),
-                contentId: (await ctx.api(FileContentApi).createFromPath(solutionPath)).id,
+                contentId: (await createFileFromPath(ctx, solutionPath)).id,
             });
         }
 
-        ctx.api(EvaluateApi)
+        ctx.cache(EvaluateApi)
             .evaluate(submission)
             .catch(e => {
                 console.error(`UNEXPECTED ERROR DURING EVALUATION:`);

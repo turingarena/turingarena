@@ -1,5 +1,5 @@
 import { gql } from 'apollo-server-core';
-import { ApiObject } from '../main/api';
+import { ApiCache } from '../main/api-cache';
 import { ApiContext } from '../main/api-context';
 import { createSimpleLoader } from '../main/base-model';
 import { Contest } from './contest';
@@ -37,11 +37,11 @@ export class User {
         return `${this.contest.id}/${this.username}`;
     }
     async name() {
-        return (await this.ctx.api(UserCache).metadataLoader.load(this.id())).name;
+        return (await this.ctx.cache(UserCache).metadataLoader.load(this.id())).name;
     }
 
     async validate() {
-        await this.ctx.api(UserCache).metadataLoader.load(this.id());
+        await this.ctx.cache(UserCache).metadataLoader.load(this.id());
 
         return this;
     }
@@ -53,7 +53,7 @@ export class User {
     }
 }
 
-export class UserCache extends ApiObject {
+export class UserCache extends ApiCache {
     metadataLoader = createSimpleLoader(async (id: string) => {
         const user = User.fromId(id, this.ctx);
         const contestMetadata = await user.contest.getMetadata();

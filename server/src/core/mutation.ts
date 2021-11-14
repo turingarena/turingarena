@@ -29,6 +29,6 @@ export const mutationRoot: ApiOutputValue<'Mutation'> = {
         if (typeof message.from === 'string') await ctx.authorizeUser(message.from);
         else await ctx.authorizeAdmin();
 
-        return ctx.api(MessageApi).sendMessage(message);
+        return ctx.cache(MessageApi).sendMessage(message);
     },
 };

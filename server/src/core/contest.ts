@@ -4,7 +4,7 @@ import * as mime from 'mime-types';
 import { Op } from 'sequelize';
 import { AllowNull, Column, DataType, ForeignKey, Table } from 'sequelize-typescript';
 import * as yaml from 'yaml';
-import { ApiObject } from '../main/api';
+import { ApiCache } from '../main/api-cache';
 import { ApiContext } from '../main/api-context';
 import { createSimpleLoader, UuidBaseModel } from '../main/base-model';
 import { ApiOutputValue } from '../main/graphql-types';
@@ -59,7 +59,7 @@ export class ContestData extends UuidBaseModel<ContestData> {
 
 export type ContestStatus = ApiOutputValue<'ContestStatus'>;
 
-export class ContestApi extends ApiObject {
+export class ContestCache extends ApiCache {
     dataLoader = createSimpleLoader((id: string) => this.ctx.table(ContestData).findByPk(id));
 
     byNameLoader = createSimpleLoader(async (name: string) => {
@@ -70,33 +70,6 @@ export class ContestApi extends ApiObject {
 
         return contests.find((c, i) => metadata[i].name === name) ?? null;
     });
-
-    private statementVariantFromFile(archiveFile: ArchiveFileData): MediaFile {
-        const type = mime.lookup(archiveFile.path);
-        const pathParts = archiveFile.path.split('/');
-
-        return new MediaFile(
-            pathParts[pathParts.length - 1],
-            null,
-            type !== false ? type : 'application/octet-stream',
-            archiveFile.getContent(),
-            this.ctx,
-        );
-    }
-
-    async getStatement(c: Contest): Promise<Media> {
-        const { archiveId } = await this.dataLoader.load(c.id);
-        const statementFiles = await this.ctx.table(ArchiveFileData).findAll({
-            where: {
-                uuid: archiveId,
-                path: {
-                    [Op.like]: 'files/home%',
-                },
-            },
-        });
-
-        return new Media(statementFiles.map((archiveFile): MediaFile => this.statementVariantFromFile(archiveFile)));
-    }
 }
 
 export class Contest implements ApiOutputValue<'Contest'> {
@@ -130,14 +103,24 @@ export class Contest implements ApiOutputValue<'Contest'> {
     async archive() {
         await this.ctx.authorizeAdmin();
 
-        return new Archive((await this.ctx.api(ContestApi).dataLoader.load(this.id)).archiveId, this.ctx);
+        return new Archive((await this.ctx.cache(ContestCache).dataLoader.load(this.id)).archiveId, this.ctx);
     }
     async statement() {
-        return this.ctx.api(ContestApi).getStatement(this);
+        const { archiveId } = await this.ctx.cache(ContestCache).dataLoader.load(this.id);
+        const statementFiles = await this.ctx.table(ArchiveFileData).findAll({
+            where: {
+                uuid: archiveId,
+                path: {
+                    [Op.like]: 'files/home%',
+                },
+            },
+        });
+
+        return new Media(statementFiles.map((archiveFile): MediaFile => this.getStatementVariantFromFile(archiveFile)));
     }
 
     async getMetadata() {
-        const { archiveId } = await this.ctx.api(ContestApi).dataLoader.load(this.id);
+        const { archiveId } = await this.ctx.cache(ContestCache).dataLoader.load(this.id);
         const metadataPath = `turingarena.yaml`;
         const metadataProblemFile = await this.ctx.table(ArchiveFileData).findOne({
             where: {
@@ -179,12 +162,12 @@ export class Contest implements ApiOutputValue<'Contest'> {
         const assignments = await this.getProblemAssignments();
 
         return Promise.all(
-            assignments.map(async ({ problem }) => this.ctx.api(ProblemMaterialApi).dataLoader.load(problem.id())),
+            assignments.map(async ({ problem }) => this.ctx.cache(ProblemMaterialApi).dataLoader.load(problem.id())),
         );
     }
 
     async validate() {
-        await this.ctx.api(ContestApi).dataLoader.load(this.id);
+        await this.ctx.cache(ContestCache).dataLoader.load(this.id);
 
         return this;
     }
@@ -211,5 +194,18 @@ export class Contest implements ApiOutputValue<'Contest'> {
         const metadata = await this.getMetadata();
 
         return metadata.users.map(data => new User(this, data.username, this.ctx));
+    }
+
+    getStatementVariantFromFile(archiveFile: ArchiveFileData): MediaFile {
+        const type = mime.lookup(archiveFile.path);
+        const pathParts = archiveFile.path.split('/');
+
+        return new MediaFile(
+            pathParts[pathParts.length - 1],
+            null,
+            type !== false ? type : 'application/octet-stream',
+            archiveFile.getContent(),
+            this.ctx,
+        );
     }
 }

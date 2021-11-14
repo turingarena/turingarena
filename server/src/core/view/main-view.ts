@@ -38,7 +38,7 @@ export class MainView {
     }
     async pendingSubmissions() {
         return this.user !== null
-            ? this.ctx.api(SubmissionCache).pendingByContestAndUser.load({
+            ? this.ctx.cache(SubmissionCache).pendingByContestAndUser.load({
                   contestId: this.contest.id,
                   username: this.user.username,
               })

@@ -1,5 +1,5 @@
-import { ApiObject } from '../../main/api';
-import { ContestApi } from '../contest';
+import { ApiCache } from '../../main/api-cache';
+import { ContestCache } from '../contest';
 import { ArchiveFileData } from '../files/archive';
 import { FileContent } from '../files/file-content';
 import { Problem } from '../problem';
@@ -36,9 +36,9 @@ export interface IOITaskInfo {
     }>;
 }
 
-export class ProblemTaskInfoApi extends ApiObject {
+export class ProblemTaskInfoApi extends ApiCache {
     async getProblemTaskInfo(problem: Problem): Promise<ProblemTaskInfo> {
-        const { archiveId } = await this.ctx.api(ContestApi).dataLoader.load(problem.contest.id);
+        const { archiveId } = await this.ctx.cache(ContestCache).dataLoader.load(problem.contest.id);
         const metadataPath = `${problem.name}/.task-info.json`;
 
         const metadataProblemFile = await this.ctx.table(ArchiveFileData).findOne({

@@ -3,7 +3,7 @@ import { Model, Sequelize } from 'sequelize-typescript';
 import { AuthService } from '../core/auth';
 import { modelConstructors } from '../core/model';
 import { User, UserCache } from '../core/user';
-import { ApiObject } from './api';
+import { ApiCache } from './api-cache';
 import { Config, defaultConfig } from './config';
 import { executableSchema } from './executable-schema';
 
@@ -48,14 +48,14 @@ export abstract class ApiContext {
     abstract authorizeUser(username: string): Promise<void>;
     abstract authorizeAdmin(): Promise<void>;
 
-    readonly apiObjectCache = new Map<unknown, unknown>();
+    readonly caches = new Map<unknown, unknown>();
 
-    api<T extends ApiObject>(apiClass: new (ctx: ApiContext) => T): T {
-        if (!this.apiObjectCache.has(apiClass)) {
-            this.apiObjectCache.set(apiClass, new apiClass(this));
+    cache<T extends ApiCache>(cacheClass: new (ctx: ApiContext) => T): T {
+        if (!this.caches.has(cacheClass)) {
+            this.caches.set(cacheClass, new cacheClass(this));
         }
 
-        return this.apiObjectCache.get(apiClass) as T;
+        return this.caches.get(cacheClass) as T;
     }
 
     /** Shortcut for `this.sequelize.getRepository(modelClass)`. */
@@ -90,7 +90,7 @@ export class RemoteApiContext extends ApiContext {
         if (this.environment.config.skipAuth) return true;
 
         if (this.user === undefined) return false;
-        const { role } = await this.api(UserCache).metadataLoader.load(this.user.id());
+        const { role } = await this.cache(UserCache).metadataLoader.load(this.user.id());
 
         return role === 'admin';
     }

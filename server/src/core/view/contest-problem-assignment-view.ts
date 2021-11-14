@@ -54,7 +54,7 @@ export class ContestProblemAssignmentView {
     }
 
     async totalScoreField() {
-        const { scoreRange } = await this.ctx.api(ProblemMaterialApi).dataLoader.load(this.assignment.problem.id());
+        const { scoreRange } = await this.ctx.cache(ProblemMaterialApi).dataLoader.load(this.assignment.problem.id());
         const tackling = await this.tackling();
 
         const scoreGrade = tackling !== null ? await tackling.scoreGrade() : null;
@@ -63,7 +63,7 @@ export class ContestProblemAssignmentView {
     }
 
     async awardAssignmentViews() {
-        const { awards } = await this.ctx.api(ProblemMaterialApi).dataLoader.load(this.assignment.problem.id());
+        const { awards } = await this.ctx.cache(ProblemMaterialApi).dataLoader.load(this.assignment.problem.id());
 
         return awards.map(
             award =>

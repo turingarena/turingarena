@@ -1,7 +1,7 @@
 import { gql } from 'apollo-server-core';
 import { Op } from 'sequelize';
 import { AllowNull, Column, DataType, Table } from 'sequelize-typescript';
-import { ApiObject } from '../main/api';
+import { ApiCache } from '../main/api-cache';
 import { UuidBaseModel } from '../main/base-model';
 import { ApiInputValue } from '../main/graphql-types';
 
@@ -64,7 +64,7 @@ export class Message extends UuidBaseModel<Message> {
     }>;
 }
 
-export class MessageApi extends ApiObject {
+export class MessageApi extends ApiCache {
     async sendMessage(message: MessageInput) {
         return this.ctx.table(Message).create(message);
     }

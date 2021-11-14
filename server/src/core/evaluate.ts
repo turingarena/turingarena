@@ -2,14 +2,14 @@ import { TaskMaker } from '@edomora97/task-maker';
 import * as fs from 'fs';
 import * as path from 'path';
 import { bufferTime, concatAll, concatMap, toArray } from 'rxjs/operators';
-import { ApiObject } from '../main/api';
-import { ContestApi } from './contest';
+import { ApiCache } from '../main/api-cache';
+import { ContestCache } from './contest';
 import { EvaluationData, EvaluationStatus } from './evaluation';
 import { EvaluationEvent } from './evaluation-event';
-import { ArchiveApi } from './files/archive';
+import { extractArchive } from './files/archive';
 import { Submission } from './submission';
 
-export class EvaluateApi extends ApiObject {
+export class EvaluateApi extends ApiCache {
     /**
      * Evaluate a new submission
      *
@@ -24,8 +24,8 @@ export class EvaluateApi extends ApiObject {
         });
 
         const { assignment } = await submission.getTackling();
-        const { archiveId } = await this.ctx.api(ContestApi).dataLoader.load(assignment.problem.contest.id);
-        const contestDir = await this.ctx.api(ArchiveApi).extractArchive(archiveId);
+        const { archiveId } = await this.ctx.cache(ContestCache).dataLoader.load(assignment.problem.contest.id);
+        const contestDir = await extractArchive(this.ctx, archiveId);
 
         const problemDir = path.join(contestDir, assignment.problem.name);
 

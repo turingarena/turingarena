@@ -1,7 +1,7 @@
 import { UIMessage } from '@edomora97/task-maker';
 import { DataTypes } from 'sequelize';
 import { AllowNull, Column, ForeignKey, Table } from 'sequelize-typescript';
-import { ApiObject } from '../main/api';
+import { ApiCache } from '../main/api-cache';
 import { ApiContext } from '../main/api-context';
 import { createSimpleLoader, UuidBaseModel } from '../main/base-model';
 import { Achievement } from './achievement';
@@ -35,7 +35,7 @@ export class EvaluationEvent extends UuidBaseModel<EvaluationEvent> {
     }
 }
 
-export class EvaluationEventCache extends ApiObject {
+export class EvaluationEventCache extends ApiCache {
     allByEvaluationId = createSimpleLoader((evaluationId: string) =>
         this.ctx.table(EvaluationEvent).findAll({
             where: { evaluationId },

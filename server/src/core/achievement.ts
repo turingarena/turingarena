@@ -1,6 +1,6 @@
 import { gql } from 'apollo-server-core';
 import { AllowNull, Column, ForeignKey, PrimaryKey, Table } from 'sequelize-typescript';
-import { ApiObject } from '../main/api';
+import { ApiCache } from '../main/api-cache';
 import { ApiContext } from '../main/api-context';
 import { BaseModel, createSimpleLoader } from '../main/base-model';
 import { EvaluationCache, EvaluationData } from './evaluation';
@@ -39,10 +39,10 @@ export class Achievement extends BaseModel<Achievement> {
     }
 
     async getAward(ctx: ApiContext) {
-        const evaluation = await ctx.api(EvaluationCache).byId.load(this.evaluationId);
+        const evaluation = await ctx.cache(EvaluationCache).byId.load(this.evaluationId);
         const submission = Submission.fromId(evaluation.submissionId, ctx);
         const { assignment } = await submission.getTackling();
-        const material = await ctx.api(ProblemMaterialApi).dataLoader.load(assignment.problem.id());
+        const material = await ctx.cache(ProblemMaterialApi).dataLoader.load(assignment.problem.id());
 
         return material.awards[this.awardIndex];
     }
@@ -52,7 +52,7 @@ export class Achievement extends BaseModel<Achievement> {
     }
 }
 
-export class AchievementCache extends ApiObject {
+export class AchievementCache extends ApiCache {
     allByEvaluationId = createSimpleLoader((evaluationId: string) =>
         this.ctx.table(Achievement).findAll({
             where: { evaluationId },

@@ -1,7 +1,7 @@
 import { gql } from 'apollo-server-core';
 import * as path from 'path';
 import { AllowNull, Column, ForeignKey, Table } from 'sequelize-typescript';
-import { ApiObject } from '../main/api';
+import { ApiCache } from '../main/api-cache';
 import { ApiContext } from '../main/api-context';
 import { createSimpleLoader, UuidBaseModel } from '../main/base-model';
 import { ApiInputValue, ApiOutputValue } from '../main/graphql-types';
@@ -14,7 +14,7 @@ import { Evaluation, EvaluationCache, EvaluationStatus } from './evaluation';
 import { EvaluationEventCache } from './evaluation-event';
 import { FulfillmentField, FulfillmentGradeDomain } from './feedback/fulfillment';
 import { ScoreField, ScoreGrade, ScoreGradeDomain, ScoreRange } from './feedback/score';
-import { FileContentApi } from './files/file-content';
+import { extractFile } from './files/file-content';
 import { ProblemMaterialApi } from './material/problem-material';
 import { Text } from './material/text';
 import { Participation } from './participation';
@@ -147,7 +147,7 @@ export class Submission implements ApiOutputValue<'Submission'> {
 
         const evaluation = await this.getOfficialEvaluationData();
         const events =
-            evaluation !== null ? await this.ctx.api(EvaluationEventCache).allByEvaluationId.load(evaluation.id) : [];
+            evaluation !== null ? await this.ctx.cache(EvaluationEventCache).allByEvaluationId.load(evaluation.id) : [];
 
         const testCasesData = awards.flatMap((award, awardIndex) =>
             new Array(scoring.subtasks[awardIndex].testcases).fill(0).map(() => ({
@@ -241,11 +241,11 @@ export class Submission implements ApiOutputValue<'Submission'> {
     }
 
     async createdAt() {
-        return ApiDateTime.fromJSDate((await this.ctx.api(SubmissionCache).dataLoader.load(this.id)).createdAt);
+        return ApiDateTime.fromJSDate((await this.ctx.cache(SubmissionCache).dataLoader.load(this.id)).createdAt);
     }
 
     async evaluations() {
-        return (await this.ctx.api(EvaluationCache).allBySubmissionId.load(this.id)).map(
+        return (await this.ctx.cache(EvaluationCache).allBySubmissionId.load(this.id)).map(
             ({ id }) => new Evaluation(id, this.ctx),
         );
     }
@@ -263,17 +263,17 @@ export class Submission implements ApiOutputValue<'Submission'> {
     }
 
     async validate() {
-        await this.ctx.api(SubmissionCache).dataLoader.load(this.id);
+        await this.ctx.cache(SubmissionCache).dataLoader.load(this.id);
 
         return this;
     }
 
     async getSubmissionFiles() {
-        return this.ctx.api(SubmissionFileCache).allBySubmissionId.load(this.id);
+        return this.ctx.cache(SubmissionFileCache).allBySubmissionId.load(this.id);
     }
 
     async getTackling() {
-        const { contestId, problemName, username } = await this.ctx.api(SubmissionCache).dataLoader.load(this.id);
+        const { contestId, problemName, username } = await this.ctx.cache(SubmissionCache).dataLoader.load(this.id);
 
         const contest = new Contest(contestId, this.ctx);
 
@@ -301,26 +301,26 @@ export class Submission implements ApiOutputValue<'Submission'> {
             const extension = fileTypeName;
 
             const filePath = path.join(submissionPath, `${fieldName}.${fileTypeName}.${extension}`);
-            await this.ctx.api(FileContentApi).extract(content, filePath);
+            await extractFile(content, filePath);
         }
 
         return submissionPath;
     }
 
     async getOfficialEvaluationData() {
-        return this.ctx.api(EvaluationCache).officialOf.load(this.id);
+        return this.ctx.cache(EvaluationCache).officialOf.load(this.id);
     }
 
     async getMaterial() {
         const { assignment } = await this.getTackling();
 
-        return this.ctx.api(ProblemMaterialApi).dataLoader.load(assignment.problem.id());
+        return this.ctx.cache(ProblemMaterialApi).dataLoader.load(assignment.problem.id());
     }
 
     async getAwardAchievements() {
         const evaluation = await this.getOfficialEvaluationData();
         const achievements =
-            evaluation !== null ? await this.ctx.api(AchievementCache).allByEvaluationId.load(evaluation.id) : [];
+            evaluation !== null ? await this.ctx.cache(AchievementCache).allByEvaluationId.load(evaluation.id) : [];
         const material = await this.getMaterial();
 
         return material.awards.map((award, awardIndex) => ({
@@ -351,7 +351,7 @@ export class Submission implements ApiOutputValue<'Submission'> {
 
 export type SubmissionInput = ApiInputValue<'SubmissionInput'>;
 
-export class SubmissionCache extends ApiObject {
+export class SubmissionCache extends ApiCache {
     dataLoader = createSimpleLoader((id: string) => this.ctx.table(SubmissionData).findByPk(id));
 
     allByTackling = createSimpleLoader(async (id: string) => {

@@ -4,9 +4,9 @@ import * as commander from 'commander';
 import { ApiContext, ApiEnvironment, LocalApiContext } from '../main/api-context';
 import { loadConfig } from '../main/config';
 import { serve } from '../main/server';
-import { ContestImportApi } from './import';
+import { importContest } from './import';
 import { restoreContest } from './restore';
-import { LocalSubmitApi } from './submit';
+import { submitLocalFile } from './submit';
 
 const program = new commander.Command();
 
@@ -43,7 +43,7 @@ program
     .description('import a contest')
     .action(async (dir, opts) => {
         const ctx = await ctxFromConfig(opts.parent.config);
-        await ctx.api(ContestImportApi).importContest(dir);
+        await importContest(ctx, dir);
     });
 
 program
@@ -51,7 +51,7 @@ program
     .description('create a submission')
     .action(async (user, contest, problem, solution, opts) => {
         const ctx = await ctxFromConfig(opts.parent.config);
-        await ctx.api(LocalSubmitApi).submitLocalFile(user, contest, problem, solution);
+        await submitLocalFile(ctx, user, contest, problem, solution);
     });
 
 program

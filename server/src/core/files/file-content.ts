@@ -3,7 +3,8 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { AllowNull, Column, PrimaryKey, Table } from 'sequelize-typescript';
 import * as ssri from 'ssri';
-import { ApiObject } from '../../main/api';
+import { ApiCache } from '../../main/api-cache';
+import { ApiContext } from '../../main/api-context';
 import { BaseModel, createByIdDataLoader } from '../../main/base-model';
 import { ApiOutputValue } from '../../main/graphql-types';
 
@@ -42,33 +43,33 @@ export class FileContent extends BaseModel<FileContent> implements ApiOutputValu
     }
 }
 
-export class FileContentApi extends ApiObject {
+export class FileContentApi extends ApiCache {
     byId = createByIdDataLoader(this.ctx, FileContent);
+}
 
-    async createFromContent(content: Buffer) {
-        const id = ssri.fromData(content).hexDigest();
+export async function createFileFromContent(ctx: ApiContext, content: Buffer) {
+    const id = ssri.fromData(content).hexDigest();
 
-        return (
-            (await this.ctx.table(FileContent).findOne({ where: { id } })) ??
-            (await this.ctx.table(FileContent).create({ content, id }))
-        );
-    }
+    return (
+        (await ctx.table(FileContent).findOne({ where: { id } })) ??
+        (await ctx.table(FileContent).create({ content, id }))
+    );
+}
 
-    async createFromPath(filePath: string) {
-        const content = fs.readFileSync(filePath);
+export async function createFileFromPath(ctx: ApiContext, filePath: string) {
+    const content = fs.readFileSync(filePath);
 
-        return this.createFromContent(content);
-    }
+    return createFileFromContent(ctx, content);
+}
 
-    /**
-     * Extract the file to path.
-     * Creates necessary directories.
-     *
-     * @param path file path
-     */
-    async extract(fileContent: FileContent, filePath: string) {
-        await fs.promises.mkdir(path.dirname(filePath), { recursive: true });
+/**
+ * Extract the file to path.
+ * Creates necessary directories.
+ *
+ * @param path file path
+ */
+export async function extractFile(fileContent: FileContent, filePath: string) {
+    await fs.promises.mkdir(path.dirname(filePath), { recursive: true });
 
-        return fs.promises.writeFile(filePath, fileContent.content);
-    }
+    return fs.promises.writeFile(filePath, fileContent.content);
 }

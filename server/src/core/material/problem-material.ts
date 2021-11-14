@@ -1,9 +1,9 @@
 import { gql } from 'apollo-server-core';
-import { ApiObject } from '../../main/api';
+import { ApiCache } from '../../main/api-cache';
 import { ApiContext } from '../../main/api-context';
 import { createSimpleLoader } from '../../main/base-model';
 import { ApiOutputValue } from '../../main/graphql-types';
-import { Contest, ContestApi } from '../contest';
+import { Contest, ContestCache } from '../contest';
 import { FulfillmentGradeDomain } from '../feedback/fulfillment';
 import { ScoreGradeDomain, ScoreRange } from '../feedback/score';
 import { ArchiveFileData } from '../files/archive';
@@ -296,7 +296,7 @@ export class ProblemMaterial {
 
     async loadContent(problem: Problem, path: string) {
         const contest = new Contest(problem.contest.id, this.ctx);
-        const { archiveId } = await this.ctx.api(ContestApi).dataLoader.load(contest.id);
+        const { archiveId } = await this.ctx.cache(ContestCache).dataLoader.load(contest.id);
         const file = await this.ctx.table(ArchiveFileData).findOne({
             where: { uuid: archiveId, path: `${problem.name}/${path}` },
             include: [this.ctx.table(FileContent)],
@@ -310,12 +310,12 @@ export class ProblemMaterial {
     }
 }
 
-export class ProblemMaterialApi extends ApiObject {
+export class ProblemMaterialApi extends ApiCache {
     dataLoader = createSimpleLoader(
         async (id: string) =>
             new ProblemMaterial(
                 Problem.fromId(id, this.ctx),
-                await this.ctx.api(ProblemTaskInfoApi).getProblemTaskInfo(Problem.fromId(id, this.ctx)),
+                await this.ctx.cache(ProblemTaskInfoApi).getProblemTaskInfo(Problem.fromId(id, this.ctx)),
                 this.ctx,
             ),
     );

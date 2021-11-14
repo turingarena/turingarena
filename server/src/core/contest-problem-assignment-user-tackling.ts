@@ -65,7 +65,7 @@ export class ContestProblemAssignmentUserTackling {
     }
 
     async submissions() {
-        return this.ctx.api(SubmissionCache).allByTackling.load(this.id());
+        return this.ctx.cache(SubmissionCache).allByTackling.load(this.id());
     }
 
     assignmentView() {
@@ -73,7 +73,7 @@ export class ContestProblemAssignmentUserTackling {
     }
 
     async getAwardTacklings() {
-        const material = await this.ctx.api(ProblemMaterialApi).dataLoader.load(this.assignment.problem.id());
+        const material = await this.ctx.cache(ProblemMaterialApi).dataLoader.load(this.assignment.problem.id());
 
         return material.awards.map(
             award =>
