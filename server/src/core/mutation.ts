@@ -1,5 +1,5 @@
 import { gql } from 'apollo-server-core';
-import { Resolvers } from '../main/resolver-types';
+import { ApiOutputValue } from '../main/graphql-types';
 import { MessageApi } from './message';
 import { Submit } from './submit';
 
@@ -16,24 +16,23 @@ export interface MutationModelRecord {
     Mutation: {};
 }
 
-export const mutationResolvers: Resolvers = {
-    Mutation: {
-        init: async ({}, {}, ctx) => {
-            await ctx.environment.sequelize.sync();
+export const mutationRoot: ApiOutputValue<'Mutation'> = {
+    init: async ({}, ctx) => {
+        await ctx.environment.sequelize.sync();
 
-            return true;
-        },
-        submit: async ({}, { submission }, ctx) => {
-            await ctx.authorizeUser(submission.username);
+        return true;
+    },
+    submit: async ({ submission }, ctx) => {
+        await ctx.authorizeUser(submission.username);
+        const submissionOutput = await Submit.submit(submission, ctx);
 
-            return Submit.submit(submission, ctx);
-        },
-        logIn: ({}, { token }, ctx) => ctx.environment.authService.logIn(token),
-        sendMessage: async ({}, { message }, ctx) => {
-            if (typeof message.from === 'string') await ctx.authorizeUser(message.from);
-            else await ctx.authorizeAdmin();
+        return (submissionOutput as unknown) as ApiOutputValue<'Submission'>; // FIXME: types
+    },
+    logIn: ({ token }, ctx) => ctx.environment.authService.logIn(token),
+    sendMessage: async ({ message }, ctx) => {
+        if (typeof message.from === 'string') await ctx.authorizeUser(message.from);
+        else await ctx.authorizeAdmin();
 
-            return ctx.api(MessageApi).sendMessage(message);
-        },
+        return ctx.api(MessageApi).sendMessage(message);
     },
 };

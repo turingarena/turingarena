@@ -1,4 +1,5 @@
 import { gql } from 'apollo-server-core';
+import { ApiOutputValue } from '../../main/graphql-types';
 import { FulfillmentGradeDomain } from '../feedback/fulfillment';
 import { ScoreGradeDomain, ScoreRange } from '../feedback/score';
 import { ProblemMaterial } from './problem-material';
@@ -24,7 +25,7 @@ export const awardSchema = gql`
     }
 `;
 
-export class Award {
+export class Award implements ApiOutputValue<'Award'> {
     constructor(readonly material: ProblemMaterial, readonly index: number) {}
 
     private readonly subtaskInfo = this.material.taskInfo.IOI.scoring.subtasks[this.index];

@@ -5,7 +5,7 @@ import { AuthService } from '../core/auth';
 import { User, UserCache } from '../core/user';
 import { ApiObject } from './api';
 import { Config, defaultConfig } from './config';
-import { createSchema } from './executable-schema';
+import { executableSchema } from './executable-schema';
 
 export interface OperationRequest<V> {
     document: DocumentNode;
@@ -111,7 +111,7 @@ export class RemoteApiContext extends ApiContext {
         throw new Error(`Not authorized`);
     }
 
-    schema = createSchema();
+    schema = executableSchema;
 
     /** Run a GraphQL operation in this context. */
     async execute<T = unknown, V = {}>({ document, operationName, variableValues }: OperationRequest<V>) {

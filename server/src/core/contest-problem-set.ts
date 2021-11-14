@@ -3,6 +3,7 @@ import { ApiContext } from '../main/api-context';
 import { Contest } from './contest';
 import { ContestProblemSetUserTackling } from './contest-problem-set-user-tackling';
 import { ScoreRange } from './feedback/score';
+import { ApiOutputValue } from '../main/graphql-types';
 
 export const contestProblemSetSchema = gql`
     """
@@ -25,7 +26,7 @@ export const contestProblemSetSchema = gql`
     }
 `;
 
-export class ContestProblemSet {
+export class ContestProblemSet implements ApiOutputValue<'ContestProblemSet'> {
     readonly ctx: ApiContext;
     constructor(readonly contest: Contest) {
         this.ctx = contest.ctx;

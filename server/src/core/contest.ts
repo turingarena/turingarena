@@ -11,7 +11,7 @@ import { ApiOutputValue } from '../main/graphql-types';
 import { ContestMetadata } from './contest-metadata';
 import { ContestProblemAssignment } from './contest-problem-assignment';
 import { ContestProblemSet } from './contest-problem-set';
-import { ArchiveFileData } from './files/archive';
+import { Archive, ArchiveFileData } from './files/archive';
 import { FileContent } from './files/file-content';
 import { Media, MediaFile } from './material/media';
 import { ProblemMaterial, ProblemMaterialApi } from './material/problem-material';
@@ -107,7 +107,7 @@ export class ContestApi extends ApiObject {
     }
 }
 
-export class Contest {
+export class Contest implements ApiOutputValue<'Contest'> {
     constructor(readonly id: string, readonly ctx: ApiContext) {}
 
     __typename = 'Contest' as const;
@@ -133,12 +133,12 @@ export class Contest {
     async problemSet() {
         await this.ctx.authorizeAdmin();
 
-        return new ContestProblemSet(this);
+        return (new ContestProblemSet(this) as unknown) as ApiOutputValue<'ContestProblemSet'>;
     }
     async archive() {
         await this.ctx.authorizeAdmin();
 
-        return { uuid: (await this.ctx.api(ContestApi).dataLoader.load(this.id)).archiveId };
+        return new Archive((await this.ctx.api(ContestApi).dataLoader.load(this.id)).archiveId, this.ctx);
     }
     async statement() {
         return this.ctx.api(ContestApi).getStatement(this);

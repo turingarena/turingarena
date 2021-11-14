@@ -4,7 +4,7 @@ import * as path from 'path';
 import { bufferTime, concatAll, concatMap, toArray } from 'rxjs/operators';
 import { ApiObject } from '../main/api';
 import { ContestApi } from './contest';
-import { Evaluation, EvaluationStatus } from './evaluation';
+import { EvaluationData, EvaluationStatus } from './evaluation';
 import { EvaluationEvent } from './evaluation-event';
 import { ArchiveApi } from './files/archive';
 import { Submission } from './submission';
@@ -18,7 +18,7 @@ export class EvaluateApi extends ApiObject {
     async evaluate(submission: Submission) {
         console.log(`Evaluating submission ${submission.id}`);
 
-        const evaluation = await this.ctx.table(Evaluation).create({
+        const evaluation = await this.ctx.table(EvaluationData).create({
             submissionId: submission.id,
             status: EvaluationStatus.PENDING,
         });

@@ -1,5 +1,4 @@
 import { gql } from 'apollo-server-core';
-import { Resolvers } from '../main/resolver-types';
 import { Achievement, AchievementModelRecord, achievementSchema } from './achievement';
 import { authSchema } from './auth';
 import { ContestData, ContestModelRecord, contestSchema } from './contest';
@@ -14,7 +13,7 @@ import {
     ContestProblemSetUserTacklingModelRecord,
     contestProblemSetUserTacklingSchema,
 } from './contest-problem-set-user-tackling';
-import { Evaluation, EvaluationModelRecord, evaluationSchema } from './evaluation';
+import { EvaluationData, EvaluationModelRecord, evaluationSchema } from './evaluation';
 import { EvaluationEvent } from './evaluation-event';
 import { fieldSchema } from './feedback/field';
 import { FulfillmentModelRecord, fulfillmentSchema } from './feedback/fulfillment';
@@ -32,10 +31,10 @@ import { MediaModelRecord, mediaSchema } from './material/media';
 import { ProblemMaterialModelRecord, problemMaterialSchema } from './material/problem-material';
 import { TextModelRecord, textSchema } from './material/text';
 import { Message, messageSchema } from './message';
-import { MutationModelRecord, mutationResolvers, mutationSchema } from './mutation';
+import { MutationModelRecord, mutationSchema } from './mutation';
 import { ParticipationModelRecord, participationSchema } from './participation';
 import { ProblemModelRecord, problemSchema } from './problem';
-import { QueryModelRecord, queryResolvers, querySchema } from './query';
+import { querySchema } from './query';
 import { SubmissionData, SubmissionModelRecord, submissionSchema } from './submission';
 import { SubmissionFile, submissionFileSchema } from './submission-file';
 import { UserModelRecord, userSchema } from './user';
@@ -103,7 +102,7 @@ export const modelConstructors = {
     Achievement,
     ContestData,
     ArchiveFileData,
-    Evaluation,
+    EvaluationData,
     EvaluationEvent,
     FileContent,
     SubmissionData,
@@ -136,15 +135,8 @@ export type ModelRecord = unknown &
     ParticipationModelRecord &
     ProblemMaterialModelRecord &
     ProblemModelRecord &
-    QueryModelRecord &
     ScoreModelRecord &
     SubmissionModelRecord &
     TextModelRecord &
     UserModelRecord &
     unknown;
-
-/** All GraphQL resolvers. Obtained combining resolvers from each components. */
-export const resolvers: Resolvers = {
-    ...mutationResolvers,
-    ...queryResolvers,
-};

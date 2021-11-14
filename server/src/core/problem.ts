@@ -1,5 +1,6 @@
 import { gql } from 'apollo-server-core';
 import { ApiContext } from '../main/api-context';
+import { ApiOutputValue } from '../main/graphql-types';
 import { Contest } from './contest';
 import { ScoreGradeDomain } from './feedback/score';
 import { ProblemMaterialApi } from './material/problem-material';
@@ -16,7 +17,7 @@ export const problemSchema = gql`
     }
 `;
 
-export class Problem {
+export class Problem implements ApiOutputValue<'Problem'> {
     constructor(readonly contest: Contest, readonly name: string, readonly ctx: ApiContext) {}
     __typename = 'Problem' as const;
 

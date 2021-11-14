@@ -1,21 +1,17 @@
 import { gql } from 'apollo-server-core';
 import { AllowNull, Column, ForeignKey, Table } from 'sequelize-typescript';
 import { ApiObject } from '../main/api';
+import { ApiContext } from '../main/api-context';
 import { createByIdDataLoader, createSimpleLoader, UuidBaseModel } from '../main/base-model';
-import { SubmissionData } from './submission';
+import { ApiOutputValue } from '../main/graphql-types';
+import { Submission, SubmissionData } from './submission';
 
 export const evaluationSchema = gql`
     type Evaluation {
         id: ID!
 
         submission: Submission!
-        events: [EvaluationEvent!]!
         status: EvaluationStatus!
-    }
-
-    type EvaluationEvent {
-        evaluation: Evaluation!
-        data: String!
     }
 
     "Status of an evaluation"
@@ -32,8 +28,8 @@ export const evaluationSchema = gql`
 `;
 
 /** An evaluation of a submission */
-@Table
-export class Evaluation extends UuidBaseModel<Evaluation> {
+@Table({ tableName: 'evaluations' })
+export class EvaluationData extends UuidBaseModel<EvaluationData> {
     @ForeignKey(() => SubmissionData)
     @AllowNull(false)
     @Column
@@ -43,6 +39,24 @@ export class Evaluation extends UuidBaseModel<Evaluation> {
     @AllowNull(false)
     @Column
     status!: EvaluationStatus;
+}
+
+export class Evaluation implements ApiOutputValue<'Evaluation'> {
+    __typename = 'Evaluation' as const;
+
+    constructor(readonly id: string, readonly ctx: ApiContext) {}
+
+    async getData() {
+        return this.ctx.api(EvaluationCache).byId.load(this.id);
+    }
+
+    async status() {
+        return (await this.getData()).status;
+    }
+
+    async submission() {
+        return new Submission((await this.getData()).submissionId, this.ctx);
+    }
 }
 
 /** Status of this submission */
@@ -58,14 +72,20 @@ export enum EvaluationStatus {
 }
 
 export interface EvaluationModelRecord {
-    Evaluation: Evaluation;
+    Evaluation: EvaluationData;
 }
 
 export class EvaluationCache extends ApiObject {
-    byId = createByIdDataLoader(this.ctx, Evaluation);
+    byId = createByIdDataLoader(this.ctx, EvaluationData);
     allBySubmissionId = createSimpleLoader((submissionId: string) =>
-        this.ctx.table(Evaluation).findAll({
+        this.ctx.table(EvaluationData).findAll({
             where: { submissionId },
+        }),
+    );
+    officialOf = createSimpleLoader((submissionId: string) =>
+        this.ctx.table(EvaluationData).findOne({
+            where: { submissionId },
+            order: [['createdAt', 'DESC']],
         }),
     );
 }

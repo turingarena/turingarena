@@ -131,36 +131,43 @@ const languages = {
     },
 };
 
-const fileRules = [
+type SubmissionFileTypeRule = ApiOutputValue<'SubmissionFileTypeRule'>;
+
+const fileRules: SubmissionFileTypeRule[] = [
     {
         extensions: ['.c', '.h'],
         defaultType: languages.c,
         recommendedTypes: [languages.c],
         otherTypes: [languages.cpp],
+        fields: null,
     },
     {
         extensions: ['.py'],
         defaultType: languages.python3,
         recommendedTypes: [languages.python3, languages.python2],
         otherTypes: [],
+        fields: null,
     },
     {
         extensions: ['.cpp', '.hpp', '.cc', '.cxx'],
         defaultType: languages.cpp,
         recommendedTypes: [languages.cpp],
         otherTypes: [],
+        fields: null,
     },
     {
         extensions: ['.java'],
         defaultType: languages.java,
         recommendedTypes: [languages.java],
         otherTypes: [],
+        fields: null,
     },
     {
         extensions: ['.rs'],
         defaultType: languages.rust,
         recommendedTypes: [languages.rust],
         otherTypes: [],
+        fields: null,
     },
 ];
 
@@ -244,14 +251,18 @@ export class ProblemMaterial {
             .map(d => d.scoreRange),
     );
 
-    submissionListColumns = [
+    submissionListColumns: Array<ApiOutputValue<'Column'>> = [
         ...this.awards.map(({ title, gradeDomain }) => {
-            if (gradeDomain instanceof ScoreGradeDomain) return { __typename: 'ScoreColumn', title };
-            if (gradeDomain instanceof FulfillmentGradeDomain) return { __typename: 'FulfillmentColumn', title };
+            if (gradeDomain instanceof ScoreGradeDomain) {
+                return { __typename: 'ScoreColumn' as const, title };
+            }
+            if (gradeDomain instanceof FulfillmentGradeDomain) {
+                return { __typename: 'FulfillmentColumn' as const, title };
+            }
             throw new Error(`unexpected grade domain ${gradeDomain}`);
         }),
         {
-            __typename: 'ScoreColumn',
+            __typename: 'ScoreColumn' as const,
             title: new Text([{ value: 'Total score' }]),
         },
     ];

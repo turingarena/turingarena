@@ -3,7 +3,7 @@ import { Op } from 'sequelize';
 import { AllowNull, Column, DataType, Table } from 'sequelize-typescript';
 import { ApiObject } from '../main/api';
 import { UuidBaseModel } from '../main/base-model';
-import { ApiOutputValue } from '../main/graphql-types';
+import { ApiInputValue } from '../main/graphql-types';
 
 export const messageSchema = gql`
     type Message {
@@ -36,7 +36,7 @@ export const messageSchema = gql`
     }
 `;
 
-type MessageInput = ApiOutputValue<'MessageInput'>;
+type MessageInput = ApiInputValue<'MessageInput'>;
 
 @Table({ tableName: 'message' })
 export class Message extends UuidBaseModel<Message> {

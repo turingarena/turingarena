@@ -1,6 +1,7 @@
 import { gql } from 'apollo-server-core';
 import { ApiContext } from '../main/api-context';
 import { Problem } from './problem';
+import { ApiOutputValue } from '../main/graphql-types';
 
 export const contestProblemAssignmentSchema = gql`
     type ContestProblemAssignment {
@@ -11,8 +12,9 @@ export const contestProblemAssignmentSchema = gql`
     }
 `;
 
-export class ContestProblemAssignment {
+export class ContestProblemAssignment implements ApiOutputValue<'ContestProblemAssignment'> {
     constructor(readonly problem: Problem) {}
+
     __typename = 'ContestProblemAssignment' as const;
     id() {
         return `${this.problem.contest.id}/${this.problem.name}`;

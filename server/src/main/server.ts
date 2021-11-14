@@ -1,14 +1,17 @@
 import { ApolloServer } from 'apollo-server-express';
+import * as cors from 'cors';
 import * as express from 'express';
 import { Duration } from 'luxon';
 import * as mime from 'mime-types';
 import * as path from 'path';
 import * as util from 'util';
 import { FileContent } from '../core/files/file-content';
+import { mutationRoot } from '../core/mutation';
+import { queryRoot } from '../core/query';
 import { ApiEnvironment, RemoteApiContext } from './api-context';
 import { Config } from './config';
-import { createSchema } from './executable-schema';
-var cors = require('cors');
+import { executableSchema } from './executable-schema';
+
 // Needed to make Docker exit correctly on CTRL-C
 process.on('SIGINT', () => process.exit(0));
 
@@ -21,7 +24,7 @@ export function serve(config: Config) {
     const env = new ApiEnvironment(config);
 
     const server = new ApolloServer({
-        schema: createSchema(),
+        schema: executableSchema,
         context: async ({ req }) => {
             const token = req.headers.authorization ?? '';
             const nAuthParts = 2;
@@ -31,7 +34,7 @@ export function serve(config: Config) {
 
             return api;
         },
-        rootValue: {},
+        rootValue: { ...mutationRoot, ...queryRoot },
         debug: true,
         playground: true,
         formatError: err => {

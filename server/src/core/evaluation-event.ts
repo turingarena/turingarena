@@ -5,14 +5,14 @@ import { ApiObject } from '../main/api';
 import { ApiContext } from '../main/api-context';
 import { createSimpleLoader, UuidBaseModel } from '../main/base-model';
 import { Achievement } from './achievement';
-import { Evaluation } from './evaluation';
+import { EvaluationData } from './evaluation';
 
 export type TaskMakerEvent = UIMessage;
 
 /** Evant of an evaluation */
 @Table({ updatedAt: false })
 export class EvaluationEvent extends UuidBaseModel<EvaluationEvent> {
-    @ForeignKey(() => Evaluation)
+    @ForeignKey(() => EvaluationData)
     @AllowNull(false)
     @Column
     evaluationId!: number;

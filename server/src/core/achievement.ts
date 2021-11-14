@@ -3,7 +3,7 @@ import { AllowNull, Column, ForeignKey, PrimaryKey, Table } from 'sequelize-type
 import { ApiObject } from '../main/api';
 import { ApiContext } from '../main/api-context';
 import { BaseModel, createSimpleLoader } from '../main/base-model';
-import { Evaluation, EvaluationCache } from './evaluation';
+import { EvaluationData, EvaluationCache } from './evaluation';
 import { FulfillmentGrade } from './feedback/fulfillment';
 import { ScoreGrade, ScoreGradeDomain } from './feedback/score';
 import { ProblemMaterialApi } from './material/problem-material';
@@ -21,7 +21,7 @@ export const achievementSchema = gql`
 @Table
 export class Achievement extends BaseModel<Achievement> {
     @PrimaryKey
-    @ForeignKey(() => Evaluation)
+    @ForeignKey(() => EvaluationData)
     @AllowNull(false)
     @Column
     evaluationId!: string;

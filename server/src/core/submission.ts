@@ -12,7 +12,7 @@ import { ContestProblemAssignment } from './contest-problem-assignment';
 import { ContestProblemAssignmentUserTackling } from './contest-problem-assignment-user-tackling';
 import { Evaluation, EvaluationCache, EvaluationStatus } from './evaluation';
 import { EvaluationEventCache } from './evaluation-event';
-import { FulfillmentGradeDomain } from './feedback/fulfillment';
+import { FulfillmentField, FulfillmentGradeDomain } from './feedback/fulfillment';
 import { ScoreField, ScoreGrade, ScoreGradeDomain, ScoreRange } from './feedback/score';
 import { FileContentApi } from './files/file-content';
 import { ProblemMaterialApi } from './material/problem-material';
@@ -69,7 +69,7 @@ export class SubmissionData extends UuidBaseModel<SubmissionData> {
     username!: string;
 }
 
-export class Submission {
+export class Submission implements ApiOutputValue<'Submission'> {
     constructor(readonly id: string, readonly ctx: ApiContext) {}
     __typename = 'Submission' as const;
 
@@ -100,10 +100,10 @@ export class Submission {
     }
 
     async officialEvaluation() {
-        return this.getOfficialEvaluation();
+        return new Evaluation((await this.getOfficialEvaluationData()).id, this.ctx);
     }
 
-    async summaryRow() {
+    async summaryRow(): Promise<ApiOutputValue<'Record'>> {
         const scoreRange = (await this.getMaterial()).scoreRange;
         const score = (await this.getTotalScore())?.score;
 
@@ -120,10 +120,9 @@ export class Submission {
                         );
                     }
                     if (gradeDomain instanceof FulfillmentGradeDomain) {
-                        return {
-                            __typename: 'FulfillmentField',
-                            fulfilled: achievement !== undefined ? achievement.getFulfillmentGrade().fulfilled : null,
-                        };
+                        return new FulfillmentField(
+                            achievement !== undefined ? achievement.getFulfillmentGrade().fulfilled : null,
+                        );
                     }
                     throw new Error(`unexpected grade domain ${gradeDomain}`);
                 }),
@@ -146,7 +145,7 @@ export class Submission {
         const memoryUnitBytes = 1024;
         const warningWatermarkMultiplier = 0.2;
 
-        const evaluation = await this.getOfficialEvaluation();
+        const evaluation = await this.getOfficialEvaluationData();
         const events =
             evaluation !== null ? await this.ctx.api(EvaluationEventCache).allByEvaluationId.load(evaluation.id) : [];
 
@@ -246,7 +245,9 @@ export class Submission {
     }
 
     async evaluations() {
-        return this.ctx.api(EvaluationCache).allBySubmissionId.load(this.id);
+        return (await this.ctx.api(EvaluationCache).allBySubmissionId.load(this.id)).map(
+            ({ id }) => new Evaluation(id, this.ctx),
+        );
     }
 
     async files() {
@@ -306,11 +307,8 @@ export class Submission {
         return submissionPath;
     }
 
-    async getOfficialEvaluation() {
-        return this.ctx.table(Evaluation).findOne({
-            where: { submissionId: this.id },
-            order: [['createdAt', 'DESC']],
-        });
+    async getOfficialEvaluationData() {
+        return this.ctx.api(EvaluationCache).officialOf.load(this.id);
     }
 
     async getMaterial() {
@@ -320,7 +318,7 @@ export class Submission {
     }
 
     async getAwardAchievements() {
-        const evaluation = await this.getOfficialEvaluation();
+        const evaluation = await this.getOfficialEvaluationData();
         const achievements =
             evaluation !== null ? await this.ctx.api(AchievementCache).allByEvaluationId.load(evaluation.id) : [];
         const material = await this.getMaterial();
@@ -332,7 +330,7 @@ export class Submission {
     }
 
     async getTotalScore() {
-        if ((await this.getOfficialEvaluation())?.status !== EvaluationStatus.SUCCESS) {
+        if ((await this.getOfficialEvaluationData())?.status !== EvaluationStatus.SUCCESS) {
             let scoreRange = new ScoreRange(0, 0, false);
             await this.problem().then(p => p.totalScoreDomain().then(s => (scoreRange = s.scoreRange)));
 
@@ -378,7 +376,7 @@ export class SubmissionCache extends ApiObject {
             // TODO: denormalize DB to make this code simpler and faster
             const submissions = await this.ctx.table(SubmissionData).findAll({ where: { username } });
             const officialEvaluations = await Promise.all(
-                submissions.map(async s => Submission.fromId(s.id, this.ctx).getOfficialEvaluation()),
+                submissions.map(async s => Submission.fromId(s.id, this.ctx).getOfficialEvaluationData()),
             );
 
             return submissions

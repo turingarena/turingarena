@@ -31,7 +31,7 @@ export interface ScalarMap {
     File: File;
 }
 
-export type GraphQLOutputValueWrapper<T> = { graphql: T } | T;
+export type GraphQLOutputValueWrapper<T> = T | Promise<T>;
 export type GraphQLInputValueWrapper<T> = T;
 
 export interface GraphQLArrayOutputValue<T>
@@ -117,11 +117,7 @@ export type GraphQLInputValueOfTypeRef<
     ? NonNull<GraphQLInputValueOfTypeRefUnspecifiedNullability<TConfig, T['ofType']>>
     : Nullable<GraphQLInputValueOfTypeRefUnspecifiedNullability<TConfig, T>>;
 
-export type GraphQLFieldResolver<TValue, TArgs, TContext> =
-    | TValue
-    | Promise<TValue>
-    | ((args: TArgs, ctx: TContext) => TValue)
-    | ((args: TArgs, ctx: TContext) => Promise<TValue>);
+export type GraphQLFieldResolver<TValue, TArgs, TContext> = TValue | ((args: TArgs, ctx: TContext) => TValue);
 
 export type GraphQLResolverOfField<
     TConfig extends GraphQLConfigMap,
@@ -129,7 +125,7 @@ export type GraphQLResolverOfField<
 > = GraphQLFieldResolver<
     GraphQLOutputValueWrapper<GraphQLOutputValueOfTypeRef<TConfig, T['type']>>,
     {
-        [K in T['args'][number]['name']]: GraphQLOutputValueOfTypeRef<
+        [K in T['args'][number]['name']]: GraphQLInputValueOfTypeRef<
             TConfig,
             ExtractNamed<T['args'][number], K>['type']
         >;
