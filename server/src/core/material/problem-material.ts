@@ -1,8 +1,8 @@
 import { gql } from 'apollo-server-core';
-import { __generated_Field } from '../../generated/graphql-types';
 import { ApiObject } from '../../main/api';
 import { ApiContext } from '../../main/api-context';
 import { createSimpleLoader } from '../../main/base-model';
+import { ApiGraphQLValue } from '../../main/graphql-types';
 import { Contest, ContestApi } from '../contest';
 import { FulfillmentGradeDomain } from '../feedback/fulfillment';
 import { ScoreGradeDomain, ScoreRange } from '../feedback/score';
@@ -91,6 +91,8 @@ export const problemMaterialSchema = gql`
     }
 `;
 
+type Field = ApiGraphQLValue<'Field'>;
+
 export interface ProblemAttachment {
     title: Text;
     media: Media;
@@ -98,7 +100,7 @@ export interface ProblemAttachment {
 
 export interface ProblemAttribute {
     title: Text;
-    field: __generated_Field; // FIXME: should not use generated types here
+    field: Field; // FIXME: should not use generated types here
     icon: string;
 }
 
@@ -205,6 +207,8 @@ export class ProblemMaterial {
                     __typename: 'TimeUsage',
                     seconds: this.timeLimitSeconds,
                 },
+                timeUsagePrimaryWatermark: null,
+                valence: null,
             },
             icon: 'stopwatch',
         },
@@ -220,6 +224,8 @@ export class ProblemMaterial {
                     __typename: 'MemoryUsage',
                     bytes: this.memoryLimitBytes,
                 },
+                memoryUsagePrimaryWatermark: null,
+                valence: null,
             },
             icon: 'microchip',
         },

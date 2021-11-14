@@ -1,5 +1,6 @@
 // tslint:disable: no-implicit-dependencies
 import { generate } from '@graphql-codegen/cli';
+import { readFileSync, writeFileSync } from 'fs';
 
 type CodegenConfig = Parameters<typeof generate>[0];
 
@@ -43,6 +44,13 @@ const config: CodegenConfig = {
     require: 'ts-node/register/transpile-only',
 };
 
-generate(config).catch(e => {
+async function run() {
+    await generate(config);
+    const schemaBuffer = readFileSync(`src/generated/graphql.schema.json`);
+    const schemaJson = schemaBuffer.toString();
+    writeFileSync('src/generated/graphql.schema.ts', `export const graphqlIntrospection = ${schemaJson} as const;`);
+}
+
+run().catch(e => {
     console.error(e);
 });

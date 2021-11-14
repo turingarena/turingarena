@@ -4,10 +4,10 @@ import * as mime from 'mime-types';
 import { Op } from 'sequelize';
 import { AllowNull, Column, DataType, ForeignKey, Table } from 'sequelize-typescript';
 import * as yaml from 'yaml';
-import { __generated_ContestStatus } from '../generated/graphql-types';
 import { ApiObject } from '../main/api';
 import { ApiContext } from '../main/api-context';
 import { createSimpleLoader, UuidBaseModel } from '../main/base-model';
+import { ApiGraphQLValue } from '../main/graphql-types';
 import { ContestMetadata } from './contest-metadata';
 import { ContestProblemAssignment } from './contest-problem-assignment';
 import { ContestProblemSet } from './contest-problem-set';
@@ -56,7 +56,7 @@ export class ContestData extends UuidBaseModel<ContestData> {
     }
 }
 
-export type ContestStatus = __generated_ContestStatus;
+export type ContestStatus = ApiGraphQLValue<'ContestStatus'>;
 
 export interface MutationModelRecord {
     Mutation: {};
@@ -106,8 +106,8 @@ export class ContestApi extends ApiObject {
     }
 }
 
-export class Contest {
-    constructor(readonly id: string, readonly ctx: ApiContext) { }
+export class Contest implements ApiObject {
+    constructor(readonly id: string, readonly ctx: ApiContext) {}
 
     __typename = 'Contest';
     async name() {

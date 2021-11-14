@@ -1,9 +1,9 @@
 import { gql } from 'apollo-server-core';
 import { Op } from 'sequelize';
 import { AllowNull, Column, DataType, Table } from 'sequelize-typescript';
-import { __generated_MessageInput } from '../generated/graphql-types';
 import { ApiObject } from '../main/api';
 import { UuidBaseModel } from '../main/base-model';
+import { ApiGraphQLValue } from '../main/graphql-types';
 
 export const messageSchema = gql`
     type Message {
@@ -36,7 +36,7 @@ export const messageSchema = gql`
     }
 `;
 
-type MessageInput = __generated_MessageInput;
+type MessageInput = ApiGraphQLValue<'MessageInput'>;
 
 @Table({ tableName: 'message' })
 export class Message extends UuidBaseModel<Message> {
