@@ -18,7 +18,7 @@ export const problemSchema = gql`
 
 export class Problem {
     constructor(readonly contest: Contest, readonly name: string, readonly ctx: ApiContext) {}
-    __typename = 'Problem';
+    __typename = 'Problem' as const;
 
     static fromId(id: string, ctx: ApiContext): Problem {
         const [contestId, problemName] = id.split('/');

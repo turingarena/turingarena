@@ -32,7 +32,7 @@ export const contestProblemSetViewSchema = gql`
 export class ContestProblemSetView {
     constructor(readonly problemSet: ContestProblemSet, readonly user: User | null, readonly ctx: ApiContext) {}
 
-    __typename = 'ContestProblemSetView';
+    __typename = 'ContestProblemSetView' as const;
 
     contestView() {
         return new ContestView(this.problemSet.contest, this.user, this.ctx);

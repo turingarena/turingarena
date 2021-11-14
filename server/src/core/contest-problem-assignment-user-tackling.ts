@@ -40,7 +40,7 @@ export const contestProblemAssignmentUserTacklingSchema = gql`
 export class ContestProblemAssignmentUserTackling {
     constructor(readonly assignment: ContestProblemAssignment, readonly user: User, readonly ctx: ApiContext) {}
 
-    __typename = 'ContestProblemAssignmentUserTackling';
+    __typename = 'ContestProblemAssignmentUserTackling' as const;
 
     id(): string {
         return `${this.assignment.id()}/${this.user.id()}`;

@@ -18,7 +18,7 @@ export const contestAwardAssignmentSchema = gql`
 
 export class ContestAwardAssignment {
     constructor(readonly problemAssignment: ContestProblemAssignment, readonly award: Award) {}
-    __typename = 'ContestAwardAssignment';
+    __typename = 'ContestAwardAssignment' as const;
     id() {
         return `${this.problemAssignment.problem.contest.id}/${this.problemAssignment.problem.name}/${this.award.index}`;
     }

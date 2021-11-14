@@ -109,7 +109,7 @@ export class ContestApi extends ApiObject {
 export class Contest implements ApiObject {
     constructor(readonly id: string, readonly ctx: ApiContext) {}
 
-    __typename = 'Contest';
+    __typename = 'Contest' as const;
     async name() {
         return (await this.getMetadata()).name;
     }

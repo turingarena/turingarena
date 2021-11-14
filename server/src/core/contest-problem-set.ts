@@ -31,7 +31,7 @@ export class ContestProblemSet {
         this.ctx = contest.ctx;
     }
 
-    __typename = 'ContestProblemSet';
+    __typename = 'ContestProblemSet' as const;
 
     async assignments() {
         return this.contest.getProblemAssignments();

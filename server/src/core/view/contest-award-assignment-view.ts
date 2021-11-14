@@ -27,7 +27,7 @@ export const contestAwardAssignmentViewSchema = gql`
 export class ContestAwardAssignmentView {
     constructor(readonly assignment: ContestAwardAssignment, readonly user: User | null, readonly ctx: ApiContext) {}
 
-    __typename = 'ContestAwardAssignmentView';
+    __typename = 'ContestAwardAssignmentView' as const;
 
     async problemAssignmentView() {
         return new ContestProblemAssignmentView(this.assignment.problemAssignment, this.user, this.ctx);

@@ -32,7 +32,7 @@ export enum UserRole {
 
 export class User {
     constructor(readonly contest: Contest, readonly username: string, readonly  ctx : ApiContext) {}
-    __typename = 'User';
+    __typename = 'User' as const;
     id() {
         return `${this.contest.id}/${this.username}`;
     }

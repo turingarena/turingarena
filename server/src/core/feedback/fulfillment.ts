@@ -1,4 +1,5 @@
 import { gql } from 'apollo-server-core';
+import { ApiGraphQLValue } from '../../main/graphql-types';
 
 export const fulfillmentSchema = gql`
     "A grade expressed as a boolean value: fulfilled or not."
@@ -27,22 +28,21 @@ export const fulfillmentSchema = gql`
     }
 `;
 
-export class FulfillmentGrade {
-    constructor(readonly fulfilled: boolean | null) {}
-    __typename = 'FulfillmentGrade';
-    valence() {
-        return this.fulfilled === null ? null : this.fulfilled ? 'SUCCESS' : 'FAILURE';
-    }
+export class FulfillmentGrade implements ApiGraphQLValue<'FulfillmentGrade'> {
+    constructor(readonly fulfilled: boolean) {}
+    __typename = 'FulfillmentGrade' as const;
+    valence = this.fulfilled ? 'SUCCESS' : 'FAILURE';
 }
 
-export class FulfillmentGradeDomain {
-    _: (() => true) | undefined;
-    __typename = 'FulfillmentGradeDomain';
+export class FulfillmentGradeDomain implements ApiGraphQLValue<'FulfillmentGradeDomain'> {
+    __typename = 'FulfillmentGradeDomain' as const;
+    _ = null;
 }
 
-export class FulfillmentField {
+export class FulfillmentField implements ApiGraphQLValue<'FulfillmentField'> {
     constructor(readonly fulfilled: boolean | null) {}
-    __typename = 'FulfillmentField';
+    __typename = 'FulfillmentField' as const;
+    valence = this.fulfilled === null ? null : this.fulfilled ? ('SUCCESS' as const) : ('FAILURE' as const);
 }
 
 export interface FulfillmentModelRecord {

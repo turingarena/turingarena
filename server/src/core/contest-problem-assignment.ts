@@ -13,7 +13,7 @@ export const contestProblemAssignmentSchema = gql`
 
 export class ContestProblemAssignment {
     constructor(readonly problem: Problem) {}
-    __typename = 'ContestProblemAssignment';
+    __typename = 'ContestProblemAssignment' as const;
     id() {
         return `${this.problem.contest.id}/${this.problem.name}`;
     }

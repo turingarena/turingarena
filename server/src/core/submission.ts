@@ -70,7 +70,7 @@ export class SubmissionData extends UuidBaseModel<SubmissionData> {
 
 export class Submission {
     constructor(readonly id: string, readonly ctx: ApiContext) {}
-    __typename = 'Submission';
+    __typename = 'Submission' as const;
 
     async contest() {
         return (await this.getTackling()).assignment.problem.contest;

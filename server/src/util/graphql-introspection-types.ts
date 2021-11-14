@@ -89,6 +89,7 @@ export type GraphQLValueOfTypeRef<
 
 export type GraphQLFieldResolver<TValue, TArgs, TContext> =
     | TValue
+    | Promise<TValue>
     | ((args: TArgs, ctx: TContext) => TValue)
     | ((args: TArgs, ctx: TContext) => Promise<TValue>);
 

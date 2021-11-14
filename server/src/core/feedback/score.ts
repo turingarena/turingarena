@@ -1,4 +1,5 @@
 import { gql } from 'apollo-server-core';
+import { ApiGraphQLValue } from '../../main/graphql-types';
 import { Valence } from './valence';
 
 export const scoreSchema = gql`
@@ -42,9 +43,10 @@ export const scoreSchema = gql`
     }
 `;
 
-export class ScoreGrade {
+export class ScoreGrade implements ApiGraphQLValue<'ScoreGrade'> {
     constructor(readonly scoreRange: ScoreRange, readonly score: number) {}
-    __typename = 'ScoreGrade';
+
+    __typename = 'ScoreGrade' as const;
 
     static total(values: ScoreGrade[]) {
         return new ScoreGrade(
@@ -54,9 +56,9 @@ export class ScoreGrade {
     }
 }
 
-export class ScoreRange {
+export class ScoreRange implements ApiGraphQLValue<'ScoreRange'> {
     constructor(readonly max: number, readonly decimalDigits: number, readonly allowPartial: boolean) {}
-    __typename = 'ScoreRange';
+    __typename = 'ScoreRange' as const;
 
     static total(domains: ScoreRange[]) {
         return new ScoreRange(
@@ -67,14 +69,14 @@ export class ScoreRange {
     }
 }
 
-export class ScoreGradeDomain {
+export class ScoreGradeDomain implements ApiGraphQLValue<'ScoreGradeDomain'> {
     constructor(readonly scoreRange: ScoreRange) {}
-    __typename = 'ScoreGradeDomain';
+    __typename = 'ScoreGradeDomain' as const;
 }
 
-export class ScoreField {
+export class ScoreField implements ApiGraphQLValue<'ScoreField'> {
     constructor(readonly scoreRange: ScoreRange, readonly score: number | null) {}
-    __typename = 'ScoreField';
+    __typename = 'ScoreField' as const;
 
     valence(): Valence | null {
         return this.score === null

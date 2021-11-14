@@ -5,6 +5,7 @@ import { AllowNull, Column, PrimaryKey, Table } from 'sequelize-typescript';
 import * as ssri from 'ssri';
 import { ApiObject } from '../../main/api';
 import { BaseModel, createByIdDataLoader } from '../../main/base-model';
+import { ApiGraphQLValue } from '../../main/graphql-types';
 
 export const fileContentSchema = gql`
     type FileContent {
@@ -21,7 +22,7 @@ export const fileContentSchema = gql`
 
 /** A generic file in TuringArena. */
 @Table({ updatedAt: false })
-export class FileContent extends BaseModel<FileContent> {
+export class FileContent extends BaseModel<FileContent> implements ApiGraphQLValue<'FileContent'> {
     /** The SHA-1 hash of the file. Is automatically computed on insert. */
     @PrimaryKey
     @AllowNull(false)

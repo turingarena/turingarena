@@ -9,7 +9,7 @@ import { User } from './user';
 export class ContestAwardAssignmentUserTackling {
     constructor(readonly assignment: ContestAwardAssignment, readonly user: User, readonly ctx: ApiContext) {}
 
-    __typename = 'ContestAwardAssignmentUserTackling';
+    __typename = 'ContestAwardAssignmentUserTackling' as const;
 
     async getBestAchievement() {
         const achievements = await this.ctx.environment.sequelize.query<Achievement>(
