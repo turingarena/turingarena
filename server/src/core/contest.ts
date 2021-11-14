@@ -18,6 +18,7 @@ import { ProblemMaterial, ProblemMaterialApi } from './material/problem-material
 import { Text } from './material/text';
 import { Problem } from './problem';
 import { User } from './user';
+import { ApiDateTime } from './util/date-time';
 
 export const contestSchema = gql`
     type Contest {
@@ -106,7 +107,7 @@ export class ContestApi extends ApiObject {
     }
 }
 
-export class Contest implements ApiObject {
+export class Contest {
     constructor(readonly id: string, readonly ctx: ApiContext) {}
 
     __typename = 'Contest' as const;
@@ -117,10 +118,14 @@ export class Contest implements ApiObject {
         return new Text([{ value: (await this.getMetadata()).title }]);
     }
     async start() {
-        return (await this.getMetadata()).start;
+        const start = (await this.getMetadata()).start;
+
+        return ApiDateTime.fromISO(start);
     }
     async end() {
-        return (await this.getMetadata()).end ?? null;
+        const end = (await this.getMetadata()).end;
+
+        return end === undefined ? null : ApiDateTime.fromISO(end);
     }
     async status() {
         return this.getStatus();

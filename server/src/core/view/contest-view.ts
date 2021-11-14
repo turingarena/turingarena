@@ -20,10 +20,9 @@ export const contestViewSchema = gql`
     }
 `;
 
-
 export class ContestView {
     constructor(readonly contest: Contest, readonly user: User | null, readonly ctx: ApiContext) {}
-    __typename= 'ContestView';
+    __typename = 'ContestView' as const;
     async problemSetView() {
         const status = await this.contest.getStatus();
         switch (status) {

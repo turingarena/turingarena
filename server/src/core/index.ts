@@ -39,7 +39,7 @@ import { QueryModelRecord, queryResolvers, querySchema } from './query';
 import { SubmissionData, SubmissionModelRecord, submissionSchema } from './submission';
 import { SubmissionFile, submissionFileSchema } from './submission-file';
 import { UserModelRecord, userSchema } from './user';
-import { DateTimeModelRecord, dateTimeResolvers, dateTimeSchema } from './util/date-time';
+import { DateTimeModelRecord, dateTimeSchema } from './util/date-time';
 import {
     ContestAwardAssignmentViewModelRecord,
     contestAwardAssignmentViewSchema,
@@ -145,7 +145,6 @@ export type ModelRecord = unknown &
 
 /** All GraphQL resolvers. Obtained combining resolvers from each components. */
 export const resolvers: Resolvers = {
-    ...dateTimeResolvers,
     ...mutationResolvers,
     ...queryResolvers,
     ...archiveResolvers,

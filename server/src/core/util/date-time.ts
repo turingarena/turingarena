@@ -1,8 +1,7 @@
 import { gql } from 'apollo-server-core';
 import { DateTime } from 'luxon';
-import { ResolverFn } from '../../generated/graphql-types';
-import { ApiContext } from '../../main/api-context';
-import { Resolvers } from '../../main/resolver-types';
+import { ApiGraphQLValue } from '../../main/graphql-types';
+import { unreachable } from '../../util/unreachable';
 
 export const dateTimeSchema = gql`
     "An instant, i.e., a point in time."
@@ -30,26 +29,21 @@ export interface DateTimeModelRecord {
     DateTime: DateModel;
 }
 
-function makeDateTime(dateTime: DateModel, ctx: ApiContext) {
-    if (typeof dateTime === 'string') return DateTime.fromISO(dateTime);
-    if (dateTime instanceof DateTime) return dateTime;
-    if (dateTime instanceof Date) return DateTime.fromJSDate(dateTime);
-    ctx.fail(`Invalid date-time: ${dateTime}`);
-}
+export class ApiDateTime implements ApiGraphQLValue<'DateTime'> {
+    constructor(readonly inner: DateTime) {}
 
-function makeDateTimeResolver<T>(
-    resolver: ResolverFn<T, DateTime, ApiContext, {}>,
-): ResolverFn<T, DateModel, ApiContext, {}> {
-    return (dateTime: DateModel, args, ctx, info) => resolver(makeDateTime(dateTime, ctx), args, ctx, info);
-}
+    utc = this.inner.toUTC().toISO() ?? unreachable(`invalid date-time`);
+    local = this.inner.toISO() ?? unreachable(`invalid date-time`);
+    millisFromEpochInteger = this.inner.toMillis();
+    secondsFromEpochDecimal = this.inner.toSeconds();
+    secondsFromEpochInteger = Math.floor(this.inner.toSeconds());
+    utcOffsetMinutes = this.inner.offset;
 
-export const dateTimeResolvers: Resolvers = {
-    DateTime: {
-        utc: makeDateTimeResolver((t, _, ctx) => t.toUTC().toISO() ?? ctx.fail(`invalid date-time`)),
-        local: makeDateTimeResolver((t, _, ctx) => t.toISO() ?? ctx.fail(`invalid date-time`)),
-        millisFromEpochInteger: makeDateTimeResolver(t => t.toMillis()),
-        secondsFromEpochDecimal: makeDateTimeResolver(t => t.toSeconds()),
-        secondsFromEpochInteger: makeDateTimeResolver(t => Math.floor(t.toSeconds())),
-        utcOffsetMinutes: makeDateTimeResolver(t => t.offset),
-    },
-};
+    static fromISO(dateTimeString: string) {
+        return new ApiDateTime(DateTime.fromISO(dateTimeString));
+    }
+
+    static fromJSDate(jsDate: Date) {
+        return new ApiDateTime(DateTime.fromJSDate(jsDate));
+    }
+}

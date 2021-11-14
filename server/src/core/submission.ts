@@ -21,6 +21,7 @@ import { Participation } from './participation';
 import { Problem } from './problem';
 import { SubmissionFileCache } from './submission-file';
 import { User } from './user';
+import { ApiDateTime } from './util/date-time';
 
 export const submissionSchema = gql`
     type Submission {
@@ -132,11 +133,113 @@ export class Submission {
     }
 
     async feedbackTable() {
-        return this.getFeedbackTable();
+        const {
+            awards,
+            taskInfo,
+            evaluationFeedbackColumns,
+            timeLimitSeconds,
+            memoryLimitBytes,
+        } = await this.getMaterial();
+        const { scoring } = taskInfo.IOI;
+
+        const limitsMarginMultiplier = 2;
+        const memoryUnitBytes = 1024;
+        const warningWatermarkMultiplier = 0.2;
+
+        const evaluation = await this.getOfficialEvaluation();
+        const events =
+            evaluation !== null ? await this.ctx.api(EvaluationEventCache).allByEvaluationId.load(evaluation.id) : [];
+
+        const testCasesData = awards.flatMap((award, awardIndex) =>
+            new Array(scoring.subtasks[awardIndex].testcases).fill(0).map(() => ({
+                award,
+                awardIndex,
+                timeUsage: null as number | null,
+                memoryUsage: null as number | null,
+                message: null as string | null,
+                score: null as number | null,
+            })),
+        );
+
+        for (const { data } of events) {
+            if (typeof data === 'object' && 'IOITestcaseScore' in data) {
+                const { testcase, score, message } = data.IOITestcaseScore;
+                const testCaseData = testCasesData[testcase];
+                testCaseData.message = message;
+                testCaseData.score = score;
+            }
+
+            if (typeof data === 'object' && 'IOIEvaluation' in data) {
+                const { status, testcase } = data.IOIEvaluation;
+                if (typeof status === 'object' && 'Done' in status) {
+                    const { cpu_time, memory } = status.Done.result.resources;
+                    const testCaseData = testCasesData[testcase];
+                    testCaseData.memoryUsage = memory;
+                    testCaseData.timeUsage = cpu_time;
+                }
+            }
+        }
+
+        return {
+            __typename: 'FeedbackTable',
+            columns: evaluationFeedbackColumns,
+            rows: testCasesData.map(({ awardIndex, score, message, timeUsage, memoryUsage }, testCaseIndex) => ({
+                valence: score !== null ? (score >= 1 ? 'SUCCESS' : score > 0 ? 'PARTIAL' : 'FAILURE') : null,
+                fields: [
+                    {
+                        __typename: 'HeaderField',
+                        index: awardIndex,
+                        title: new Text([{ value: `Subtask ${awardIndex}` }]),
+                    },
+                    {
+                        __typename: 'HeaderField',
+                        index: testCaseIndex,
+                        title: new Text([{ value: `Case ${testCaseIndex}` }]),
+                    },
+                    {
+                        __typename: 'TimeUsageField',
+                        timeUsage: timeUsage !== null ? { seconds: timeUsage } : null,
+                        timeUsageMaxRelevant: { seconds: timeLimitSeconds * limitsMarginMultiplier },
+                        timeUsagePrimaryWatermark: { seconds: timeLimitSeconds },
+                        valence:
+                            timeUsage === null
+                                ? null
+                                : timeUsage <= warningWatermarkMultiplier * timeLimitSeconds
+                                ? 'NOMINAL'
+                                : timeUsage <= timeLimitSeconds
+                                ? 'WARNING'
+                                : 'FAILURE',
+                    },
+                    {
+                        __typename: 'MemoryUsageField',
+                        memoryUsage: memoryUsage !== null ? { bytes: memoryUsage * memoryUnitBytes } : null,
+                        memoryUsageMaxRelevant: {
+                            bytes: memoryLimitBytes * limitsMarginMultiplier,
+                        },
+                        memoryUsagePrimaryWatermark: {
+                            bytes: memoryLimitBytes,
+                        },
+                        valence:
+                            memoryUsage === null
+                                ? null
+                                : memoryUsage * memoryUnitBytes <= warningWatermarkMultiplier * memoryLimitBytes
+                                ? 'NOMINAL'
+                                : memoryUsage * memoryUnitBytes <= memoryLimitBytes
+                                ? 'WARNING'
+                                : 'FAILURE',
+                    },
+                    {
+                        __typename: 'MessageField',
+                        message: new Text([{ value: `${message ?? ``}` }]),
+                    },
+                    new ScoreField(new ScoreRange(1, 2, true), score),
+                ],
+            })),
+        };
     }
 
     async createdAt() {
-        return (await this.ctx.api(SubmissionCache).dataLoader.load(this.id)).createdAt;
+        return ApiDateTime.fromJSDate((await this.ctx.api(SubmissionCache).dataLoader.load(this.id)).createdAt);
     }
 
     async evaluations() {
@@ -242,112 +345,6 @@ export class Submission {
                 return [];
             }),
         );
-    }
-
-    async getFeedbackTable() {
-        const {
-            awards,
-            taskInfo,
-            evaluationFeedbackColumns,
-            timeLimitSeconds,
-            memoryLimitBytes,
-        } = await this.getMaterial();
-        const { scoring } = taskInfo.IOI;
-
-        const limitsMarginMultiplier = 2;
-        const memoryUnitBytes = 1024;
-        const warningWatermarkMultiplier = 0.2;
-
-        const evaluation = await this.getOfficialEvaluation();
-        const events =
-            evaluation !== null ? await this.ctx.api(EvaluationEventCache).allByEvaluationId.load(evaluation.id) : [];
-
-        const testCasesData = awards.flatMap((award, awardIndex) =>
-            new Array(scoring.subtasks[awardIndex].testcases).fill(0).map(() => ({
-                award,
-                awardIndex,
-                timeUsage: null as number | null,
-                memoryUsage: null as number | null,
-                message: null as string | null,
-                score: null as number | null,
-            })),
-        );
-
-        for (const { data } of events) {
-            if (typeof data === 'object' && 'IOITestcaseScore' in data) {
-                const { testcase, score, message } = data.IOITestcaseScore;
-                const testCaseData = testCasesData[testcase];
-                testCaseData.message = message;
-                testCaseData.score = score;
-            }
-
-            if (typeof data === 'object' && 'IOIEvaluation' in data) {
-                const { status, testcase } = data.IOIEvaluation;
-                if (typeof status === 'object' && 'Done' in status) {
-                    const { cpu_time, memory } = status.Done.result.resources;
-                    const testCaseData = testCasesData[testcase];
-                    testCaseData.memoryUsage = memory;
-                    testCaseData.timeUsage = cpu_time;
-                }
-            }
-        }
-
-        return {
-            __typename: 'FeedbackTable',
-            columns: evaluationFeedbackColumns,
-            rows: testCasesData.map(({ awardIndex, score, message, timeUsage, memoryUsage }, testCaseIndex) => ({
-                valence: score !== null ? (score >= 1 ? 'SUCCESS' : score > 0 ? 'PARTIAL' : 'FAILURE') : null,
-                fields: [
-                    {
-                        __typename: 'HeaderField',
-                        index: awardIndex,
-                        title: new Text([{ value: `Subtask ${awardIndex}` }]),
-                    },
-                    {
-                        __typename: 'HeaderField',
-                        index: testCaseIndex,
-                        title: new Text([{ value: `Case ${testCaseIndex}` }]),
-                    },
-                    {
-                        __typename: 'TimeUsageField',
-                        timeUsage: timeUsage !== null ? { seconds: timeUsage } : null,
-                        timeUsageMaxRelevant: { seconds: timeLimitSeconds * limitsMarginMultiplier },
-                        timeUsagePrimaryWatermark: { seconds: timeLimitSeconds },
-                        valence:
-                            timeUsage === null
-                                ? null
-                                : timeUsage <= warningWatermarkMultiplier * timeLimitSeconds
-                                ? 'NOMINAL'
-                                : timeUsage <= timeLimitSeconds
-                                ? 'WARNING'
-                                : 'FAILURE',
-                    },
-                    {
-                        __typename: 'MemoryUsageField',
-                        memoryUsage: memoryUsage !== null ? { bytes: memoryUsage * memoryUnitBytes } : null,
-                        memoryUsageMaxRelevant: {
-                            bytes: memoryLimitBytes * limitsMarginMultiplier,
-                        },
-                        memoryUsagePrimaryWatermark: {
-                            bytes: memoryLimitBytes,
-                        },
-                        valence:
-                            memoryUsage === null
-                                ? null
-                                : memoryUsage * memoryUnitBytes <= warningWatermarkMultiplier * memoryLimitBytes
-                                ? 'NOMINAL'
-                                : memoryUsage * memoryUnitBytes <= memoryLimitBytes
-                                ? 'WARNING'
-                                : 'FAILURE',
-                    },
-                    {
-                        __typename: 'MessageField',
-                        message: new Text([{ value: `${message ?? ``}` }]),
-                    },
-                    new ScoreField(new ScoreRange(1, 2, true), score),
-                ],
-            })),
-        };
     }
 }
 
