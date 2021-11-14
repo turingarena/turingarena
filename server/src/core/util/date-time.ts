@@ -1,6 +1,6 @@
 import { gql } from 'apollo-server-core';
 import { DateTime } from 'luxon';
-import { ApiGraphQLValue } from '../../main/graphql-types';
+import { ApiOutputValue } from '../../main/graphql-types';
 import { unreachable } from '../../util/unreachable';
 
 export const dateTimeSchema = gql`
@@ -29,7 +29,7 @@ export interface DateTimeModelRecord {
     DateTime: DateModel;
 }
 
-export class ApiDateTime implements ApiGraphQLValue<'DateTime'> {
+export class ApiDateTime implements ApiOutputValue<'DateTime'> {
     constructor(readonly inner: DateTime) {}
 
     utc = this.inner.toUTC().toISO() ?? unreachable(`invalid date-time`);

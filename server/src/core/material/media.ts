@@ -1,6 +1,6 @@
 import { gql } from 'apollo-server-core';
 import { ApiContext } from '../../main/api-context';
-import { ApiGraphQLValue } from '../../main/graphql-types';
+import { ApiOutputValue } from '../../main/graphql-types';
 import { FileContent } from '../files/file-content';
 
 export const mediaSchema = gql`
@@ -44,7 +44,7 @@ export interface MediaModelRecord {
     MediaFile: MediaFile;
 }
 
-export class MediaFile implements ApiGraphQLValue<'MediaFile'> {
+export class MediaFile implements ApiOutputValue<'MediaFile'> {
     constructor(
         readonly name: string,
         readonly language: string | null,

@@ -1,6 +1,6 @@
 import { ApiObject } from '../../main/api';
 import { ContestApi } from '../contest';
-import { Archive } from '../files/archive';
+import { ArchiveFileData } from '../files/archive';
 import { FileContent } from '../files/file-content';
 import { Problem } from '../problem';
 
@@ -41,7 +41,7 @@ export class ProblemTaskInfoApi extends ApiObject {
         const { archiveId } = await this.ctx.api(ContestApi).dataLoader.load(problem.contest.id);
         const metadataPath = `${problem.name}/.task-info.json`;
 
-        const metadataProblemFile = await this.ctx.table(Archive).findOne({
+        const metadataProblemFile = await this.ctx.table(ArchiveFileData).findOne({
             where: { uuid: archiveId, path: metadataPath },
         });
 

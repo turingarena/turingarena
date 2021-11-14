@@ -2,11 +2,11 @@ import { gql } from 'apollo-server-core';
 import { ApiObject } from '../../main/api';
 import { ApiContext } from '../../main/api-context';
 import { createSimpleLoader } from '../../main/base-model';
-import { ApiGraphQLValue } from '../../main/graphql-types';
+import { ApiOutputValue } from '../../main/graphql-types';
 import { Contest, ContestApi } from '../contest';
 import { FulfillmentGradeDomain } from '../feedback/fulfillment';
 import { ScoreGradeDomain, ScoreRange } from '../feedback/score';
-import { Archive } from '../files/archive';
+import { ArchiveFileData } from '../files/archive';
 import { FileContent } from '../files/file-content';
 import { Problem } from '../problem';
 import { Award } from './award';
@@ -91,7 +91,7 @@ export const problemMaterialSchema = gql`
     }
 `;
 
-type Field = ApiGraphQLValue<'Field'>;
+type Field = ApiOutputValue<'Field'>;
 
 export interface ProblemAttachment {
     title: Text;
@@ -286,7 +286,7 @@ export class ProblemMaterial {
     async loadContent(problem: Problem, path: string) {
         const contest = new Contest(problem.contest.id, this.ctx);
         const { archiveId } = await this.ctx.api(ContestApi).dataLoader.load(contest.id);
-        const file = await this.ctx.table(Archive).findOne({
+        const file = await this.ctx.table(ArchiveFileData).findOne({
             where: { uuid: archiveId, path: `${problem.name}/${path}` },
             include: [this.ctx.table(FileContent)],
         });

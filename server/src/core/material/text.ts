@@ -1,5 +1,5 @@
 import { gql } from 'apollo-server-core';
-import { ApiGraphQLValue } from '../../main/graphql-types';
+import { ApiOutputValue } from '../../main/graphql-types';
 
 export const textSchema = gql`
     """
@@ -13,7 +13,7 @@ export const textSchema = gql`
     }
 `;
 
-export class Text implements ApiGraphQLValue<'Text'> {
+export class Text implements ApiOutputValue<'Text'> {
     constructor(readonly variants: TextVariant[]) {}
 
     variant() {

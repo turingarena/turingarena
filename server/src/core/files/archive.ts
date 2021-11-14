@@ -4,19 +4,20 @@ import * as path from 'path';
 import { AllowNull, BelongsTo, Column, DataType, ForeignKey, PrimaryKey, Table } from 'sequelize-typescript';
 import { v4 as UUIDv4 } from 'uuid';
 import { ApiObject } from '../../main/api';
+import { ApiContext } from '../../main/api-context';
 import { BaseModel } from '../../main/base-model';
-import { Resolvers } from '../../main/resolver-types';
+import { ApiOutputValue } from '../../main/graphql-types';
 import { FileContent, FileContentApi } from './file-content';
 
 export const archiveSchema = gql`
-    type ArchiveElement {
+    type ArchiveFile {
         path: String!
         content: FileContent!
     }
 
     type Archive {
         uuid: String!
-        files: [ArchiveElement!]!
+        files: [ArchiveFile!]!
     }
 `;
 
@@ -26,7 +27,7 @@ export const archiveSchema = gql`
  * NOTE: a collection is immutable, when is created files cannot be added/removed.
  */
 @Table({ timestamps: false, tableName: 'file_collection' })
-export class Archive extends BaseModel<Archive> {
+export class ArchiveFileData extends BaseModel<ArchiveFileData> {
     @PrimaryKey
     @Column(DataType.UUIDV4)
     uuid!: string;
@@ -50,7 +51,7 @@ export interface ArchiveModelRecord {
     Archive: {
         uuid: string;
     };
-    ArchiveElement: Archive;
+    ArchiveFile: ArchiveFileData;
 }
 
 export class ArchiveApi extends ApiObject {
@@ -75,7 +76,7 @@ export class ArchiveApi extends ApiObject {
                 } else {
                     console.debug(`ADD FILE ${relPath}`);
                     const content = await this.ctx.api(FileContentApi).createFromPath(path.join(directory, relPath));
-                    await this.ctx.table(Archive).create({
+                    await this.ctx.table(ArchiveFileData).create({
                         uuid,
                         contentId: content.id,
                         path: relPath,
@@ -110,7 +111,7 @@ export class ArchiveApi extends ApiObject {
 
         console.debug(`EXTRACT FILE COLLECTION uuid = ${uuid} INTO ${tempDir}`);
 
-        const collection = await this.ctx.table(Archive).findAll({ where: { uuid } });
+        const collection = await this.ctx.table(ArchiveFileData).findAll({ where: { uuid } });
 
         for (const file of collection) {
             const filePath = path.join(tempDir, file.path);
@@ -125,13 +126,12 @@ export class ArchiveApi extends ApiObject {
     }
 }
 
-export const archiveResolvers: Resolvers = {
-    Archive: {
-        uuid: f => f.uuid,
-        files: ({ uuid }, _, ctx) => ctx.table(Archive).findAll({ where: { uuid } }),
-    },
-    ArchiveElement: {
-        path: f => f.path,
-        content: (collection, _, ctx) => ctx.table(FileContent).findOne({ where: { id: collection.contentId } }),
-    },
-};
+export class Archive implements ApiOutputValue<'Archive'> {
+    constructor(readonly uuid: string, readonly ctx: ApiContext) {}
+
+    __typename = 'Archive' as const;
+
+    files() {
+        return this.ctx.table(ArchiveFileData).findAll({ where: { uuid: this.uuid } });
+    }
+}

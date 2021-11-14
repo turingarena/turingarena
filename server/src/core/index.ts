@@ -25,7 +25,7 @@ import { messageFieldSchema } from './feedback/message';
 import { ScoreModelRecord, scoreSchema } from './feedback/score';
 import { timeUsageSchema } from './feedback/time-usage';
 import { valenceSchema } from './feedback/valence';
-import { Archive, ArchiveModelRecord, archiveResolvers, archiveSchema } from './files/archive';
+import { ArchiveFileData, ArchiveModelRecord, archiveSchema } from './files/archive';
 import { FileContent, FileContentModelRecord, fileContentSchema } from './files/file-content';
 import { AwardModelRecord, awardSchema } from './material/award';
 import { MediaModelRecord, mediaSchema } from './material/media';
@@ -102,7 +102,7 @@ export const schema = gql`
 export const modelConstructors = {
     Achievement,
     ContestData,
-    Archive,
+    ArchiveFileData,
     Evaluation,
     EvaluationEvent,
     FileContent,
@@ -147,5 +147,4 @@ export type ModelRecord = unknown &
 export const resolvers: Resolvers = {
     ...mutationResolvers,
     ...queryResolvers,
-    ...archiveResolvers,
 };

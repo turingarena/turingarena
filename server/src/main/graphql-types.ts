@@ -1,6 +1,11 @@
 import { graphqlIntrospection } from '../generated/graphql.schema';
-import { GraphQLValue } from '../util/graphql-introspection-types';
+import { GraphQLInputValue, GraphQLOutputValue } from '../util/graphql-introspection-types';
 
 type AllTypes = typeof graphqlIntrospection['__schema']['types'][number];
 
-export type ApiGraphQLValue<T extends AllTypes['name']> = GraphQLValue<{ allTypes: AllTypes; context: unknown }, T>;
+export type ApiOutputValue<T extends AllTypes['name']> = GraphQLOutputValue<
+    { allTypes: AllTypes; context: unknown },
+    T
+>;
+
+export type ApiInputValue<T extends AllTypes['name']> = GraphQLInputValue<{ allTypes: AllTypes; context: unknown }, T>;

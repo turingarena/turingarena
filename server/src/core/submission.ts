@@ -4,7 +4,7 @@ import { AllowNull, Column, ForeignKey, Table } from 'sequelize-typescript';
 import { ApiObject } from '../main/api';
 import { ApiContext } from '../main/api-context';
 import { createSimpleLoader, UuidBaseModel } from '../main/base-model';
-import { ApiGraphQLValue } from '../main/graphql-types';
+import { ApiInputValue } from '../main/graphql-types';
 import { typed } from '../util/types';
 import { AchievementCache } from './achievement';
 import { Contest, ContestData } from './contest';
@@ -352,7 +352,7 @@ export interface SubmissionModelRecord {
     Submission: Submission;
 }
 
-export type SubmissionInput = ApiGraphQLValue<'SubmissionInput'>;
+export type SubmissionInput = ApiInputValue<'SubmissionInput'>;
 
 export class SubmissionCache extends ApiObject {
     dataLoader = createSimpleLoader((id: string) => this.ctx.table(SubmissionData).findByPk(id));

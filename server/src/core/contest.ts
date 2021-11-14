@@ -7,11 +7,11 @@ import * as yaml from 'yaml';
 import { ApiObject } from '../main/api';
 import { ApiContext } from '../main/api-context';
 import { createSimpleLoader, UuidBaseModel } from '../main/base-model';
-import { ApiGraphQLValue } from '../main/graphql-types';
+import { ApiOutputValue } from '../main/graphql-types';
 import { ContestMetadata } from './contest-metadata';
 import { ContestProblemAssignment } from './contest-problem-assignment';
 import { ContestProblemSet } from './contest-problem-set';
-import { Archive } from './files/archive';
+import { ArchiveFileData } from './files/archive';
 import { FileContent } from './files/file-content';
 import { Media, MediaFile } from './material/media';
 import { ProblemMaterial, ProblemMaterialApi } from './material/problem-material';
@@ -49,7 +49,7 @@ export const contestSchema = gql`
 export class ContestData extends UuidBaseModel<ContestData> {
     @AllowNull(false)
     @Column(DataType.UUIDV4)
-    @ForeignKey(() => Archive)
+    @ForeignKey(() => ArchiveFileData)
     archiveId!: string;
 
     getContest(ctx: ApiContext) {
@@ -57,7 +57,7 @@ export class ContestData extends UuidBaseModel<ContestData> {
     }
 }
 
-export type ContestStatus = ApiGraphQLValue<'ContestStatus'>;
+export type ContestStatus = ApiOutputValue<'ContestStatus'>;
 
 export interface MutationModelRecord {
     Mutation: {};
@@ -79,7 +79,7 @@ export class ContestApi extends ApiObject {
         return contests.find((c, i) => metadata[i].name === name) ?? null;
     });
 
-    private statementVariantFromFile(archiveFile: Archive): MediaFile {
+    private statementVariantFromFile(archiveFile: ArchiveFileData): MediaFile {
         const type = mime.lookup(archiveFile.path);
         const pathParts = archiveFile.path.split('/');
 
@@ -94,7 +94,7 @@ export class ContestApi extends ApiObject {
 
     async getStatement(c: Contest): Promise<Media> {
         const { archiveId } = await this.dataLoader.load(c.id);
-        const statementFiles = await this.ctx.table(Archive).findAll({
+        const statementFiles = await this.ctx.table(ArchiveFileData).findAll({
             where: {
                 uuid: archiveId,
                 path: {
@@ -147,7 +147,7 @@ export class Contest {
     async getMetadata() {
         const { archiveId } = await this.ctx.api(ContestApi).dataLoader.load(this.id);
         const metadataPath = `turingarena.yaml`;
-        const metadataProblemFile = await this.ctx.table(Archive).findOne({
+        const metadataProblemFile = await this.ctx.table(ArchiveFileData).findOne({
             where: {
                 uuid: archiveId,
                 path: metadataPath,

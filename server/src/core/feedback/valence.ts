@@ -1,5 +1,5 @@
 import { gql } from 'apollo-server-core';
-import { ApiGraphQLValue } from '../../main/graphql-types';
+import { ApiOutputValue } from '../../main/graphql-types';
 
 export const valenceSchema = gql`
     """
@@ -57,4 +57,4 @@ export const valenceSchema = gql`
     }
 `;
 
-export type Valence = ApiGraphQLValue<'Valence'>;
+export type Valence = ApiOutputValue<'Valence'>;
