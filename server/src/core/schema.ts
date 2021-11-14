@@ -1,14 +1,13 @@
 import { gql } from 'apollo-server-core';
-import { Achievement, achievementSchema } from './achievement';
+import { achievementSchema } from './achievement';
 import { authSchema } from './auth';
-import { ContestData, contestSchema } from './contest';
+import { contestSchema } from './contest';
 import { contestAwardAssignmentSchema } from './contest-award-assignment';
 import { contestProblemAssignmentSchema } from './contest-problem-assignment';
 import { contestProblemAssignmentUserTacklingSchema } from './contest-problem-assignment-user-tackling';
 import { contestProblemSetSchema } from './contest-problem-set';
 import { contestProblemSetUserTacklingSchema } from './contest-problem-set-user-tackling';
-import { EvaluationData, evaluationSchema } from './evaluation';
-import { EvaluationEvent } from './evaluation-event';
+import { evaluationSchema } from './evaluation';
 import { fieldSchema } from './feedback/field';
 import { fulfillmentSchema } from './feedback/fulfillment';
 import { gradeSchema } from './feedback/grade';
@@ -18,19 +17,19 @@ import { messageFieldSchema } from './feedback/message';
 import { scoreSchema } from './feedback/score';
 import { timeUsageSchema } from './feedback/time-usage';
 import { valenceSchema } from './feedback/valence';
-import { ArchiveFileData, archiveSchema } from './files/archive';
-import { FileContent, fileContentSchema } from './files/file-content';
+import { archiveSchema } from './files/archive';
+import { fileContentSchema } from './files/file-content';
 import { awardSchema } from './material/award';
 import { mediaSchema } from './material/media';
 import { problemMaterialSchema } from './material/problem-material';
 import { textSchema } from './material/text';
-import { Message, messageSchema } from './message';
+import { messageSchema } from './message';
 import { mutationSchema } from './mutation';
 import { participationSchema } from './participation';
 import { problemSchema } from './problem';
 import { querySchema } from './query';
-import { SubmissionData, submissionSchema } from './submission';
-import { SubmissionFile, submissionFileSchema } from './submission-file';
+import { submissionSchema } from './submission';
+import { submissionFileSchema } from './submission-file';
 import { userSchema } from './user';
 import { dateTimeSchema } from './util/date-time';
 import { contestAwardAssignmentViewSchema } from './view/contest-award-assignment-view';
@@ -84,16 +83,3 @@ export const schema = gql`
         OK
     }
 `;
-
-/** All model classes constructors. */
-export const modelConstructors = {
-    Achievement,
-    ArchiveFileData,
-    ContestData,
-    EvaluationData,
-    EvaluationEvent,
-    FileContent,
-    Message,
-    SubmissionData,
-    SubmissionFile,
-};

@@ -9,6 +9,16 @@
             "runtimeExecutable": "npm",
             "runtimeArgs": ["run", "debug:start"],
             "port": 9229
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Debug GraphQL Schema",
+            "cwd": "${workspaceFolder}/server/",
+            "runtimeExecutable": "node",
+            "runtimeArgs": ["--nolazy", "-r", "ts-node/register/transpile-only"],
+            "args": ["scripts/graphql-schema.ts"],
+            "port": 9229
         }
     ]
 }

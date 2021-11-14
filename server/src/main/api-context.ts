@@ -1,7 +1,7 @@
 import { DocumentNode, execute } from 'graphql';
 import { Model, Sequelize } from 'sequelize-typescript';
-import { modelConstructors } from '../core';
 import { AuthService } from '../core/auth';
+import { modelConstructors } from '../core/model';
 import { User, UserCache } from '../core/user';
 import { ApiObject } from './api';
 import { Config, defaultConfig } from './config';
@@ -111,7 +111,7 @@ export class RemoteApiContext extends ApiContext {
         throw new Error(`Not authorized`);
     }
 
-    schema = executableSchema;
+    schema = executableSchema();
 
     /** Run a GraphQL operation in this context. */
     async execute<T = unknown, V = {}>({ document, operationName, variableValues }: OperationRequest<V>) {

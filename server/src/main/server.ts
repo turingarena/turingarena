@@ -24,7 +24,7 @@ export function serve(config: Config) {
     const env = new ApiEnvironment(config);
 
     const server = new ApolloServer({
-        schema: executableSchema,
+        schema: executableSchema(),
         context: async ({ req }) => {
             const token = req.headers.authorization ?? '';
             const nAuthParts = 2;

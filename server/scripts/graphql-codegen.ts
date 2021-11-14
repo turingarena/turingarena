@@ -6,7 +6,6 @@ type CodegenConfig = Parameters<typeof generate>[0];
 
 const config: CodegenConfig = {
     schema: `scripts/graphql-schema.ts`,
-    documents: `src/core/*.ts`,
     overwrite: true,
     watch: process.argv.includes('--watch'),
     generates: {
