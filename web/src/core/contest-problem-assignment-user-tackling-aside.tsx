@@ -31,7 +31,7 @@ export const contestProblemAssignmentUserTacklingAsideFragment = gql`
     submissions {
       id
       officialEvaluation {
-        status
+        id
       }
     }
 
@@ -91,10 +91,8 @@ export function ContestProblemAssignmentUserTacklingAside({
               `,
             )}
           >
-            {lastSubmission.officialEvaluation?.status !== 'PENDING' && <FontAwesomeIcon icon="history" />}
-            {lastSubmission.officialEvaluation?.status === 'PENDING' && (
-              <FontAwesomeIcon icon="spinner" pulse={true} />
-            )}{' '}
+            {lastSubmission.officialEvaluation !== null && <FontAwesomeIcon icon="history" />}
+            {lastSubmission.officialEvaluation === null && <FontAwesomeIcon icon="spinner" pulse={true} />}{' '}
             {t('lastSubmission')}
           </Link>
 

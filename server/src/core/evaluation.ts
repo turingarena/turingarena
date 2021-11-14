@@ -5,25 +5,13 @@ import { ApiContext } from '../main/api-context';
 import { createByIdDataLoader, createSimpleLoader, UuidBaseModel } from '../main/base-model';
 import { ApiOutputValue } from '../main/graphql-types';
 import { Submission, SubmissionData } from './submission';
+import DataLoader = require('dataloader');
 
 export const evaluationSchema = gql`
     type Evaluation {
         id: ID!
 
         submission: Submission!
-        status: EvaluationStatus!
-    }
-
-    "Status of an evaluation"
-    enum EvaluationStatus {
-        "The evaluation is not completed yet"
-        PENDING
-        "The evaluation terminated correctly"
-        SUCCESS
-        "There was an error in this evaluation"
-        ERROR
-        "There was an error in the compilation"
-        COMPILEERROR
     }
 `;
 
@@ -35,10 +23,9 @@ export class EvaluationData extends UuidBaseModel<EvaluationData> {
     @Column
     submissionId!: string;
 
-    /** Status of this evaluation */
     @AllowNull(false)
     @Column
-    status!: EvaluationStatus;
+    eventsJson!: string;
 }
 
 export class Evaluation implements ApiOutputValue<'Evaluation'> {
@@ -50,25 +37,9 @@ export class Evaluation implements ApiOutputValue<'Evaluation'> {
         return this.ctx.cache(EvaluationCache).byId.load(this.id);
     }
 
-    async status() {
-        return (await this.getData()).status;
-    }
-
     async submission() {
         return new Submission((await this.getData()).submissionId, this.ctx);
     }
-}
-
-/** Status of this submission */
-export enum EvaluationStatus {
-    /** The evaluation not completed yet */
-    PENDING = 'PENDING',
-    /** The evaluation terminated correclty */
-    SUCCESS = 'SUCCESS',
-    /** There was an error in this evaluation */
-    ERROR = 'ERROR',
-    /** There was an error in the compilation */
-    COMPILEERROR = 'COMPILEERROR',
 }
 
 export class EvaluationCache extends ApiCache {
@@ -78,10 +49,15 @@ export class EvaluationCache extends ApiCache {
             where: { submissionId },
         }),
     );
-    officialBySubmission = createSimpleLoader((submissionId: string) =>
-        this.ctx.table(EvaluationData).findOne({
-            where: { submissionId },
-            order: [['createdAt', 'DESC']],
-        }),
+    officialBySubmission = new DataLoader((submissionIds: readonly string[]) =>
+        Promise.all(
+            submissionIds.map(
+                async submissionId =>
+                    this.ctx.table(EvaluationData).findOne({
+                        where: { submissionId },
+                        order: [['createdAt', 'DESC']],
+                    }) ?? null,
+            ),
+        ),
     );
 }

@@ -37,7 +37,7 @@ export const contestProblemAssignmentUserTacklingSubmissionListFragment = gql`
     }
     # TODO: submission files
     officialEvaluation {
-      status
+      id
     }
     summaryRow {
       ...Record
@@ -87,7 +87,7 @@ export function ContestProblemAssignmentUserTacklingSubmissionList({
                 to={`${basePath}/submission/${submission.id}`}
               >
                 {DateTime.fromISO(submission.createdAt.local).toRelative() ?? `${submission.createdAt.local}`}
-                {submission.officialEvaluation?.status === 'PENDING' && (
+                {submission.officialEvaluation === null && (
                   <span
                     className={css`
                       margin-left: auto;

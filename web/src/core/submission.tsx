@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { css } from 'emotion';
 import React from 'react';
 import { Table } from 'react-bootstrap';
-import { SubmissionFragment} from '../generated/graphql-types';
+import { SubmissionFragment } from '../generated/graphql-types';
 import { useT } from '../translations/main';
 import { FragmentProps } from '../util/fragment-props';
 import { columnFragment, getTableClassByValence, recordFragment } from './field-table';
@@ -18,7 +18,7 @@ export const submissionFragment = gql`
       local
     }
     officialEvaluation {
-      status
+      id
     }
     problem {
       id
@@ -46,21 +46,21 @@ export function Submission({ data }: FragmentProps<SubmissionFragment>) {
 
   return (
     <>
-      {data.officialEvaluation?.status === 'COMPILEERROR' ? (
-        <div
-          className={css`
-            background-color: rgba(0, 0, 0, 0.1);
-            text-align: center;
-          `}
-        >
-          {t('compileError')}
-        </div>
-      ) : (
-        <div></div>
-      )}
+      {
+        /* TODO: compile error */ false && (
+          <div
+            className={css`
+              background-color: rgba(0, 0, 0, 0.1);
+              text-align: center;
+            `}
+          >
+            {t('compileError')}
+          </div>
+        )
+      }
       <div
         className={
-          data.officialEvaluation?.status === 'PENDING'
+          data.officialEvaluation === null
             ? css`
                 background-color: rgba(0, 0, 0, 0.1);
                 text-align: center;

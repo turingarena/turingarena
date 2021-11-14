@@ -18,7 +18,6 @@ export class ContestAwardAssignmentUserTackling {
                     successful_evaluations AS (
                         SELECT e.*
                         FROM evaluations e
-                        WHERE e.status = 'SUCCESS'
                     ),
                     official_evaluations AS (
                         SELECT e.*

@@ -1,22 +1,41 @@
-import { TaskMaker } from '@edomora97/task-maker';
+import { TaskMaker, UIMessage } from '@edomora97/task-maker';
 import * as fs from 'fs';
 import * as path from 'path';
-import { bufferTime, concatAll, concatMap, toArray } from 'rxjs/operators';
+import { tap, toArray } from 'rxjs/operators';
 import { ApiContext } from '../main/api-context';
 import { Service } from '../main/service';
+import { unreachable } from '../util/unreachable';
+import { Achievement } from './achievement';
 import { ContestCache } from './contest';
-import { EvaluationData, EvaluationStatus } from './evaluation';
-import { EvaluationEvent } from './evaluation-event';
+import { EvaluationData } from './evaluation';
 import { extractArchive } from './files/archive';
+import { ProblemMaterialCache } from './material/problem-material';
 import { Submission } from './submission';
 
-export class EvaluationService extends Service {
-    run() {
-        console.log(`starting evaluation service`);
+export interface LiveEvaluation {
+    submissionId: string;
+    events: UIMessage[];
+}
 
+export class LiveEvaluationService extends Service {
+    liveEvaluations = new Map<string, LiveEvaluation>();
+
+    run() {
         return () => {
             console.log(`closing`);
         };
+    }
+
+    add(evaluation: LiveEvaluation) {
+        this.liveEvaluations.set(evaluation.submissionId, evaluation);
+    }
+
+    remove(evaluation: LiveEvaluation) {
+        this.liveEvaluations.delete(evaluation.submissionId);
+    }
+
+    getBySubmission(submissionId: string) {
+        return this.liveEvaluations.get(submissionId) ?? null;
     }
 }
 
@@ -28,14 +47,11 @@ export class EvaluationService extends Service {
 export async function evaluateSubmission(ctx: ApiContext, submission: Submission) {
     console.log(`Evaluating submission ${submission.id}`);
 
-    const evaluation = await ctx.table(EvaluationData).create({
-        submissionId: submission.id,
-        status: EvaluationStatus.PENDING,
-    });
-
     const { assignment } = await submission.getTackling();
     const { archiveId } = await ctx.cache(ContestCache).byId.load(assignment.problem.contest.id);
     const contestDir = await extractArchive(ctx, archiveId);
+
+    const material = await ctx.cache(ProblemMaterialCache).byId.load(assignment.problem.id());
 
     const problemDir = path.join(contestDir, assignment.problem.name);
 
@@ -45,80 +61,54 @@ export async function evaluateSubmission(ctx: ApiContext, submission: Submission
     const solutionPath = path.join(submissionPath, filepath);
     const taskMaker = new TaskMaker(ctx.config.taskMaker);
 
-    const { lines, child, stderr } = taskMaker.evaluate({
+    const { child, lines } = taskMaker.evaluate({
         taskDir: problemDir,
         solution: solutionPath,
     });
 
-    const bufferTimeSpanMillis = 200;
-    const maxBufferSize = 20;
+    const liveEvaluation: LiveEvaluation = { submissionId: submission.id, events: [] };
 
-    const events = await lines
-        .pipe(
-            bufferTime(bufferTimeSpanMillis, undefined, maxBufferSize),
-            concatMap(async eventsData => {
-                console.log(`Inserting ${eventsData.length} buffered events.`);
+    const evaluationService = ctx.service(LiveEvaluationService);
+    evaluationService.add(liveEvaluation);
 
-                return ctx.table(EvaluationEvent).bulkCreate(
-                    eventsData.map(data => ({
-                        evaluationId: evaluation.id,
-                        data,
-                    })),
-                );
-            }),
-            concatAll(),
-            toArray(),
-        )
-        .toPromise();
-    let jsonEvents;
     try {
-        jsonEvents = await JSON.parse(await JSON.stringify(events));
-    } catch (e) {
-        jsonEvents = await JSON.parse('');
-        console.log(e);
-    }
-    let failedToCompile = false;
-    jsonEvents.forEach(
-        (je: {
-            data: {
-                Compilation:
-                    | { status: string | { Done: { result: { status: string | { ReturnCode: number } } } } }
-                    | undefined;
-            };
-        }) => {
-            if (
-                typeof je?.data?.Compilation?.status !== 'string' &&
-                typeof je?.data?.Compilation?.status?.Done?.result?.status !== 'string' &&
-                je?.data?.Compilation?.status?.Done?.result?.status?.ReturnCode === 1
-            ) {
-                failedToCompile = true;
+        const events = await lines
+            .pipe(
+                tap(event => {
+                    liveEvaluation.events.push(event);
+                }),
+                toArray(),
+            )
+            .toPromise();
+
+        const output = await child;
+
+        if (output.code !== 0) throw unreachable(`task maker return code was not zero`);
+
+        await ctx.db.transaction(async t => {
+            const evaluation = await ctx
+                .table(EvaluationData)
+                .create({ submissionId: submission.id, eventsJson: JSON.stringify(events) });
+
+            for (const award of material.awards) {
+                for (const event of events) {
+                    if (typeof event === 'object' && 'IOISubtaskScore' in event) {
+                        const { subtask, normalized_score, score } = event.IOISubtaskScore;
+                        if (subtask === award.index) {
+                            await ctx.table(Achievement).create({
+                                evaluationId: evaluation.id,
+                                awardIndex: subtask,
+                                grade:
+                                    award.gradeDomain.__typename === 'FulfillmentGradeDomain'
+                                        ? normalized_score
+                                        : score,
+                            });
+                        }
+                    }
+                }
             }
-        },
-    );
-
-    let output;
-    try {
-        output = await child;
-    } catch (e) {
-        await evaluation.update({
-            status: EvaluationStatus.ERROR,
         });
-        const stderrContent = await stderr;
-        console.error('task-maker failed to evaluate task:', e, stderrContent);
-
-        return;
-    }
-
-    if (output.code === 0) {
-        for (const event of events) {
-            await event.storeAchievements(ctx);
-        }
-        await evaluation.update({
-            status: failedToCompile ? EvaluationStatus.COMPILEERROR : EvaluationStatus.SUCCESS,
-        });
-    } else {
-        await evaluation.update({
-            status: EvaluationStatus.ERROR,
-        });
+    } finally {
+        evaluationService.remove(liveEvaluation);
     }
 }

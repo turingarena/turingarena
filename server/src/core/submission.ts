@@ -1,3 +1,4 @@
+import { UIMessage } from '@edomora97/task-maker';
 import { gql } from 'apollo-server-core';
 import * as path from 'path';
 import { AllowNull, Column, ForeignKey, Table } from 'sequelize-typescript';
@@ -10,8 +11,8 @@ import { AchievementCache } from './achievement';
 import { Contest, ContestData } from './contest';
 import { ContestProblemAssignment } from './contest-problem-assignment';
 import { ContestProblemAssignmentUserTackling } from './contest-problem-assignment-user-tackling';
-import { Evaluation, EvaluationCache, EvaluationStatus } from './evaluation';
-import { EvaluationEventCache } from './evaluation-event';
+import { LiveEvaluationService } from './evaluate';
+import { Evaluation, EvaluationCache } from './evaluation';
 import { FulfillmentField, FulfillmentGradeDomain } from './feedback/fulfillment';
 import { ScoreField, ScoreGrade, ScoreGradeDomain, ScoreRange } from './feedback/score';
 import { extractFile } from './files/file-content';
@@ -100,7 +101,10 @@ export class Submission implements ApiOutputValue<'Submission'> {
     }
 
     async officialEvaluation() {
-        return new Evaluation((await this.getOfficialEvaluationData()).id, this.ctx);
+        const data = await this.getOfficialEvaluationData();
+        if (data === null) return null;
+
+        return new Evaluation(data.id, this.ctx);
     }
 
     async summaryRow(): Promise<ApiOutputValue<'Record'>> {
@@ -145,9 +149,7 @@ export class Submission implements ApiOutputValue<'Submission'> {
         const memoryUnitBytes = 1024;
         const warningWatermarkMultiplier = 0.2;
 
-        const evaluation = await this.getOfficialEvaluationData();
-        const events =
-            evaluation !== null ? await this.ctx.cache(EvaluationEventCache).byEvaluation.load(evaluation.id) : [];
+        const events = await this.getLiveEvaluationEvents();
 
         const testCasesData = awards.flatMap((award, awardIndex) =>
             new Array(scoring.subtasks[awardIndex].testcases).fill(0).map(() => ({
@@ -160,16 +162,32 @@ export class Submission implements ApiOutputValue<'Submission'> {
             })),
         );
 
-        for (const { data } of events) {
-            if (typeof data === 'object' && 'IOITestcaseScore' in data) {
-                const { testcase, score, message } = data.IOITestcaseScore;
+        let compilationError = null;
+
+        for (const event of events ?? []) {
+            if (
+                typeof event === 'object' &&
+                'Compilation' in event &&
+                typeof event.Compilation.status === 'object' &&
+                'Done' in event.Compilation.status &&
+                !(
+                    typeof event.Compilation.status.Done.result.status === 'object' &&
+                    'ReturnCode' in event.Compilation.status.Done.result.status &&
+                    event.Compilation.status.Done.result.status.ReturnCode === 0
+                )
+            ) {
+                compilationError = event.Compilation.status.Done.result.stderr;
+            }
+
+            if (typeof event === 'object' && 'IOITestcaseScore' in event) {
+                const { testcase, score, message } = event.IOITestcaseScore;
                 const testCaseData = testCasesData[testcase];
                 testCaseData.message = message;
                 testCaseData.score = score;
             }
 
-            if (typeof data === 'object' && 'IOIEvaluation' in data) {
-                const { status, testcase } = data.IOIEvaluation;
+            if (typeof event === 'object' && 'IOIEvaluation' in event) {
+                const { status, testcase } = event.IOIEvaluation;
                 if (typeof status === 'object' && 'Done' in status) {
                     const { cpu_time, memory } = status.Done.result.resources;
                     const testCaseData = testCasesData[testcase];
@@ -238,6 +256,16 @@ export class Submission implements ApiOutputValue<'Submission'> {
                 }),
             ),
         };
+    }
+
+    private async getLiveEvaluationEvents() {
+        const liveEvaluation = this.ctx.service(LiveEvaluationService).getBySubmission(this.id);
+        if (liveEvaluation !== null) return liveEvaluation.events;
+
+        const evaluation = await this.getOfficialEvaluationData();
+        if (evaluation !== null) return JSON.parse(evaluation.eventsJson) as UIMessage[];
+
+        return [];
     }
 
     async createdAt() {
@@ -330,13 +358,6 @@ export class Submission implements ApiOutputValue<'Submission'> {
     }
 
     async getTotalScore() {
-        if ((await this.getOfficialEvaluationData())?.status !== EvaluationStatus.SUCCESS) {
-            let scoreRange = new ScoreRange(0, 0, false);
-            await this.problem().then(p => p.totalScoreDomain().then(s => (scoreRange = s.scoreRange)));
-
-            return new ScoreGrade(scoreRange, 0);
-        }
-
         return ScoreGrade.total(
             (await this.getAwardAchievements()).flatMap(({ achievement, award: { gradeDomain } }) => {
                 if (gradeDomain instanceof ScoreGradeDomain && achievement !== undefined) {
@@ -371,12 +392,9 @@ export class SubmissionCache extends ApiCache {
         async ({ contestId, username }: { contestId: string; username: string }) => {
             // TODO: denormalize DB to make this code simpler and faster
             const submissions = await this.ctx.table(SubmissionData).findAll({ where: { username } });
-            const officialEvaluations = await Promise.all(
-                submissions.map(async s => Submission.fromId(s.id, this.ctx).getOfficialEvaluationData()),
-            );
 
             return submissions
-                .filter((s, i) => officialEvaluations[i]?.status === 'PENDING')
+                .filter((s, i) => this.ctx.service(LiveEvaluationService).getBySubmission(s.id))
                 .map(s => Submission.fromId(s.id, this.ctx));
         },
     );
