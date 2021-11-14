@@ -18,6 +18,6 @@ export async function submitLocalFile(
     problemName: string,
     solutionPath: string,
 ) {
-    const contest = await ctx.cache(ContestCache).byNameLoader.load(contestName);
+    const contest = await ctx.cache(ContestCache).byName.load(contestName);
     await Submit.submit({ username, contestId: contest.id, problemName, files: [] }, ctx, solutionPath);
 }

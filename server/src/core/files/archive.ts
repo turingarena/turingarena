@@ -6,7 +6,7 @@ import { v4 as UUIDv4 } from 'uuid';
 import { ApiContext } from '../../main/api-context';
 import { BaseModel } from '../../main/base-model';
 import { ApiOutputValue } from '../../main/graphql-types';
-import { createFileFromPath, extractFile, FileContent, FileContentApi } from './file-content';
+import { createFileFromPath, extractFile, FileContent, FileContentCache } from './file-content';
 
 export const archiveSchema = gql`
     type ArchiveFile {
@@ -109,7 +109,7 @@ export async function extractArchive(ctx: ApiContext, uuid: string) {
 
         console.debug(`EXTRACT FILE hash = ${file.contentId} IN ${filePath}`);
 
-        const content = await ctx.cache(FileContentApi).byId.load(file.contentId);
+        const content = await ctx.cache(FileContentCache).byId.load(file.contentId);
         await extractFile(content, filePath);
     }
 

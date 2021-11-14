@@ -73,12 +73,12 @@ export enum EvaluationStatus {
 
 export class EvaluationCache extends ApiCache {
     byId = createByIdDataLoader(this.ctx, EvaluationData);
-    allBySubmissionId = createSimpleLoader((submissionId: string) =>
+    bySubmission = createSimpleLoader((submissionId: string) =>
         this.ctx.table(EvaluationData).findAll({
             where: { submissionId },
         }),
     );
-    officialOf = createSimpleLoader((submissionId: string) =>
+    officialBySubmission = createSimpleLoader((submissionId: string) =>
         this.ctx.table(EvaluationData).findOne({
             where: { submissionId },
             order: [['createdAt', 'DESC']],

@@ -1,7 +1,7 @@
 import * as path from 'path';
 import { ApiContext } from '../main/api-context';
 import { Contest } from './contest';
-import { EvaluateApi } from './evaluate';
+import { evaluateSubmission } from './evaluate';
 import { createFileFromContent, createFileFromPath } from './files/file-content';
 import { Submission, SubmissionData, SubmissionInput } from './submission';
 import { SubmissionFile } from './submission-file';
@@ -41,12 +41,10 @@ export class Submit {
             });
         }
 
-        ctx.cache(EvaluateApi)
-            .evaluate(submission)
-            .catch(e => {
-                console.error(`UNEXPECTED ERROR DURING EVALUATION:`);
-                console.error(e);
-            });
+        evaluateSubmission(ctx, submission).catch(e => {
+            console.error(`UNEXPECTED ERROR DURING EVALUATION:`);
+            console.error(e);
+        });
 
         return submission;
     }

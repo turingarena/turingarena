@@ -1,4 +1,4 @@
-import { ApiCache } from '../../main/api-cache';
+import { ApiContext } from '../../main/api-context';
 import { ContestCache } from '../contest';
 import { ArchiveFileData } from '../files/archive';
 import { FileContent } from '../files/file-content';
@@ -36,23 +36,19 @@ export interface IOITaskInfo {
     }>;
 }
 
-export class ProblemTaskInfoApi extends ApiCache {
-    async getProblemTaskInfo(problem: Problem): Promise<ProblemTaskInfo> {
-        const { archiveId } = await this.ctx.cache(ContestCache).dataLoader.load(problem.contest.id);
-        const metadataPath = `${problem.name}/.task-info.json`;
+export async function getProblemTaskInfo(ctx: ApiContext, problem: Problem): Promise<ProblemTaskInfo> {
+    const { archiveId } = await ctx.cache(ContestCache).byId.load(problem.contest.id);
+    const metadataPath = `${problem.name}/.task-info.json`;
 
-        const metadataProblemFile = await this.ctx.table(ArchiveFileData).findOne({
-            where: { uuid: archiveId, path: metadataPath },
-        });
+    const metadataProblemFile = await ctx.table(ArchiveFileData).findOne({
+        where: { uuid: archiveId, path: metadataPath },
+    });
 
-        if (metadataProblemFile === null) {
-            throw new Error(`Problem ${problem.name} is missing metadata file ${metadataPath}`);
-        }
-
-        const metadataContent = await this.ctx
-            .table(FileContent)
-            .findOne({ where: { id: metadataProblemFile.contentId } });
-
-        return JSON.parse(metadataContent!.content.toString()) as ProblemTaskInfo;
+    if (metadataProblemFile === null) {
+        throw new Error(`Problem ${problem.name} is missing metadata file ${metadataPath}`);
     }
+
+    const metadataContent = await ctx.table(FileContent).findOne({ where: { id: metadataProblemFile.contentId } });
+
+    return JSON.parse(metadataContent!.content.toString()) as ProblemTaskInfo;
 }

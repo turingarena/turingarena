@@ -11,7 +11,7 @@ import { FileContent } from '../files/file-content';
 import { Problem } from '../problem';
 import { Award } from './award';
 import { Media, MediaFile } from './media';
-import { ProblemTaskInfo, ProblemTaskInfoApi } from './problem-task-info';
+import { getProblemTaskInfo, ProblemTaskInfo } from './problem-task-info';
 import { Text } from './text';
 
 export const problemMaterialSchema = gql`
@@ -296,7 +296,7 @@ export class ProblemMaterial {
 
     async loadContent(problem: Problem, path: string) {
         const contest = new Contest(problem.contest.id, this.ctx);
-        const { archiveId } = await this.ctx.cache(ContestCache).dataLoader.load(contest.id);
+        const { archiveId } = await this.ctx.cache(ContestCache).byId.load(contest.id);
         const file = await this.ctx.table(ArchiveFileData).findOne({
             where: { uuid: archiveId, path: `${problem.name}/${path}` },
             include: [this.ctx.table(FileContent)],
@@ -310,12 +310,12 @@ export class ProblemMaterial {
     }
 }
 
-export class ProblemMaterialApi extends ApiCache {
-    dataLoader = createSimpleLoader(
+export class ProblemMaterialCache extends ApiCache {
+    byId = createSimpleLoader(
         async (id: string) =>
             new ProblemMaterial(
                 Problem.fromId(id, this.ctx),
-                await this.ctx.cache(ProblemTaskInfoApi).getProblemTaskInfo(Problem.fromId(id, this.ctx)),
+                await getProblemTaskInfo(this.ctx, Problem.fromId(id, this.ctx)),
                 this.ctx,
             ),
     );

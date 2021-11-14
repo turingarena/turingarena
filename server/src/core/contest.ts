@@ -14,7 +14,7 @@ import { ContestProblemSet } from './contest-problem-set';
 import { Archive, ArchiveFileData } from './files/archive';
 import { FileContent } from './files/file-content';
 import { Media, MediaFile } from './material/media';
-import { ProblemMaterial, ProblemMaterialApi } from './material/problem-material';
+import { ProblemMaterial, ProblemMaterialCache } from './material/problem-material';
 import { Text } from './material/text';
 import { Problem } from './problem';
 import { User } from './user';
@@ -59,19 +59,6 @@ export class ContestData extends UuidBaseModel<ContestData> {
 
 export type ContestStatus = ApiOutputValue<'ContestStatus'>;
 
-export class ContestCache extends ApiCache {
-    dataLoader = createSimpleLoader((id: string) => this.ctx.table(ContestData).findByPk(id));
-
-    byNameLoader = createSimpleLoader(async (name: string) => {
-        // FIXME: should contests be addressable by name anyway?
-
-        const contests = await this.ctx.table(ContestData).findAll();
-        const metadata = await Promise.all(contests.map(d => d.getContest(this.ctx)).map(async c => c.getMetadata()));
-
-        return contests.find((c, i) => metadata[i].name === name) ?? null;
-    });
-}
-
 export class Contest implements ApiOutputValue<'Contest'> {
     constructor(readonly id: string, readonly ctx: ApiContext) {}
 
@@ -103,10 +90,10 @@ export class Contest implements ApiOutputValue<'Contest'> {
     async archive() {
         await this.ctx.authorizeAdmin();
 
-        return new Archive((await this.ctx.cache(ContestCache).dataLoader.load(this.id)).archiveId, this.ctx);
+        return new Archive((await this.ctx.cache(ContestCache).byId.load(this.id)).archiveId, this.ctx);
     }
     async statement() {
-        const { archiveId } = await this.ctx.cache(ContestCache).dataLoader.load(this.id);
+        const { archiveId } = await this.ctx.cache(ContestCache).byId.load(this.id);
         const statementFiles = await this.ctx.table(ArchiveFileData).findAll({
             where: {
                 uuid: archiveId,
@@ -120,7 +107,7 @@ export class Contest implements ApiOutputValue<'Contest'> {
     }
 
     async getMetadata() {
-        const { archiveId } = await this.ctx.cache(ContestCache).dataLoader.load(this.id);
+        const { archiveId } = await this.ctx.cache(ContestCache).byId.load(this.id);
         const metadataPath = `turingarena.yaml`;
         const metadataProblemFile = await this.ctx.table(ArchiveFileData).findOne({
             where: {
@@ -162,12 +149,12 @@ export class Contest implements ApiOutputValue<'Contest'> {
         const assignments = await this.getProblemAssignments();
 
         return Promise.all(
-            assignments.map(async ({ problem }) => this.ctx.cache(ProblemMaterialApi).dataLoader.load(problem.id())),
+            assignments.map(async ({ problem }) => this.ctx.cache(ProblemMaterialCache).byId.load(problem.id())),
         );
     }
 
     async validate() {
-        await this.ctx.cache(ContestCache).dataLoader.load(this.id);
+        await this.ctx.cache(ContestCache).byId.load(this.id);
 
         return this;
     }
@@ -208,4 +195,16 @@ export class Contest implements ApiOutputValue<'Contest'> {
             this.ctx,
         );
     }
+}
+
+export class ContestCache extends ApiCache {
+    byId = createSimpleLoader((id: string) => this.ctx.table(ContestData).findByPk(id));
+    byName = createSimpleLoader(async (name: string) => {
+        // FIXME: should contests be addressable by name anyway?
+
+        const contests = await this.ctx.table(ContestData).findAll();
+        const metadata = await Promise.all(contests.map(d => d.getContest(this.ctx)).map(async c => c.getMetadata()));
+
+        return contests.find((c, i) => metadata[i].name === name) ?? null;
+    });
 }

@@ -4,7 +4,7 @@ import { ContestAwardAssignment } from './contest-award-assignment';
 import { ContestAwardAssignmentUserTackling } from './contest-award-assignment-user-tackling';
 import { ContestProblemAssignment } from './contest-problem-assignment';
 import { ScoreGrade } from './feedback/score';
-import { ProblemMaterialApi } from './material/problem-material';
+import { ProblemMaterialCache } from './material/problem-material';
 import { SubmissionCache } from './submission';
 import { User } from './user';
 import { ContestProblemAssignmentView } from './view/contest-problem-assignment-view';
@@ -65,7 +65,7 @@ export class ContestProblemAssignmentUserTackling {
     }
 
     async submissions() {
-        return this.ctx.cache(SubmissionCache).allByTackling.load(this.id());
+        return this.ctx.cache(SubmissionCache).byTackling.load(this.id());
     }
 
     assignmentView() {
@@ -73,7 +73,7 @@ export class ContestProblemAssignmentUserTackling {
     }
 
     async getAwardTacklings() {
-        const material = await this.ctx.cache(ProblemMaterialApi).dataLoader.load(this.assignment.problem.id());
+        const material = await this.ctx.cache(ProblemMaterialCache).byId.load(this.assignment.problem.id());
 
         return material.awards.map(
             award =>

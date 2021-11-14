@@ -51,7 +51,7 @@ export class SubmissionFile extends BaseModel<SubmissionFile> {
 }
 
 export class SubmissionFileCache extends ApiCache {
-    allBySubmissionId = createSimpleLoader((submissionId: string) =>
+    bySubmission = createSimpleLoader((submissionId: string) =>
         this.ctx.table(SubmissionFile).findAll({ where: { submissionId } }),
     );
 }

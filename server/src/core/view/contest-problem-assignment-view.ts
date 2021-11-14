@@ -5,7 +5,7 @@ import { ContestProblemAssignment } from '../contest-problem-assignment';
 import { ContestProblemAssignmentUserTackling } from '../contest-problem-assignment-user-tackling';
 import { ContestProblemSet } from '../contest-problem-set';
 import { ScoreField } from '../feedback/score';
-import { ProblemMaterialApi } from '../material/problem-material';
+import { ProblemMaterialCache } from '../material/problem-material';
 import { User } from '../user';
 import { ContestAwardAssignmentView } from './contest-award-assignment-view';
 import { ContestProblemSetView } from './contest-problem-set-view';
@@ -54,7 +54,7 @@ export class ContestProblemAssignmentView {
     }
 
     async totalScoreField() {
-        const { scoreRange } = await this.ctx.cache(ProblemMaterialApi).dataLoader.load(this.assignment.problem.id());
+        const { scoreRange } = await this.ctx.cache(ProblemMaterialCache).byId.load(this.assignment.problem.id());
         const tackling = await this.tackling();
 
         const scoreGrade = tackling !== null ? await tackling.scoreGrade() : null;
@@ -63,7 +63,7 @@ export class ContestProblemAssignmentView {
     }
 
     async awardAssignmentViews() {
-        const { awards } = await this.ctx.cache(ProblemMaterialApi).dataLoader.load(this.assignment.problem.id());
+        const { awards } = await this.ctx.cache(ProblemMaterialCache).byId.load(this.assignment.problem.id());
 
         return awards.map(
             award =>

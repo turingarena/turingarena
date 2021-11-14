@@ -43,7 +43,7 @@ export class FileContent extends BaseModel<FileContent> implements ApiOutputValu
     }
 }
 
-export class FileContentApi extends ApiCache {
+export class FileContentCache extends ApiCache {
     byId = createByIdDataLoader(this.ctx, FileContent);
 }
 

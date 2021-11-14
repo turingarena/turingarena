@@ -37,11 +37,11 @@ export class User {
         return `${this.contest.id}/${this.username}`;
     }
     async name() {
-        return (await this.ctx.cache(UserCache).metadataLoader.load(this.id())).name;
+        return (await this.ctx.cache(UserCache).byId.load(this.id())).name;
     }
 
     async validate() {
-        await this.ctx.cache(UserCache).metadataLoader.load(this.id());
+        await this.ctx.cache(UserCache).byId.load(this.id());
 
         return this;
     }
@@ -54,7 +54,7 @@ export class User {
 }
 
 export class UserCache extends ApiCache {
-    metadataLoader = createSimpleLoader(async (id: string) => {
+    byId = createSimpleLoader(async (id: string) => {
         const user = User.fromId(id, this.ctx);
         const contestMetadata = await user.contest.getMetadata();
 

@@ -15,7 +15,7 @@ import { EvaluationEventCache } from './evaluation-event';
 import { FulfillmentField, FulfillmentGradeDomain } from './feedback/fulfillment';
 import { ScoreField, ScoreGrade, ScoreGradeDomain, ScoreRange } from './feedback/score';
 import { extractFile } from './files/file-content';
-import { ProblemMaterialApi } from './material/problem-material';
+import { ProblemMaterialCache } from './material/problem-material';
 import { Text } from './material/text';
 import { Participation } from './participation';
 import { Problem } from './problem';
@@ -147,7 +147,7 @@ export class Submission implements ApiOutputValue<'Submission'> {
 
         const evaluation = await this.getOfficialEvaluationData();
         const events =
-            evaluation !== null ? await this.ctx.cache(EvaluationEventCache).allByEvaluationId.load(evaluation.id) : [];
+            evaluation !== null ? await this.ctx.cache(EvaluationEventCache).byEvaluation.load(evaluation.id) : [];
 
         const testCasesData = awards.flatMap((award, awardIndex) =>
             new Array(scoring.subtasks[awardIndex].testcases).fill(0).map(() => ({
@@ -241,11 +241,11 @@ export class Submission implements ApiOutputValue<'Submission'> {
     }
 
     async createdAt() {
-        return ApiDateTime.fromJSDate((await this.ctx.cache(SubmissionCache).dataLoader.load(this.id)).createdAt);
+        return ApiDateTime.fromJSDate((await this.ctx.cache(SubmissionCache).byId.load(this.id)).createdAt);
     }
 
     async evaluations() {
-        return (await this.ctx.cache(EvaluationCache).allBySubmissionId.load(this.id)).map(
+        return (await this.ctx.cache(EvaluationCache).bySubmission.load(this.id)).map(
             ({ id }) => new Evaluation(id, this.ctx),
         );
     }
@@ -263,17 +263,17 @@ export class Submission implements ApiOutputValue<'Submission'> {
     }
 
     async validate() {
-        await this.ctx.cache(SubmissionCache).dataLoader.load(this.id);
+        await this.ctx.cache(SubmissionCache).byId.load(this.id);
 
         return this;
     }
 
     async getSubmissionFiles() {
-        return this.ctx.cache(SubmissionFileCache).allBySubmissionId.load(this.id);
+        return this.ctx.cache(SubmissionFileCache).bySubmission.load(this.id);
     }
 
     async getTackling() {
-        const { contestId, problemName, username } = await this.ctx.cache(SubmissionCache).dataLoader.load(this.id);
+        const { contestId, problemName, username } = await this.ctx.cache(SubmissionCache).byId.load(this.id);
 
         const contest = new Contest(contestId, this.ctx);
 
@@ -308,19 +308,19 @@ export class Submission implements ApiOutputValue<'Submission'> {
     }
 
     async getOfficialEvaluationData() {
-        return this.ctx.cache(EvaluationCache).officialOf.load(this.id);
+        return this.ctx.cache(EvaluationCache).officialBySubmission.load(this.id);
     }
 
     async getMaterial() {
         const { assignment } = await this.getTackling();
 
-        return this.ctx.cache(ProblemMaterialApi).dataLoader.load(assignment.problem.id());
+        return this.ctx.cache(ProblemMaterialCache).byId.load(assignment.problem.id());
     }
 
     async getAwardAchievements() {
         const evaluation = await this.getOfficialEvaluationData();
         const achievements =
-            evaluation !== null ? await this.ctx.cache(AchievementCache).allByEvaluationId.load(evaluation.id) : [];
+            evaluation !== null ? await this.ctx.cache(AchievementCache).byEvaluation.load(evaluation.id) : [];
         const material = await this.getMaterial();
 
         return material.awards.map((award, awardIndex) => ({
@@ -352,9 +352,9 @@ export class Submission implements ApiOutputValue<'Submission'> {
 export type SubmissionInput = ApiInputValue<'SubmissionInput'>;
 
 export class SubmissionCache extends ApiCache {
-    dataLoader = createSimpleLoader((id: string) => this.ctx.table(SubmissionData).findByPk(id));
+    byId = createSimpleLoader((id: string) => this.ctx.table(SubmissionData).findByPk(id));
 
-    allByTackling = createSimpleLoader(async (id: string) => {
+    byTackling = createSimpleLoader(async (id: string) => {
         const cpaut = ContestProblemAssignmentUserTackling.fromId(id, this.ctx);
         const problemName = cpaut.assignment.problem.name;
         const contestId = cpaut.assignment.contest().id;

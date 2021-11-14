@@ -6,7 +6,7 @@ import { BaseModel, createSimpleLoader } from '../main/base-model';
 import { EvaluationCache, EvaluationData } from './evaluation';
 import { FulfillmentGrade } from './feedback/fulfillment';
 import { ScoreGrade, ScoreGradeDomain } from './feedback/score';
-import { ProblemMaterialApi } from './material/problem-material';
+import { ProblemMaterialCache } from './material/problem-material';
 import { Submission } from './submission';
 
 export const achievementSchema = gql`
@@ -42,7 +42,7 @@ export class Achievement extends BaseModel<Achievement> {
         const evaluation = await ctx.cache(EvaluationCache).byId.load(this.evaluationId);
         const submission = Submission.fromId(evaluation.submissionId, ctx);
         const { assignment } = await submission.getTackling();
-        const material = await ctx.cache(ProblemMaterialApi).dataLoader.load(assignment.problem.id());
+        const material = await ctx.cache(ProblemMaterialCache).byId.load(assignment.problem.id());
 
         return material.awards[this.awardIndex];
     }
@@ -53,7 +53,7 @@ export class Achievement extends BaseModel<Achievement> {
 }
 
 export class AchievementCache extends ApiCache {
-    allByEvaluationId = createSimpleLoader((evaluationId: string) =>
+    byEvaluation = createSimpleLoader((evaluationId: string) =>
         this.ctx.table(Achievement).findAll({
             where: { evaluationId },
         }),
