@@ -37,13 +37,7 @@ export class ApiEnvironment {
  * Also, contains extra information associated with an API request (e.g., authentication data).
  */
 export abstract class ApiContext {
-    constructor(readonly environment: ApiEnvironment) {
-        // this.table(Submission).afterSync('create foreign key', () => {
-        //     this.sequelize.query(
-        //         'ALTER TABLE submissions ADD CONSTRAINTS participation_fk FOREIGN KEY (user_id, contest_id) REFERENCES participations(user_id, contest_id)',
-        //     );
-        // });
-    }
+    constructor(readonly environment: ApiEnvironment) {}
 
     abstract authorizeUser(username: string): Promise<void>;
     abstract authorizeAdmin(): Promise<void>;
