@@ -30,8 +30,8 @@ export function MemoryUsageField({ data }: FragmentProps<MemoryUsageFieldFragmen
   return (
     <span className="memory-usage">
       {data.memoryUsage !== null && displayMemoryUsage(data.memoryUsage)}
-      {data.memoryUsagePrimaryWatermark !== null && (
-        <small> / {displayMemoryUsage(data.memoryUsagePrimaryWatermark)}</small>
+      {data.memoryUsageWatermark !== null && (
+        <small> / {displayMemoryUsage(data.memoryUsageWatermark)}</small>
       )}
     </span>
   );
@@ -49,7 +49,7 @@ export const memoryUsageFieldFragment = gql`
     memoryUsageMaxRelevant {
       ...MemoryUsage
     }
-    memoryUsagePrimaryWatermark {
+    memoryUsageWatermark {
       ...MemoryUsage
     }
   }

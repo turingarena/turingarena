@@ -14,7 +14,7 @@ export const timeUsageSchema = gql`
         "Maximum value over which the precise quantity of CPU time used is not relevant anymore."
         timeUsageMaxRelevant: TimeUsage!
         "Main upper limit on this time usage to show users, if any."
-        timeUsagePrimaryWatermark: TimeUsage
+        timeUsageWatermark: TimeUsage
 
         valence: Valence
     }

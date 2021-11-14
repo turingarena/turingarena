@@ -23,7 +23,7 @@ export function TimeUsageField({ data }: FragmentProps<TimeUsageFieldFragment>) 
   return (
     <span className="time-usage">
       {data.timeUsage !== null && displayTimeUsage(data.timeUsage)}
-      {data.timeUsagePrimaryWatermark !== null && <small> / {displayTimeUsage(data.timeUsagePrimaryWatermark)}</small>}
+      {data.timeUsageWatermark !== null && <small> / {displayTimeUsage(data.timeUsageWatermark)}</small>}
     </span>
   );
 }
@@ -40,7 +40,7 @@ export const timeUsageFieldFragment = gql`
     timeUsageMaxRelevant {
       ...TimeUsage
     }
-    timeUsagePrimaryWatermark {
+    timeUsageWatermark {
       ...TimeUsage
     }
   }

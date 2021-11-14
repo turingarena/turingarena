@@ -200,7 +200,7 @@ export class Submission implements ApiOutputValue<'Submission'> {
                             __typename: 'TimeUsageField',
                             timeUsage: timeUsage !== null ? { seconds: timeUsage } : null,
                             timeUsageMaxRelevant: { seconds: timeLimitSeconds * limitsMarginMultiplier },
-                            timeUsagePrimaryWatermark: { seconds: timeLimitSeconds },
+                            timeUsageWatermark: { seconds: timeLimitSeconds },
                             valence:
                                 timeUsage === null
                                     ? null
@@ -216,7 +216,7 @@ export class Submission implements ApiOutputValue<'Submission'> {
                             memoryUsageMaxRelevant: {
                                 bytes: memoryLimitBytes * limitsMarginMultiplier,
                             },
-                            memoryUsagePrimaryWatermark: {
+                            memoryUsageWatermark: {
                                 bytes: memoryLimitBytes,
                             },
                             valence:

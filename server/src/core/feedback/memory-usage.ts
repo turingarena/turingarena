@@ -14,7 +14,7 @@ export const memoryUsageSchema = gql`
         "Maximum value over which the precise quantity of memory used is not relevant anymore."
         memoryUsageMaxRelevant: MemoryUsage!
         "Main upper limit on this memory usage to show users, if any."
-        memoryUsagePrimaryWatermark: MemoryUsage
+        memoryUsageWatermark: MemoryUsage
 
         valence: Valence
     }
