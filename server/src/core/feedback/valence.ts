@@ -12,12 +12,12 @@ export const valenceSchema = gql`
     enum Valence {
         """
         A successful result.
-        E.g., a award is given full score.
+        E.g., an award is given full score.
         """
         SUCCESS
         """
         A partial success.
-        E.g., a award is given partial score.
+        E.g., an award is given partial score.
         """
         PARTIAL
         """
@@ -26,7 +26,7 @@ export const valenceSchema = gql`
         """
         FAILURE
         """
-        The user should pay attention to something because it could result in a future failure.
+        The user should pay attention to something because it could result in a failure.
         E.g., memory usage approaches the limit.
         """
         WARNING
@@ -42,7 +42,7 @@ export const valenceSchema = gql`
         SKIPPED
         """
         An operation is not performed, because irrelevant in the context.
-        E.g., the compilation of a source program written in Python is note performed.
+        E.g., the compilation of a source program written in Python is not performed.
         """
         IGNORED
         """

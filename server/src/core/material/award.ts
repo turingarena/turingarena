@@ -8,7 +8,7 @@ export const awardSchema = gql`
     """
     Graded element in a problem.
     For every award of a problem, a progressively higher grade can be achieved during a contest.
-    Corresponds to a subtask in IOI-like problems, assuming max-by-subtask scoring.
+    Corresponds to a subtask in IOI-like problems (assuming max-by-subtask scoring strategy).
     """
     type Award {
         id: ID!

@@ -1,7 +1,7 @@
 import { gql } from 'apollo-server-core';
 
 export const fieldSchema = gql`
-    "Container for values to show users af feedback, e.g., in table cells."
+    "Container for values to show users as feedback, e.g., in table cells."
     union Field = ScoreField | FulfillmentField | MessageField | TimeUsageField | MemoryUsageField | HeaderField
 
     "A column with a title."
