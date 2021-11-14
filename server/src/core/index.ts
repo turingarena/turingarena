@@ -1,59 +1,48 @@
 import { gql } from 'apollo-server-core';
-import { Achievement, AchievementModelRecord, achievementSchema } from './achievement';
+import { Achievement, achievementSchema } from './achievement';
 import { authSchema } from './auth';
-import { ContestData, ContestModelRecord, contestSchema } from './contest';
-import { ContestAwardAssignmentModelRecord, contestAwardAssignmentSchema } from './contest-award-assignment';
-import { ContestProblemAssignmentModelRecord, contestProblemAssignmentSchema } from './contest-problem-assignment';
-import {
-    ContestProblemAssignmentUserTacklingModelRecord,
-    contestProblemAssignmentUserTacklingSchema,
-} from './contest-problem-assignment-user-tackling';
-import { ContestProblemSetModelRecord, contestProblemSetSchema } from './contest-problem-set';
-import {
-    ContestProblemSetUserTacklingModelRecord,
-    contestProblemSetUserTacklingSchema,
-} from './contest-problem-set-user-tackling';
-import { EvaluationData, EvaluationModelRecord, evaluationSchema } from './evaluation';
+import { ContestData, contestSchema } from './contest';
+import { contestAwardAssignmentSchema } from './contest-award-assignment';
+import { contestProblemAssignmentSchema } from './contest-problem-assignment';
+import { contestProblemAssignmentUserTacklingSchema } from './contest-problem-assignment-user-tackling';
+import { contestProblemSetSchema } from './contest-problem-set';
+import { contestProblemSetUserTacklingSchema } from './contest-problem-set-user-tackling';
+import { EvaluationData, evaluationSchema } from './evaluation';
 import { EvaluationEvent } from './evaluation-event';
 import { fieldSchema } from './feedback/field';
-import { FulfillmentModelRecord, fulfillmentSchema } from './feedback/fulfillment';
+import { fulfillmentSchema } from './feedback/fulfillment';
 import { gradeSchema } from './feedback/grade';
 import { headerSchema } from './feedback/header';
 import { memoryUsageSchema } from './feedback/memory-usage';
 import { messageFieldSchema } from './feedback/message';
-import { ScoreModelRecord, scoreSchema } from './feedback/score';
+import { scoreSchema } from './feedback/score';
 import { timeUsageSchema } from './feedback/time-usage';
 import { valenceSchema } from './feedback/valence';
-import { ArchiveFileData, ArchiveModelRecord, archiveSchema } from './files/archive';
-import { FileContent, FileContentModelRecord, fileContentSchema } from './files/file-content';
-import { AwardModelRecord, awardSchema } from './material/award';
-import { MediaModelRecord, mediaSchema } from './material/media';
-import { ProblemMaterialModelRecord, problemMaterialSchema } from './material/problem-material';
-import { TextModelRecord, textSchema } from './material/text';
+import { ArchiveFileData, archiveSchema } from './files/archive';
+import { FileContent, fileContentSchema } from './files/file-content';
+import { awardSchema } from './material/award';
+import { mediaSchema } from './material/media';
+import { problemMaterialSchema } from './material/problem-material';
+import { textSchema } from './material/text';
 import { Message, messageSchema } from './message';
-import { MutationModelRecord, mutationSchema } from './mutation';
-import { ParticipationModelRecord, participationSchema } from './participation';
-import { ProblemModelRecord, problemSchema } from './problem';
+import { mutationSchema } from './mutation';
+import { participationSchema } from './participation';
+import { problemSchema } from './problem';
 import { querySchema } from './query';
-import { SubmissionData, SubmissionModelRecord, submissionSchema } from './submission';
+import { SubmissionData, submissionSchema } from './submission';
 import { SubmissionFile, submissionFileSchema } from './submission-file';
-import { UserModelRecord, userSchema } from './user';
-import { DateTimeModelRecord, dateTimeSchema } from './util/date-time';
-import {
-    ContestAwardAssignmentViewModelRecord,
-    contestAwardAssignmentViewSchema,
-} from './view/contest-award-assignment-view';
-import {
-    ContestProblemAssignmentViewModelRecord,
-    contestProblemAssignmentViewSchema,
-} from './view/contest-problem-assignment-view';
-import { ContestProblemSetViewModelRecord, contestProblemSetViewSchema } from './view/contest-problem-set-view';
-import { ContestViewModelRecord, contestViewSchema } from './view/contest-view';
-import { MainViewModelRecord, mainViewSchema } from './view/main-view';
+import { userSchema } from './user';
+import { dateTimeSchema } from './util/date-time';
+import { contestAwardAssignmentViewSchema } from './view/contest-award-assignment-view';
+import { contestProblemAssignmentViewSchema } from './view/contest-problem-assignment-view';
+import { contestProblemSetViewSchema } from './view/contest-problem-set-view';
+import { contestViewSchema } from './view/contest-view';
+import { mainViewSchema } from './view/main-view';
 
 /** Full GraphQL schema document. Obtained combining schema parts from each components. */
 export const schema = gql`
     ${achievementSchema}
+    ${archiveSchema}
     ${authSchema}
     ${awardSchema}
     ${contestAwardAssignmentSchema}
@@ -69,7 +58,6 @@ export const schema = gql`
     ${dateTimeSchema}
     ${evaluationSchema}
     ${fieldSchema}
-    ${archiveSchema}
     ${fileContentSchema}
     ${fulfillmentSchema}
     ${gradeSchema}
@@ -78,6 +66,7 @@ export const schema = gql`
     ${mediaSchema}
     ${memoryUsageSchema}
     ${messageFieldSchema}
+    ${messageSchema}
     ${mutationSchema}
     ${participationSchema}
     ${problemMaterialSchema}
@@ -90,7 +79,6 @@ export const schema = gql`
     ${timeUsageSchema}
     ${userSchema}
     ${valenceSchema}
-    ${messageSchema}
 
     enum Ok {
         OK
@@ -100,43 +88,12 @@ export const schema = gql`
 /** All model classes constructors. */
 export const modelConstructors = {
     Achievement,
-    ContestData,
     ArchiveFileData,
+    ContestData,
     EvaluationData,
     EvaluationEvent,
     FileContent,
+    Message,
     SubmissionData,
     SubmissionFile,
-    Message,
 };
-
-export type ModelRecord = unknown &
-    AchievementModelRecord &
-    AwardModelRecord &
-    ContestAwardAssignmentModelRecord &
-    ContestAwardAssignmentViewModelRecord &
-    ContestModelRecord &
-    ContestProblemAssignmentModelRecord &
-    ContestProblemAssignmentUserTacklingModelRecord &
-    ContestProblemAssignmentViewModelRecord &
-    ContestProblemSetModelRecord &
-    ContestProblemSetUserTacklingModelRecord &
-    ContestProblemSetUserTacklingModelRecord &
-    ContestProblemSetViewModelRecord &
-    ContestViewModelRecord &
-    DateTimeModelRecord &
-    EvaluationModelRecord &
-    ArchiveModelRecord &
-    FileContentModelRecord &
-    FulfillmentModelRecord &
-    MainViewModelRecord &
-    MediaModelRecord &
-    MutationModelRecord &
-    ParticipationModelRecord &
-    ProblemMaterialModelRecord &
-    ProblemModelRecord &
-    ScoreModelRecord &
-    SubmissionModelRecord &
-    TextModelRecord &
-    UserModelRecord &
-    unknown;

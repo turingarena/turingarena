@@ -31,7 +31,7 @@ export enum UserRole {
 }
 
 export class User {
-    constructor(readonly contest: Contest, readonly username: string, readonly  ctx : ApiContext) {}
+    constructor(readonly contest: Contest, readonly username: string, readonly ctx: ApiContext) {}
     __typename = 'User' as const;
     id() {
         return `${this.contest.id}/${this.username}`;
@@ -63,8 +63,4 @@ export class UserCache extends ApiObject {
             this.ctx.fail(`user ${user.username} does not exist in contest ${user.contest.id}`)
         );
     });
-}
-
-export interface UserModelRecord {
-    User: User;
 }

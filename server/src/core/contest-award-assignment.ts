@@ -23,7 +23,3 @@ export class ContestAwardAssignment {
         return `${this.problemAssignment.problem.contest.id}/${this.problemAssignment.problem.name}/${this.award.index}`;
     }
 }
-
-export interface ContestAwardAssignmentModelRecord {
-    ContestAwardAssignment: ContestAwardAssignment;
-}

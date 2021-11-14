@@ -45,7 +45,3 @@ export class Award implements ApiOutputValue<'Award'> {
         return this.material.problem;
     }
 }
-
-export interface AwardModelRecord {
-    Award: Award;
-}

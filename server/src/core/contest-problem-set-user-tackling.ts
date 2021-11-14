@@ -26,7 +26,7 @@ export const contestProblemSetUserTacklingSchema = gql`
 `;
 
 export class ContestProblemSetUserTackling {
-    constructor(readonly problemSet: ContestProblemSet, readonly user: User, readonly ctx: ApiContext) { }
+    constructor(readonly problemSet: ContestProblemSet, readonly user: User, readonly ctx: ApiContext) {}
 
     __typename = 'ContestProblemSetUserTackling' as const;
 
@@ -51,8 +51,4 @@ export class ContestProblemSetUserTackling {
 
         return assignments.map(assignment => new ContestProblemAssignmentUserTackling(assignment, this.user, this.ctx));
     }
-}
-
-export interface ContestProblemSetUserTacklingModelRecord {
-    ContestProblemSetUserTackling: ContestProblemSetUserTackling;
 }

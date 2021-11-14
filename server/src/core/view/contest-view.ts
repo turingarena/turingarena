@@ -35,7 +35,3 @@ export class ContestView {
         }
     }
 }
-
-export interface ContestViewModelRecord {
-    ContestView: ContestView;
-}

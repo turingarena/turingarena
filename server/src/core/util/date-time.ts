@@ -23,12 +23,6 @@ export const dateTimeSchema = gql`
     }
 `;
 
-type DateModel = Date | DateTime | string;
-
-export interface DateTimeModelRecord {
-    DateTime: DateModel;
-}
-
 export class ApiDateTime implements ApiOutputValue<'DateTime'> {
     constructor(readonly inner: DateTime) {}
 

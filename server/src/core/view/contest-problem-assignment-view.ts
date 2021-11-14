@@ -71,7 +71,3 @@ export class ContestProblemAssignmentView {
         );
     }
 }
-
-export interface ContestProblemAssignmentViewModelRecord {
-    ContestProblemAssignmentView: ContestProblemAssignmentView;
-}

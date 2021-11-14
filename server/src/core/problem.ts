@@ -64,7 +64,3 @@ export class Problem implements ApiOutputValue<'Problem'> {
         return new ScoreGradeDomain((await this.ctx.api(ProblemMaterialApi).dataLoader.load(this.id())).scoreRange);
     }
 }
-
-export interface ProblemModelRecord {
-    Problem: Problem;
-}

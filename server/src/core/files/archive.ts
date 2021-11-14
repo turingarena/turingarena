@@ -47,13 +47,6 @@ export class ArchiveFileData extends BaseModel<ArchiveFileData> {
     getContent!: () => Promise<FileContent>;
 }
 
-export interface ArchiveModelRecord {
-    Archive: {
-        uuid: string;
-    };
-    ArchiveFile: ArchiveFileData;
-}
-
 export class ArchiveApi extends ApiObject {
     /**
      * Create a new Archive from a directory

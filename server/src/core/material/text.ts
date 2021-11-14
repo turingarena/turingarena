@@ -25,7 +25,3 @@ export interface TextVariant {
     language?: string;
     value: string;
 }
-
-export interface TextModelRecord {
-    Text: Text;
-}

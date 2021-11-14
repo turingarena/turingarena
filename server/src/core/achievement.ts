@@ -3,7 +3,7 @@ import { AllowNull, Column, ForeignKey, PrimaryKey, Table } from 'sequelize-type
 import { ApiObject } from '../main/api';
 import { ApiContext } from '../main/api-context';
 import { BaseModel, createSimpleLoader } from '../main/base-model';
-import { EvaluationData, EvaluationCache } from './evaluation';
+import { EvaluationCache, EvaluationData } from './evaluation';
 import { FulfillmentGrade } from './feedback/fulfillment';
 import { ScoreGrade, ScoreGradeDomain } from './feedback/score';
 import { ProblemMaterialApi } from './material/problem-material';
@@ -50,10 +50,6 @@ export class Achievement extends BaseModel<Achievement> {
     getFulfillmentGrade(): FulfillmentGrade {
         return new FulfillmentGrade(this.grade === 1);
     }
-}
-
-export interface AchievementModelRecord {
-    Achievement: Achievement;
 }
 
 export class AchievementCache extends ApiObject {

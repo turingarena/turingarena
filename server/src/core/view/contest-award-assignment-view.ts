@@ -58,7 +58,3 @@ export class ContestAwardAssignmentView {
         return new ContestAwardAssignmentUserTackling(this.assignment, this.user, this.ctx);
     }
 }
-
-export interface ContestAwardAssignmentViewModelRecord {
-    ContestAwardAssignmentView: ContestAwardAssignmentView;
-}

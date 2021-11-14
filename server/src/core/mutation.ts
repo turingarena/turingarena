@@ -12,10 +12,6 @@ export const mutationSchema = gql`
     }
 `;
 
-export interface MutationModelRecord {
-    Mutation: {};
-}
-
 export const mutationRoot: ApiOutputValue<'Mutation'> = {
     init: async ({}, ctx) => {
         await ctx.environment.sequelize.sync();

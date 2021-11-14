@@ -44,9 +44,3 @@ export class FulfillmentField implements ApiOutputValue<'FulfillmentField'> {
     __typename = 'FulfillmentField' as const;
     valence = this.fulfilled === null ? null : this.fulfilled ? ('SUCCESS' as const) : ('FAILURE' as const);
 }
-
-export interface FulfillmentModelRecord {
-    FulfillmentGrade: FulfillmentGrade;
-    FulfillmentGradeDomain: FulfillmentGradeDomain;
-    FulfillmentField: FulfillmentField;
-}

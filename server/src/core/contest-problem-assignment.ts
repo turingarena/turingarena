@@ -1,7 +1,7 @@
 import { gql } from 'apollo-server-core';
 import { ApiContext } from '../main/api-context';
-import { Problem } from './problem';
 import { ApiOutputValue } from '../main/graphql-types';
+import { Problem } from './problem';
 
 export const contestProblemAssignmentSchema = gql`
     type ContestProblemAssignment {
@@ -25,8 +25,4 @@ export class ContestProblemAssignment implements ApiOutputValue<'ContestProblemA
     static fromId(id: string, ctx: ApiContext): ContestProblemAssignment {
         return new ContestProblemAssignment(Problem.fromId(id, ctx));
     }
-}
-
-export interface ContestProblemAssignmentModelRecord {
-    ContestProblemAssignment: ContestProblemAssignment;
 }

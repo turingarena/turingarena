@@ -349,10 +349,6 @@ export class Submission implements ApiOutputValue<'Submission'> {
     }
 }
 
-export interface SubmissionModelRecord {
-    Submission: Submission;
-}
-
 export type SubmissionInput = ApiInputValue<'SubmissionInput'>;
 
 export class SubmissionCache extends ApiObject {

@@ -42,10 +42,6 @@ export class FileContent extends BaseModel<FileContent> implements ApiOutputValu
     }
 }
 
-export interface FileContentModelRecord {
-    FileContent: FileContent;
-}
-
 export class FileContentApi extends ApiObject {
     byId = createByIdDataLoader(this.ctx, FileContent);
 

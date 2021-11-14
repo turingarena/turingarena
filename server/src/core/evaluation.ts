@@ -71,10 +71,6 @@ export enum EvaluationStatus {
     COMPILEERROR = 'COMPILEERROR',
 }
 
-export interface EvaluationModelRecord {
-    Evaluation: EvaluationData;
-}
-
 export class EvaluationCache extends ApiObject {
     byId = createByIdDataLoader(this.ctx, EvaluationData);
     allBySubmissionId = createSimpleLoader((submissionId: string) =>

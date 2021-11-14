@@ -59,7 +59,3 @@ export class ContestProblemSetView {
         return new ScoreField(scoreRange, scoreGrade?.score ?? null);
     }
 }
-
-export interface ContestProblemSetViewModelRecord {
-    ContestProblemSetView: ContestProblemSetView;
-}

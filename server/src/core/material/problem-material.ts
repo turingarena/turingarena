@@ -310,10 +310,6 @@ export class ProblemMaterial {
     }
 }
 
-export interface ProblemMaterialModelRecord {
-    ProblemAttachment: ProblemAttachment;
-}
-
 export class ProblemMaterialApi extends ApiObject {
     dataLoader = createSimpleLoader(
         async (id: string) =>

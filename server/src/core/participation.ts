@@ -14,7 +14,3 @@ export interface Participation {
     contest: Contest;
     user: User;
 }
-
-export interface ParticipationModelRecord {
-    Participation: Participation;
-}

@@ -92,7 +92,3 @@ export class ContestProblemAssignmentUserTackling {
         return ScoreGrade.total(awardGrades.filter((g): g is ScoreGrade => g instanceof ScoreGrade));
     }
 }
-
-export interface ContestProblemAssignmentUserTacklingModelRecord {
-    ContestProblemAssignmentUserTackling: ContestProblemAssignmentUserTackling;
-}

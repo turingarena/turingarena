@@ -17,10 +17,6 @@ export interface AuthResult {
     token: string;
 }
 
-export interface AuthModelRecord {
-    AuthResult: AuthResult;
-}
-
 /**
  * Structure of the JsonWebToken
  */

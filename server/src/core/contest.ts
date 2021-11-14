@@ -59,14 +59,6 @@ export class ContestData extends UuidBaseModel<ContestData> {
 
 export type ContestStatus = ApiOutputValue<'ContestStatus'>;
 
-export interface MutationModelRecord {
-    Mutation: {};
-}
-
-export interface ContestModelRecord {
-    Contest: Contest;
-}
-
 export class ContestApi extends ApiObject {
     dataLoader = createSimpleLoader((id: string) => this.ctx.table(ContestData).findByPk(id));
 

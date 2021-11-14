@@ -88,9 +88,3 @@ export class ScoreField implements ApiOutputValue<'ScoreField'> {
             : 'FAILURE';
     }
 }
-
-export interface ScoreModelRecord {
-    ScoreGrade: ScoreGrade;
-    ScoreGradeDomain: ScoreGradeDomain;
-    ScoreField: ScoreField;
-}

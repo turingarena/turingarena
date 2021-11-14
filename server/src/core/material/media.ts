@@ -39,11 +39,6 @@ export class Media {
     }
 }
 
-export interface MediaModelRecord {
-    Media: Media;
-    MediaFile: MediaFile;
-}
-
 export class MediaFile implements ApiOutputValue<'MediaFile'> {
     constructor(
         readonly name: string,

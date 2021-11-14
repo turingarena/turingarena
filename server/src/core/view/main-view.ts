@@ -45,7 +45,3 @@ export class MainView {
             : [];
     }
 }
-
-export interface MainViewModelRecord {
-    MainView: MainView;
-}

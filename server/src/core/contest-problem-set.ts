@@ -1,9 +1,9 @@
 import { gql } from 'apollo-server-core';
 import { ApiContext } from '../main/api-context';
+import { ApiOutputValue } from '../main/graphql-types';
 import { Contest } from './contest';
 import { ContestProblemSetUserTackling } from './contest-problem-set-user-tackling';
 import { ScoreRange } from './feedback/score';
-import { ApiOutputValue } from '../main/graphql-types';
 
 export const contestProblemSetSchema = gql`
     """
@@ -50,8 +50,4 @@ export class ContestProblemSet implements ApiOutputValue<'ContestProblemSet'> {
 
         return ScoreRange.total(material.map(m => m.scoreRange));
     }
-}
-
-export interface ContestProblemSetModelRecord {
-    ContestProblemSet: ContestProblemSet;
 }
