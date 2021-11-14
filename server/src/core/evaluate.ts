@@ -92,19 +92,17 @@ export async function evaluateSubmission(ctx: ApiContext, submission: Submission
 
             for (const award of material.awards) {
                 for (const event of events) {
-                    if (typeof event === 'object' && 'IOISubtaskScore' in event) {
-                        const { subtask, normalized_score, score } = event.IOISubtaskScore;
-                        if (subtask === award.index) {
-                            await ctx.table(Achievement).create({
-                                evaluationId: evaluation.id,
-                                awardIndex: subtask,
-                                grade:
-                                    award.gradeDomain.__typename === 'FulfillmentGradeDomain'
-                                        ? normalized_score
-                                        : score,
-                            });
-                        }
-                    }
+                    if (!(typeof event === 'object' && 'IOISubtaskScore' in event)) continue;
+
+                    const { subtask, normalized_score, score } = event.IOISubtaskScore;
+                    if (subtask !== award.index) continue;
+                    if (normalized_score === 0) continue;
+
+                    await ctx.table(Achievement).create({
+                        evaluationId: evaluation.id,
+                        awardIndex: subtask,
+                        grade: award.gradeDomain.__typename === 'FulfillmentGradeDomain' ? normalized_score : score,
+                    });
                 }
             }
         });

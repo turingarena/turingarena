@@ -7,6 +7,7 @@ import { ApiContext } from '../main/api-context';
 import { createSimpleLoader, UuidBaseModel } from '../main/base-model';
 import { ApiInputValue, ApiOutputValue } from '../main/graphql-types';
 import { typed } from '../util/types';
+import { unreachable } from '../util/unreachable';
 import { AchievementCache } from './achievement';
 import { Contest, ContestData } from './contest';
 import { ContestProblemAssignment } from './contest-problem-assignment';
@@ -43,7 +44,7 @@ export const submissionSchema = gql`
         summaryRow: Record!
         feedbackTable: FeedbackTable!
 
-        totalScore: ScoreGrade!
+        totalScore: ScoreGrade
     }
 
     input SubmissionInput {
@@ -110,25 +111,32 @@ export class Submission implements ApiOutputValue<'Submission'> {
     async summaryRow(): Promise<ApiOutputValue<'Record'>> {
         const scoreRange = (await this.getMaterial()).scoreRange;
         const score = (await this.getTotalScore())?.score;
+        const achievements = await this.getAwardAchievements();
+        const material = await this.getMaterial();
 
         return {
             __typename: 'Record',
             valence:
                 score !== undefined ? (score >= scoreRange.max ? 'SUCCESS' : score > 0 ? 'PARTIAL' : 'FAILURE') : null,
             fields: [
-                ...(await this.getAwardAchievements()).map(({ award: { gradeDomain }, achievement }) => {
+                ...material.awards.map(award => {
+                    const { gradeDomain } = award;
                     if (gradeDomain instanceof ScoreGradeDomain) {
                         return new ScoreField(
                             gradeDomain.scoreRange,
-                            achievement !== undefined ? achievement.getScoreGrade(gradeDomain).score : null,
+                            achievements !== null
+                                ? achievements.get(award)?.getScoreGrade(gradeDomain).score ?? 0
+                                : null,
                         );
                     }
                     if (gradeDomain instanceof FulfillmentGradeDomain) {
                         return new FulfillmentField(
-                            achievement !== undefined ? achievement.getFulfillmentGrade().fulfilled : null,
+                            achievements !== null
+                                ? achievements.get(award)?.getFulfillmentGrade().fulfilled ?? false
+                                : null,
                         );
                     }
-                    throw new Error(`unexpected grade domain ${gradeDomain}`);
+                    throw unreachable();
                 }),
                 new ScoreField(scoreRange, score !== undefined ? score : null),
             ],
@@ -162,7 +170,7 @@ export class Submission implements ApiOutputValue<'Submission'> {
             })),
         );
 
-        let compilationError = null;
+        let compilationError: string | null = null;
 
         for (const event of events ?? []) {
             if (
@@ -176,7 +184,9 @@ export class Submission implements ApiOutputValue<'Submission'> {
                     event.Compilation.status.Done.result.status.ReturnCode === 0
                 )
             ) {
-                compilationError = event.Compilation.status.Done.result.stderr;
+                compilationError = (event.Compilation.status.Done.result.stderr ?? [])
+                    .map(x => String.fromCharCode(x))
+                    .join();
             }
 
             if (typeof event === 'object' && 'IOITestcaseScore' in event) {
@@ -194,6 +204,12 @@ export class Submission implements ApiOutputValue<'Submission'> {
                     testCaseData.memoryUsage = memory;
                     testCaseData.timeUsage = cpu_time;
                 }
+            }
+        }
+
+        if (compilationError !== null) {
+            for (const testCase of testCasesData) {
+                testCase.score = 0;
             }
         }
 
@@ -347,25 +363,34 @@ export class Submission implements ApiOutputValue<'Submission'> {
 
     async getAwardAchievements() {
         const evaluation = await this.getOfficialEvaluationData();
-        const achievements =
-            evaluation !== null ? await this.ctx.cache(AchievementCache).byEvaluation.load(evaluation.id) : [];
+        if (evaluation === null) return null;
+
+        const achievements = await this.ctx.cache(AchievementCache).byEvaluation.load(evaluation.id);
         const material = await this.getMaterial();
 
-        return material.awards.map((award, awardIndex) => ({
-            award,
-            achievement: achievements.find(a => a.awardIndex === awardIndex),
-        }));
+        return new Map(
+            material.awards.map((award, awardIndex) => [
+                award,
+                achievements.find(a => a.awardIndex === awardIndex) ?? null,
+            ]),
+        );
     }
 
     async getTotalScore() {
-        return ScoreGrade.total(
-            (await this.getAwardAchievements()).flatMap(({ achievement, award: { gradeDomain } }) => {
-                if (gradeDomain instanceof ScoreGradeDomain && achievement !== undefined) {
-                    return [achievement.getScoreGrade(gradeDomain)];
-                }
+        const achievements = await this.getAwardAchievements();
+        if (!achievements) return null;
+        const material = await this.getMaterial();
 
-                return [];
-            }),
+        return ScoreGrade.total(
+            material.awards
+                .map(award => {
+                    if (award.gradeDomain instanceof ScoreGradeDomain) {
+                        return achievements.get(award)?.getScoreGrade(award.gradeDomain) ?? null;
+                    }
+
+                    return null;
+                })
+                .flatMap(x => (x === null ? [] : [x])),
         );
     }
 }
