@@ -1,4 +1,5 @@
 import { gql } from 'apollo-server-core';
+import { Request } from 'express';
 import { sign, verify } from 'jsonwebtoken';
 import { ApiEnvironment, LocalApiContext } from '../main/api-context';
 import { loadConfig } from '../main/config';
@@ -75,7 +76,7 @@ export class AuthService {
  * @param req Request that received
  * @returns true if the JsonWebToken received in the header is legit, false otherwise
  */
-export function isLogged(req): boolean {
+export function isLogged(req: Request): boolean {
     const bearerHeader = req.headers['authorization']; //extract the Bearer from the header
     if (typeof bearerHeader !== 'undefined') {
         // bearerHeader = "bearer <token>" so it split the string on the space and take the second part
