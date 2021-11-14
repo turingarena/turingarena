@@ -4,7 +4,7 @@ import { AllowNull, Column, ForeignKey, Table } from 'sequelize-typescript';
 import { ApiObject } from '../main/api';
 import { ApiContext } from '../main/api-context';
 import { createSimpleLoader, UuidBaseModel } from '../main/base-model';
-import { ApiInputValue } from '../main/graphql-types';
+import { ApiInputValue, ApiOutputValue } from '../main/graphql-types';
 import { typed } from '../util/types';
 import { AchievementCache } from './achievement';
 import { Contest, ContestData } from './contest';
@@ -132,7 +132,7 @@ export class Submission {
         };
     }
 
-    async feedbackTable() {
+    async feedbackTable(): Promise<ApiOutputValue<'FeedbackTable'>> {
         const {
             awards,
             taskInfo,
@@ -183,58 +183,61 @@ export class Submission {
         return {
             __typename: 'FeedbackTable',
             columns: evaluationFeedbackColumns,
-            rows: testCasesData.map(({ awardIndex, score, message, timeUsage, memoryUsage }, testCaseIndex) => ({
-                valence: score !== null ? (score >= 1 ? 'SUCCESS' : score > 0 ? 'PARTIAL' : 'FAILURE') : null,
-                fields: [
-                    {
-                        __typename: 'HeaderField',
-                        index: awardIndex,
-                        title: new Text([{ value: `Subtask ${awardIndex}` }]),
-                    },
-                    {
-                        __typename: 'HeaderField',
-                        index: testCaseIndex,
-                        title: new Text([{ value: `Case ${testCaseIndex}` }]),
-                    },
-                    {
-                        __typename: 'TimeUsageField',
-                        timeUsage: timeUsage !== null ? { seconds: timeUsage } : null,
-                        timeUsageMaxRelevant: { seconds: timeLimitSeconds * limitsMarginMultiplier },
-                        timeUsagePrimaryWatermark: { seconds: timeLimitSeconds },
-                        valence:
-                            timeUsage === null
-                                ? null
-                                : timeUsage <= warningWatermarkMultiplier * timeLimitSeconds
-                                ? 'NOMINAL'
-                                : timeUsage <= timeLimitSeconds
-                                ? 'WARNING'
-                                : 'FAILURE',
-                    },
-                    {
-                        __typename: 'MemoryUsageField',
-                        memoryUsage: memoryUsage !== null ? { bytes: memoryUsage * memoryUnitBytes } : null,
-                        memoryUsageMaxRelevant: {
-                            bytes: memoryLimitBytes * limitsMarginMultiplier,
+            rows: testCasesData.map(
+                ({ awardIndex, score, message, timeUsage, memoryUsage }, testCaseIndex): ApiOutputValue<'Record'> => ({
+                    valence: score !== null ? (score >= 1 ? 'SUCCESS' : score > 0 ? 'PARTIAL' : 'FAILURE') : null,
+                    fields: [
+                        {
+                            __typename: 'HeaderField',
+                            index: awardIndex,
+                            title: new Text([{ value: `Subtask ${awardIndex}` }]),
                         },
-                        memoryUsagePrimaryWatermark: {
-                            bytes: memoryLimitBytes,
+                        {
+                            __typename: 'HeaderField',
+                            index: testCaseIndex,
+                            title: new Text([{ value: `Case ${testCaseIndex}` }]),
                         },
-                        valence:
-                            memoryUsage === null
-                                ? null
-                                : memoryUsage * memoryUnitBytes <= warningWatermarkMultiplier * memoryLimitBytes
-                                ? 'NOMINAL'
-                                : memoryUsage * memoryUnitBytes <= memoryLimitBytes
-                                ? 'WARNING'
-                                : 'FAILURE',
-                    },
-                    {
-                        __typename: 'MessageField',
-                        message: new Text([{ value: `${message ?? ``}` }]),
-                    },
-                    new ScoreField(new ScoreRange(1, 2, true), score),
-                ],
-            })),
+                        {
+                            __typename: 'TimeUsageField',
+                            timeUsage: timeUsage !== null ? { seconds: timeUsage } : null,
+                            timeUsageMaxRelevant: { seconds: timeLimitSeconds * limitsMarginMultiplier },
+                            timeUsagePrimaryWatermark: { seconds: timeLimitSeconds },
+                            valence:
+                                timeUsage === null
+                                    ? null
+                                    : timeUsage <= warningWatermarkMultiplier * timeLimitSeconds
+                                    ? 'NOMINAL'
+                                    : timeUsage <= timeLimitSeconds
+                                    ? 'WARNING'
+                                    : 'FAILURE',
+                        },
+                        {
+                            __typename: 'MemoryUsageField',
+                            memoryUsage: memoryUsage !== null ? { bytes: memoryUsage * memoryUnitBytes } : null,
+                            memoryUsageMaxRelevant: {
+                                bytes: memoryLimitBytes * limitsMarginMultiplier,
+                            },
+                            memoryUsagePrimaryWatermark: {
+                                bytes: memoryLimitBytes,
+                            },
+                            valence:
+                                memoryUsage === null
+                                    ? null
+                                    : memoryUsage * memoryUnitBytes <= warningWatermarkMultiplier * memoryLimitBytes
+                                    ? 'NOMINAL'
+                                    : memoryUsage * memoryUnitBytes <= memoryLimitBytes
+                                    ? 'WARNING'
+                                    : 'FAILURE',
+                        },
+                        {
+                            __typename: 'MessageField',
+                            message: new Text([{ value: `${message ?? ``}` }]),
+                            valence: null,
+                        },
+                        new ScoreField(new ScoreRange(1, 2, true), score),
+                    ],
+                }),
+            ),
         };
     }
 

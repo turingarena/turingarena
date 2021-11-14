@@ -256,7 +256,7 @@ export class ProblemMaterial {
         },
     ];
 
-    evaluationFeedbackColumns = [
+    evaluationFeedbackColumns: Array<ApiOutputValue<'Column'>> = [
         {
             __typename: 'HeaderColumn',
             title: new Text([{ value: 'Subtask' }]),
