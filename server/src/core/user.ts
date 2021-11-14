@@ -33,15 +33,15 @@ export enum UserRole {
 export class User {
     constructor(readonly contest: Contest, readonly username: string, readonly ctx: ApiContext) {}
     __typename = 'User' as const;
-    id() {
-        return `${this.contest.id}/${this.username}`;
-    }
+
+    id = `${this.contest.id}/${this.username}`;
+
     async name() {
-        return (await this.ctx.cache(UserCache).byId.load(this.id())).name;
+        return (await this.ctx.cache(UserCache).byId.load(this.id)).name;
     }
 
     async validate() {
-        await this.ctx.cache(UserCache).byId.load(this.id());
+        await this.ctx.cache(UserCache).byId.load(this.id);
 
         return this;
     }

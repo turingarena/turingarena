@@ -43,7 +43,7 @@ export class ContestProblemAssignmentUserTackling {
     __typename = 'ContestProblemAssignmentUserTackling' as const;
 
     id(): string {
-        return `${this.assignment.id()}/${this.user.id()}`;
+        return `${this.assignment.id()}/${this.user.id}`;
     }
 
     static fromId(id: string, ctx: ApiContext): ContestProblemAssignmentUserTackling {
