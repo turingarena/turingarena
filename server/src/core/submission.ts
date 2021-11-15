@@ -207,12 +207,6 @@ export class Submission implements ApiOutputValue<'Submission'> {
             }
         }
 
-        if (compilationError !== null) {
-            for (const testCase of testCasesData) {
-                testCase.score = 0;
-            }
-        }
-
         return {
             __typename: 'FeedbackTable',
             columns: evaluationFeedbackColumns,
