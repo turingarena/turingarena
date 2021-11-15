@@ -92,7 +92,7 @@ export function SubmissionsTable() {
             ptmp.push({
               username: ut.user.username,
               problem_name: at.assignment.problem.name,
-              score: sub.totalScore.score,
+              score: sub.totalScore?.score ?? 0,
               submission: sub.files[0].fileName,
               download: sub.files[0],
               createdate: new Date(sub.createdAt.millisFromEpochInteger + 32400000).toLocaleString(), //TODO: fix timezone offset
