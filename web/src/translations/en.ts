@@ -7,7 +7,7 @@ export const en = {
     ended: 'ended',
     submitASolution: 'Submit a solution',
     attachments: 'Attachments',
-    awards: 'Awards',
+    objectives: 'Objectives',
     downloadStatement: 'Download statement',
     chooseFile: 'Choose file',
     name: 'Name',

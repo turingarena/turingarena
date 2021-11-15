@@ -55,10 +55,10 @@ export const contestProblemAssignmentViewAsideFragment = gql`
       ...ScoreField
     }
 
-    awardAssignmentViews {
+    objectiveAssignmentViews {
       assignment {
         id
-        award {
+        objective {
           id
           name
           title {
@@ -133,9 +133,9 @@ export function ContestProblemAssignmentViewAside({
           overflow-y: auto;
         `}
       >
-        {data.awardAssignmentViews.length > 0 && (
+        {data.objectiveAssignmentViews.length > 0 && (
           <>
-            <h3 className={asideTitleCss}>{t('awards')}</h3>
+            <h3 className={asideTitleCss}>{t('objectives')}</h3>
             <div
               className={css`
                 padding: 0;
@@ -144,7 +144,7 @@ export function ContestProblemAssignmentViewAside({
                 margin-bottom: 16px;
               `}
             >
-              {data.awardAssignmentViews.map((v) => (
+              {data.objectiveAssignmentViews.map((v) => (
                 <div
                   key={v.assignment.id}
                   className={css`
@@ -169,7 +169,7 @@ export function ContestProblemAssignmentViewAside({
                       margin-top: 8px;
                     }
                   `}
-                  title={v.assignment.award.title.variant}
+                  title={v.assignment.objective.title.variant}
                 >
                   <span
                     className={css`
@@ -179,7 +179,7 @@ export function ContestProblemAssignmentViewAside({
                       flex: 1 1 auto;
                     `}
                   >
-                    {v.assignment.award.title.variant}
+                    {v.assignment.objective.title.variant}
                   </span>
                   <span className={cx(badgeCss, getBadgeCssByValence(v.gradeField?.valence ?? null))}>
                     <GradeField data={v.gradeField} />

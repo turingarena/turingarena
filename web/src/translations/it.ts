@@ -10,7 +10,7 @@ export const it: TranslationObject = {
     submitASolution: 'Invia una soluzione',
     attachments: 'Allegati',
     downloadStatement: 'Download statement',
-    awards: 'Awards',
+    objectives: 'Obiettivi',
     chooseFile: 'Scegli file',
     name: 'Nome',
     size: 'Dimensioni',

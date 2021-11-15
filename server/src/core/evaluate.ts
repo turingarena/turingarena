@@ -90,18 +90,18 @@ export async function evaluateSubmission(ctx: ApiContext, submission: Submission
                 .table(EvaluationData)
                 .create({ submissionId: submission.id, eventsJson: JSON.stringify(events) });
 
-            for (const award of material.awards) {
+            for (const objective of material.objectives) {
                 for (const event of events) {
                     if (!(typeof event === 'object' && 'IOISubtaskScore' in event)) continue;
 
                     const { subtask, normalized_score, score } = event.IOISubtaskScore;
-                    if (subtask !== award.index) continue;
+                    if (subtask !== objective.index) continue;
                     if (normalized_score === 0) continue;
 
                     await ctx.table(Achievement).create({
                         evaluationId: evaluation.id,
-                        awardIndex: subtask,
-                        grade: award.gradeDomain.__typename === 'FulfillmentGradeDomain' ? normalized_score : score,
+                        objectiveIndex: subtask,
+                        grade: objective.gradeDomain.__typename === 'FulfillmentGradeDomain' ? normalized_score : score,
                     });
                 }
             }

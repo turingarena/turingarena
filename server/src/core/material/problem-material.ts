@@ -10,7 +10,7 @@ import { ScoreGradeDomain, ScoreRange } from '../feedback/score';
 import { ArchiveFileData } from '../files/archive';
 import { FileContent } from '../files/file-content';
 import { Problem } from '../problem';
-import { Award } from './award';
+import { Objective } from './objective';
 import { Media, MediaFile } from './media';
 import { getProblemTaskInfo, ProblemTaskInfo } from './problem-task-info';
 import { Text } from './text';
@@ -25,8 +25,8 @@ export const problemMaterialSchema = gql`
         attachments: [ProblemAttachment!]!
         "List of attributes of this problem"
         attributes: [ProblemAttribute!]!
-        "List of awards of this problem"
-        awards: [Award]!
+        "List of objectives of this problem"
+        objectives: [Objective]!
         "List of fields that constitute a submission for this problem"
         submissionFields: [SubmissionField!]!
         "List of types that can be associated to files in a submission for this problem"
@@ -239,21 +239,21 @@ export class ProblemMaterial {
         },
     ];
 
-    awards = this.taskInfo.IOI.scoring.subtasks.map((subtask, index): Award => new Award(this, index));
+    objectives = this.taskInfo.IOI.scoring.subtasks.map((subtask, index): Objective => new Objective(this, index));
 
     submissionFields = [{ name: 'solution', title: new Text([{ value: 'Solution' }]) }];
     submissionFileTypes = Object.values(languages);
     submissionFileTypeRules = fileRules;
 
     scoreRange = ScoreRange.total(
-        this.awards
+        this.objectives
             .map(a => a.gradeDomain)
             .filter((d): d is ScoreGradeDomain => d instanceof ScoreGradeDomain)
             .map(d => d.scoreRange),
     );
 
     submissionListColumns: Array<ApiOutputValue<'Column'>> = [
-        ...this.awards.map(({ title, gradeDomain }) => {
+        ...this.objectives.map(({ title, gradeDomain }) => {
             if (gradeDomain instanceof ScoreGradeDomain) {
                 return { __typename: 'ScoreColumn' as const, title };
             }

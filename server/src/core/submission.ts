@@ -111,7 +111,7 @@ export class Submission implements ApiOutputValue<'Submission'> {
     async summaryRow(): Promise<ApiOutputValue<'Record'>> {
         const scoreRange = (await this.getMaterial()).scoreRange;
         const score = (await this.getTotalScore())?.score;
-        const achievements = await this.getAwardAchievements();
+        const achievements = await this.getObjectiveAchievements();
         const material = await this.getMaterial();
 
         return {
@@ -119,20 +119,20 @@ export class Submission implements ApiOutputValue<'Submission'> {
             valence:
                 score !== undefined ? (score >= scoreRange.max ? 'SUCCESS' : score > 0 ? 'PARTIAL' : 'FAILURE') : null,
             fields: [
-                ...material.awards.map(award => {
-                    const { gradeDomain } = award;
+                ...material.objectives.map(objective => {
+                    const { gradeDomain } = objective;
                     if (gradeDomain instanceof ScoreGradeDomain) {
                         return new ScoreField(
                             gradeDomain.scoreRange,
                             achievements !== null
-                                ? achievements.get(award)?.getScoreGrade(gradeDomain).score ?? 0
+                                ? achievements.get(objective)?.getScoreGrade(gradeDomain).score ?? 0
                                 : null,
                         );
                     }
                     if (gradeDomain instanceof FulfillmentGradeDomain) {
                         return new FulfillmentField(
                             achievements !== null
-                                ? achievements.get(award)?.getFulfillmentGrade().fulfilled ?? false
+                                ? achievements.get(objective)?.getFulfillmentGrade().fulfilled ?? false
                                 : null,
                         );
                     }
@@ -145,7 +145,7 @@ export class Submission implements ApiOutputValue<'Submission'> {
 
     async feedbackTable(): Promise<ApiOutputValue<'FeedbackTable'>> {
         const {
-            awards,
+            objectives,
             taskInfo,
             evaluationFeedbackColumns,
             timeLimitSeconds,
@@ -159,10 +159,10 @@ export class Submission implements ApiOutputValue<'Submission'> {
 
         const events = await this.getLiveEvaluationEvents();
 
-        const testCasesData = awards.flatMap((award, awardIndex) =>
-            new Array(scoring.subtasks[awardIndex].testcases).fill(0).map(() => ({
-                award,
-                awardIndex,
+        const testCasesData = objectives.flatMap((objective, objectiveIndex) =>
+            new Array(scoring.subtasks[objectiveIndex].testcases).fill(0).map(() => ({
+                objective,
+                objectiveIndex,
                 timeUsage: null as number | null,
                 memoryUsage: null as number | null,
                 message: null as string | null,
@@ -217,13 +217,13 @@ export class Submission implements ApiOutputValue<'Submission'> {
             __typename: 'FeedbackTable',
             columns: evaluationFeedbackColumns,
             rows: testCasesData.map(
-                ({ awardIndex, score, message, timeUsage, memoryUsage }, testCaseIndex): ApiOutputValue<'Record'> => ({
+                ({ objectiveIndex, score, message, timeUsage, memoryUsage }, testCaseIndex): ApiOutputValue<'Record'> => ({
                     valence: score !== null ? (score >= 1 ? 'SUCCESS' : score > 0 ? 'PARTIAL' : 'FAILURE') : null,
                     fields: [
                         {
                             __typename: 'HeaderField',
-                            index: awardIndex,
-                            title: new Text([{ value: `Subtask ${awardIndex}` }]),
+                            index: objectiveIndex,
+                            title: new Text([{ value: `Subtask ${objectiveIndex}` }]),
                         },
                         {
                             __typename: 'HeaderField',
@@ -361,7 +361,7 @@ export class Submission implements ApiOutputValue<'Submission'> {
         return this.ctx.cache(ProblemMaterialCache).byId.load(assignment.problem.id());
     }
 
-    async getAwardAchievements() {
+    async getObjectiveAchievements() {
         const evaluation = await this.getOfficialEvaluationData();
         if (evaluation === null) return null;
 
@@ -369,23 +369,23 @@ export class Submission implements ApiOutputValue<'Submission'> {
         const material = await this.getMaterial();
 
         return new Map(
-            material.awards.map((award, awardIndex) => [
-                award,
-                achievements.find(a => a.awardIndex === awardIndex) ?? null,
+            material.objectives.map((objective, objectiveIndex) => [
+                objective,
+                achievements.find(a => a.objectiveIndex === objectiveIndex) ?? null,
             ]),
         );
     }
 
     async getTotalScore() {
-        const achievements = await this.getAwardAchievements();
+        const achievements = await this.getObjectiveAchievements();
         if (!achievements) return null;
         const material = await this.getMaterial();
 
         return ScoreGrade.total(
-            material.awards
-                .map(award => {
-                    if (award.gradeDomain instanceof ScoreGradeDomain) {
-                        return achievements.get(award)?.getScoreGrade(award.gradeDomain) ?? null;
+            material.objectives
+                .map(objective => {
+                    if (objective.gradeDomain instanceof ScoreGradeDomain) {
+                        return achievements.get(objective)?.getScoreGrade(objective.gradeDomain) ?? null;
                     }
 
                     return null;

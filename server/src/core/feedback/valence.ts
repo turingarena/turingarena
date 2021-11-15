@@ -12,17 +12,17 @@ export const valenceSchema = gql`
     enum Valence {
         """
         A successful result.
-        E.g., an award is given full score.
+        E.g., an objective is given full score.
         """
         SUCCESS
         """
         A partial success.
-        E.g., an award is given partial score.
+        E.g., an objective is given partial score.
         """
         PARTIAL
         """
         A failed result.
-        E.g., time limit exceeded causes the loss of an award.
+        E.g., time limit exceeded causes the loss of an objective.
         """
         FAILURE
         """
@@ -37,7 +37,7 @@ export const valenceSchema = gql`
         NOMINAL
         """
         An operation is not performed, because a previous _success_ makes it unnecessary.
-        E.g., an award is not evaluated because already achieved.
+        E.g., an objective is not evaluated because already achieved.
         """
         SKIPPED
         """

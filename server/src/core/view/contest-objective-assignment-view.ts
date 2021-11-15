@@ -1,40 +1,40 @@
 import { gql } from 'apollo-server-core';
 import { ApiContext } from '../../main/api-context';
-import { ContestAwardAssignment } from '../contest-award-assignment';
-import { ContestAwardAssignmentUserTackling } from '../contest-award-assignment-user-tackling';
+import { ContestObjectiveAssignment } from '../contest-objective-assignment';
+import { ContestObjectiveAssignmentUserTackling } from '../contest-objective-assignment-user-tackling';
 import { FulfillmentField, FulfillmentGradeDomain } from '../feedback/fulfillment';
 import { ScoreField, ScoreGradeDomain } from '../feedback/score';
 import { User } from '../user';
 import { ContestProblemAssignmentView } from './contest-problem-assignment-view';
 
-export const contestAwardAssignmentViewSchema = gql`
+export const contestObjectiveAssignmentViewSchema = gql`
     """
-    Refers to a given award of a problem, assigned in a given contest, as seen by a given user or anonymously.
+    Refers to a given objective of a problem, assigned in a given contest, as seen by a given user or anonymously.
     """
-    type ContestAwardAssignmentView {
-        "Same award assigned in same contest."
-        assignment: ContestAwardAssignment!
+    type ContestObjectiveAssignmentView {
+        "Same objective assigned in same contest."
+        assignment: ContestObjectiveAssignment!
         "User viewing this, or null if anonymous."
         user: User
-        "The problem containing the given award, assigned in same contest, as seen by same user or anonymously"
+        "The problem containing the given objective, assigned in same contest, as seen by same user or anonymously"
         problemAssignmentView: ContestProblemAssignmentView!
 
-        "Current grade for this award in this contest, to show to the given user."
+        "Current grade for this objective in this contest, to show to the given user."
         gradeField: GradeField!
     }
 `;
 
-export class ContestAwardAssignmentView {
-    constructor(readonly assignment: ContestAwardAssignment, readonly user: User | null, readonly ctx: ApiContext) {}
+export class ContestObjectiveAssignmentView {
+    constructor(readonly assignment: ContestObjectiveAssignment, readonly user: User | null, readonly ctx: ApiContext) {}
 
-    __typename = 'ContestAwardAssignmentView' as const;
+    __typename = 'ContestObjectiveAssignmentView' as const;
 
     async problemAssignmentView() {
         return new ContestProblemAssignmentView(this.assignment.problemAssignment, this.user, this.ctx);
     }
 
     async gradeField() {
-        const { gradeDomain: domain } = this.assignment.award;
+        const { gradeDomain: domain } = this.assignment.objective;
         const tackling = this.getTackling();
 
         if (domain instanceof FulfillmentGradeDomain) {
@@ -55,6 +55,6 @@ export class ContestAwardAssignmentView {
     getTackling() {
         if (this.user === null) return null;
 
-        return new ContestAwardAssignmentUserTackling(this.assignment, this.user, this.ctx);
+        return new ContestObjectiveAssignmentUserTackling(this.assignment, this.user, this.ctx);
     }
 }

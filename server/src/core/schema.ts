@@ -2,7 +2,7 @@ import { gql } from 'apollo-server-core';
 import { achievementSchema } from './achievement';
 import { authSchema } from './auth';
 import { contestSchema } from './contest';
-import { contestAwardAssignmentSchema } from './contest-award-assignment';
+import { contestObjectiveAssignmentSchema } from './contest-objective-assignment';
 import { contestProblemAssignmentSchema } from './contest-problem-assignment';
 import { contestProblemAssignmentUserTacklingSchema } from './contest-problem-assignment-user-tackling';
 import { contestProblemSetSchema } from './contest-problem-set';
@@ -19,7 +19,7 @@ import { timeUsageSchema } from './feedback/time-usage';
 import { valenceSchema } from './feedback/valence';
 import { archiveSchema } from './files/archive';
 import { fileContentSchema } from './files/file-content';
-import { awardSchema } from './material/award';
+import { objectiveSchema } from './material/objective';
 import { mediaSchema } from './material/media';
 import { problemMaterialSchema } from './material/problem-material';
 import { textSchema } from './material/text';
@@ -32,7 +32,7 @@ import { submissionSchema } from './submission';
 import { submissionFileSchema } from './submission-file';
 import { userSchema } from './user';
 import { dateTimeSchema } from './util/date-time';
-import { contestAwardAssignmentViewSchema } from './view/contest-award-assignment-view';
+import { contestObjectiveAssignmentViewSchema } from './view/contest-objective-assignment-view';
 import { contestProblemAssignmentViewSchema } from './view/contest-problem-assignment-view';
 import { contestProblemSetViewSchema } from './view/contest-problem-set-view';
 import { contestViewSchema } from './view/contest-view';
@@ -43,9 +43,9 @@ export const schema = gql`
     ${achievementSchema}
     ${archiveSchema}
     ${authSchema}
-    ${awardSchema}
-    ${contestAwardAssignmentSchema}
-    ${contestAwardAssignmentViewSchema}
+    ${objectiveSchema}
+    ${contestObjectiveAssignmentSchema}
+    ${contestObjectiveAssignmentViewSchema}
     ${contestProblemAssignmentSchema}
     ${contestProblemAssignmentUserTacklingSchema}
     ${contestProblemAssignmentViewSchema}

@@ -1,13 +1,13 @@
 import { gql } from 'apollo-server-core';
 import { ApiContext } from '../../main/api-context';
-import { ContestAwardAssignment } from '../contest-award-assignment';
+import { ContestObjectiveAssignment } from '../contest-objective-assignment';
 import { ContestProblemAssignment } from '../contest-problem-assignment';
 import { ContestProblemAssignmentUserTackling } from '../contest-problem-assignment-user-tackling';
 import { ContestProblemSet } from '../contest-problem-set';
 import { ScoreField } from '../feedback/score';
 import { ProblemMaterialCache } from '../material/problem-material';
 import { User } from '../user';
-import { ContestAwardAssignmentView } from './contest-award-assignment-view';
+import { ContestObjectiveAssignmentView } from './contest-objective-assignment-view';
 import { ContestProblemSetView } from './contest-problem-set-view';
 
 export const contestProblemAssignmentViewSchema = gql`
@@ -33,8 +33,8 @@ export const contestProblemAssignmentViewSchema = gql`
         "Current score seen by the user for this problem in this contest."
         totalScoreField: ScoreField!
 
-        "Awards of this problem assigned in same contest as seen by same user (or anonymously)"
-        awardAssignmentViews: [ContestAwardAssignmentView!]!
+        "Objectives of this problem assigned in same contest as seen by same user (or anonymously)"
+        objectiveAssignmentViews: [ContestObjectiveAssignmentView!]!
     }
 `;
 
@@ -62,12 +62,12 @@ export class ContestProblemAssignmentView {
         return new ScoreField(scoreRange, scoreGrade?.score ?? null);
     }
 
-    async awardAssignmentViews() {
-        const { awards } = await this.ctx.cache(ProblemMaterialCache).byId.load(this.assignment.problem.id());
+    async objectiveAssignmentViews() {
+        const { objectives } = await this.ctx.cache(ProblemMaterialCache).byId.load(this.assignment.problem.id());
 
-        return awards.map(
-            award =>
-                new ContestAwardAssignmentView(new ContestAwardAssignment(this.assignment, award), this.user, this.ctx),
+        return objectives.map(
+            objective =>
+                new ContestObjectiveAssignmentView(new ContestObjectiveAssignment(this.assignment, objective), this.user, this.ctx),
         );
     }
 }

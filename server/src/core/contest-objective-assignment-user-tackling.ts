@@ -1,15 +1,15 @@
 import { QueryTypes } from 'sequelize';
 import { ApiContext } from '../main/api-context';
 import { Achievement } from './achievement';
-import { ContestAwardAssignment } from './contest-award-assignment';
+import { ContestObjectiveAssignment } from './contest-objective-assignment';
 import { FulfillmentGrade, FulfillmentGradeDomain } from './feedback/fulfillment';
 import { ScoreGrade, ScoreGradeDomain } from './feedback/score';
 import { User } from './user';
 
-export class ContestAwardAssignmentUserTackling {
-    constructor(readonly assignment: ContestAwardAssignment, readonly user: User, readonly ctx: ApiContext) {}
+export class ContestObjectiveAssignmentUserTackling {
+    constructor(readonly assignment: ContestObjectiveAssignment, readonly user: User, readonly ctx: ApiContext) {}
 
-    __typename = 'ContestAwardAssignmentUserTackling' as const;
+    __typename = 'ContestObjectiveAssignmentUserTackling' as const;
 
     async getBestAchievement() {
         const achievements = await this.ctx.db.query<Achievement>(
@@ -45,7 +45,7 @@ export class ContestAwardAssignmentUserTackling {
                             WHERE a2.username = a.username
                             AND a2.contest_id = a.contest_id
                             AND a2.problem_name = a.problem_name
-                            AND a2.award_index = a.award_index
+                            AND a2.objective_index = a.objective_index
                             ORDER BY a2.grade DESC, a2.created_at
                             LIMIT 1
                         )
@@ -55,14 +55,14 @@ export class ContestAwardAssignmentUserTackling {
                 WHERE username = $username
                     AND contest_id = $contestId
                     AND problem_name = $problemName
-                    AND award_index = $awardIndex;
+                    AND objective_index = $objectiveIndex;
             `,
             {
                 bind: {
                     contestId: this.assignment.problemAssignment.problem.contest.id,
                     problemName: this.assignment.problemAssignment.problem.name,
                     username: this.user.username,
-                    awardIndex: this.assignment.award.index,
+                    objectiveIndex: this.assignment.objective.index,
                 },
                 type: QueryTypes.SELECT,
                 mapToModel: true,
@@ -86,7 +86,7 @@ export class ContestAwardAssignmentUserTackling {
     }
 
     async getGrade() {
-        const { gradeDomain: domain } = this.assignment.award;
+        const { gradeDomain: domain } = this.assignment.objective;
         if (domain instanceof FulfillmentGradeDomain) return (await this.getFulfillmentGrade()) ?? null;
         if (domain instanceof ScoreGradeDomain) return (await this.getScoreGrade(domain)) ?? null;
         throw new Error(`unexpected grade domain ${domain}`);

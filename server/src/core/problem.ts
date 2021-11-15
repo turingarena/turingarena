@@ -42,8 +42,8 @@ export class Problem implements ApiOutputValue<'Problem'> {
     async attributes() {
         return (await this.ctx.cache(ProblemMaterialCache).byId.load(this.id())).attributes;
     }
-    async awards() {
-        return (await this.ctx.cache(ProblemMaterialCache).byId.load(this.id())).awards;
+    async objectives() {
+        return (await this.ctx.cache(ProblemMaterialCache).byId.load(this.id())).objectives;
     }
     async submissionFields() {
         return (await this.ctx.cache(ProblemMaterialCache).byId.load(this.id())).submissionFields;

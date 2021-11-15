@@ -5,27 +5,27 @@ import { ScoreGradeDomain, ScoreRange } from '../feedback/score';
 import { ProblemMaterial } from './problem-material';
 import { Text } from './text';
 
-export const awardSchema = gql`
+export const objectiveSchema = gql`
     """
     Graded element in a problem.
-    For every award of a problem, a progressively higher grade can be achieved during a contest.
+    For every objective of a problem, a progressively higher grade can be achieved during a contest.
     Corresponds to a subtask in IOI-like problems (assuming max-by-subtask scoring strategy).
     """
-    type Award {
+    type Objective {
         id: ID!
 
         problem: Problem!
 
-        "Name used to identify this award in this problem. Only for admins."
+        "Name used to identify this objective in this problem. Only for admins."
         name: String!
-        "Name of this award to display to users."
+        "Name of this objective to display to users."
         title: Text!
-        "Possible grades that can be achieved for this award"
+        "Possible grades that can be achieved for this objective"
         gradeDomain: GradeDomain!
     }
 `;
 
-export class Award implements ApiOutputValue<'Award'> {
+export class Objective implements ApiOutputValue<'Objective'> {
     constructor(readonly material: ProblemMaterial, readonly index: number) {}
 
     private readonly subtaskInfo = this.material.taskInfo.IOI.scoring.subtasks[this.index];

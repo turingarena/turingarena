@@ -1,7 +1,7 @@
 import { gql } from 'apollo-server-core';
 import { ApiContext } from '../main/api-context';
-import { ContestAwardAssignment } from './contest-award-assignment';
-import { ContestAwardAssignmentUserTackling } from './contest-award-assignment-user-tackling';
+import { ContestObjectiveAssignment } from './contest-objective-assignment';
+import { ContestObjectiveAssignmentUserTackling } from './contest-objective-assignment-user-tackling';
 import { ContestProblemAssignment } from './contest-problem-assignment';
 import { ScoreGrade } from './feedback/score';
 import { ProblemMaterialCache } from './material/problem-material';
@@ -72,13 +72,13 @@ export class ContestProblemAssignmentUserTackling {
         return new ContestProblemAssignmentView(this.assignment, this.user, this.ctx);
     }
 
-    async getAwardTacklings() {
+    async getObjectiveTacklings() {
         const material = await this.ctx.cache(ProblemMaterialCache).byId.load(this.assignment.problem.id());
 
-        return material.awards.map(
-            award =>
-                new ContestAwardAssignmentUserTackling(
-                    new ContestAwardAssignment(this.assignment, award),
+        return material.objectives.map(
+            objective =>
+                new ContestObjectiveAssignmentUserTackling(
+                    new ContestObjectiveAssignment(this.assignment, objective),
                     this.user,
                     this.ctx,
                 ),
@@ -86,9 +86,9 @@ export class ContestProblemAssignmentUserTackling {
     }
 
     async scoreGrade() {
-        const awardTacklings = await this.getAwardTacklings();
-        const awardGrades = await Promise.all(awardTacklings.map(t2 => t2.getGrade()));
+        const objectiveTacklings = await this.getObjectiveTacklings();
+        const objectiveGrades = await Promise.all(objectiveTacklings.map(t2 => t2.getGrade()));
 
-        return ScoreGrade.total(awardGrades.filter((g): g is ScoreGrade => g instanceof ScoreGrade));
+        return ScoreGrade.total(objectiveGrades.filter((g): g is ScoreGrade => g instanceof ScoreGrade));
     }
 }

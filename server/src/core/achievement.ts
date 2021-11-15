@@ -12,7 +12,7 @@ import { Submission } from './submission';
 export const achievementSchema = gql`
     type Achievement {
         evaluation: Submission!
-        awardAssignment: ContestAwardAssignment!
+        objectiveAssignment: ContestObjectiveAssignment!
         grade: Grade!
     }
 `;
@@ -29,7 +29,7 @@ export class Achievement extends BaseModel<Achievement> {
     @PrimaryKey
     @AllowNull(false)
     @Column
-    awardIndex!: number;
+    objectiveIndex!: number;
 
     @Column
     grade!: number;
@@ -38,13 +38,13 @@ export class Achievement extends BaseModel<Achievement> {
         return new ScoreGrade(scoreRange, this.grade);
     }
 
-    async getAward(ctx: ApiContext) {
+    async getObjective(ctx: ApiContext) {
         const evaluation = await ctx.cache(EvaluationCache).byId.load(this.evaluationId);
         const submission = Submission.fromId(evaluation.submissionId, ctx);
         const { assignment } = await submission.getTackling();
         const material = await ctx.cache(ProblemMaterialCache).byId.load(assignment.problem.id());
 
-        return material.awards[this.awardIndex];
+        return material.objectives[this.objectiveIndex];
     }
 
     getFulfillmentGrade(): FulfillmentGrade {
