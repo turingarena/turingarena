@@ -3,8 +3,8 @@ import { ApiContext } from '../main/api-context';
 import { ApiOutputValue } from '../main/graphql-types';
 import { ObjectiveInstance } from './objective-instance';
 import { ObjectiveTackling } from './objective-tackling';
-import { FulfillmentField, FulfillmentGradeDomain } from './feedback/fulfillment';
-import { ScoreField, ScoreGradeDomain } from './feedback/score';
+import { FulfillmentField, FulfillmentGradeDomain } from './data/fulfillment';
+import { ScoreField, ScoreGradeDomain } from './data/score';
 import { User } from './user';
 import { ProblemView } from './problem-view';
 

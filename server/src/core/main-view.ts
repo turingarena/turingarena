@@ -2,7 +2,7 @@ import { gql } from 'apollo-server-core';
 import { ApiContext } from '../main/api-context';
 import { Contest } from './contest';
 import { ContestView } from './contest-view';
-import { Text } from './text';
+import { Text } from './data/text';
 import { SubmissionCache } from './submission';
 import { User } from './user';
 

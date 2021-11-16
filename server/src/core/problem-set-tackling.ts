@@ -2,7 +2,7 @@ import { gql } from 'apollo-server-core';
 import { ApiContext } from '../main/api-context';
 import { ProblemTackling } from './problem-tackling';
 import { ProblemSetDefinition } from './problem-set-definition';
-import { ScoreGrade } from './feedback/score';
+import { ScoreGrade } from './data/score';
 import { User } from './user';
 import { ProblemSetView } from './problem-set-view';
 

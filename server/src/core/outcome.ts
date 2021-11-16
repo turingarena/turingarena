@@ -4,8 +4,8 @@ import { ApiCache } from '../main/api-cache';
 import { ApiContext } from '../main/api-context';
 import { BaseModel, createSimpleLoader } from '../main/base-model';
 import { EvaluationCache, EvaluationData } from './evaluation';
-import { FulfillmentGrade } from './feedback/fulfillment';
-import { ScoreGrade, ScoreGradeDomain } from './feedback/score';
+import { FulfillmentGrade } from './data/fulfillment';
+import { ScoreGrade, ScoreGradeDomain } from './data/score';
 import { ProblemMaterialCache } from './problem-definition-material';
 import { Submission } from './submission';
 

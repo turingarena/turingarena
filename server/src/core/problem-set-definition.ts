@@ -3,7 +3,7 @@ import { ApiContext } from '../main/api-context';
 import { ApiOutputValue } from '../main/graphql-types';
 import { Contest } from './contest';
 import { ProblemSetTackling } from './problem-set-tackling';
-import { ScoreRange } from './feedback/score';
+import { ScoreRange } from './data/score';
 
 export const problemSetSchema = gql`
     """

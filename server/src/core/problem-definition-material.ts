@@ -5,14 +5,14 @@ import { createSimpleLoader } from '../main/base-model';
 import { ApiOutputValue } from '../main/graphql-types';
 import { unreachable } from '../util/unreachable';
 import { Contest, ContestCache } from './contest';
-import { FulfillmentGradeDomain } from './feedback/fulfillment';
-import { ScoreGradeDomain, ScoreRange } from './feedback/score';
+import { FulfillmentGradeDomain } from './data/fulfillment';
+import { ScoreGradeDomain, ScoreRange } from './data/score';
 import { ArchiveFileData } from './files/archive';
 import { FileContent } from './files/file-content';
-import { Media, MediaFile } from './media';
+import { Media, MediaFile } from './data/media';
 import { ObjectiveDefinition } from './objective-definition';
 import { ProblemDefinition } from './problem-definition';
-import { Text } from './text';
+import { Text } from './data/text';
 import { getProblemTaskInfo, ProblemTaskInfo } from './problem-definition-task-info';
 
 export const problemMaterialSchema = gql`

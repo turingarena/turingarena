@@ -3,7 +3,7 @@ import { ApiContext } from '../main/api-context';
 import { ObjectiveInstance } from './objective-instance';
 import { ObjectiveTackling } from './objective-tackling';
 import { ProblemInstance } from './problem-instance';
-import { ScoreGrade } from './feedback/score';
+import { ScoreGrade } from './data/score';
 import { ProblemMaterialCache } from './problem-definition-material';
 import { SubmissionCache } from './submission';
 import { User } from './user';

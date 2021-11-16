@@ -1,9 +1,9 @@
 import { gql } from 'apollo-server-core';
 import { ApiOutputValue } from '../main/graphql-types';
-import { FulfillmentGradeDomain } from './feedback/fulfillment';
-import { ScoreGradeDomain, ScoreRange } from './feedback/score';
+import { FulfillmentGradeDomain } from './data/fulfillment';
+import { ScoreGradeDomain, ScoreRange } from './data/score';
 import { ProblemMaterial } from './problem-definition-material';
-import { Text } from './text';
+import { Text } from './data/text';
 
 export const objectiveSchema = gql`
     """

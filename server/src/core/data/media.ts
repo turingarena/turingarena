@@ -1,7 +1,7 @@
 import { gql } from 'apollo-server-core';
-import { ApiContext } from '../main/api-context';
-import { ApiOutputValue } from '../main/graphql-types';
-import { FileContent } from './files/file-content';
+import { ApiContext } from '../../main/api-context';
+import { ApiOutputValue } from '../../main/graphql-types';
+import { FileContent } from '../files/file-content';
 
 export const mediaSchema = gql`
     """
