@@ -43,9 +43,7 @@ export const problemTacklingAsideFragment = gql`
   ${problemTacklingSubmissionListFragment}
 `;
 
-export function ProblemTacklingAside({
-  data,
-}: FragmentProps<ProblemTacklingAsideFragment>) {
+export function ProblemTacklingAside({ data }: FragmentProps<ProblemTacklingAsideFragment>) {
   const basePath = useBasePath();
   const history = useHistory();
   const t = useT();
@@ -121,7 +119,7 @@ export function ProblemTacklingAside({
               >
                 <Modal.Header>
                   <h4>
-                    {t('submissionsFor')}: <strong>{data.assignmentView.assignment.problem.title.variant}</strong>
+                    {t('submissionsFor')}: <strong>{data.view.instance.definition.title.variant}</strong>
                   </h4>
                 </Modal.Header>
                 <Modal.Body style={{ padding: 0 }}>
@@ -145,7 +143,7 @@ export function ProblemTacklingAside({
                 <Modal.Header>
                   <h5>
                     {/* TODO: submission index, e.g., Submission #6 for: My Problem */}
-                    {t('submissionsFor')}: <strong>{data.assignmentView.assignment.problem.title.variant}</strong>
+                    {t('submissionsFor')}: <strong>{data.view.instance.definition.title.variant}</strong>
                   </h5>
                 </Modal.Header>
                 <Modal.Body style={{ padding: 0 }}>

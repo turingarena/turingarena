@@ -76,7 +76,7 @@ export class Submission implements ApiOutputValue<'Submission'> {
     __typename = 'Submission' as const;
 
     async contest() {
-        return (await this.getTackling()).assignment.problem.contest;
+        return (await this.getTackling()).instance.definition.contest;
     }
 
     async user() {
@@ -84,7 +84,7 @@ export class Submission implements ApiOutputValue<'Submission'> {
     }
 
     async problem() {
-        return (await this.getTackling()).assignment.problem;
+        return (await this.getTackling()).instance.definition;
     }
 
     async participation() {
@@ -92,13 +92,13 @@ export class Submission implements ApiOutputValue<'Submission'> {
 
         return typed<Participation>({
             __typename: 'Participation',
-            contest: tackling.assignment.problem.contest,
+            contest: tackling.instance.definition.contest,
             user: tackling.user,
         });
     }
 
     async contestProblemAssigment() {
-        return (await this.getTackling()).assignment;
+        return (await this.getTackling()).instance;
     }
 
     async officialEvaluation() {
@@ -350,9 +350,9 @@ export class Submission implements ApiOutputValue<'Submission'> {
     }
 
     async getMaterial() {
-        const { assignment } = await this.getTackling();
+        const { instance } = await this.getTackling();
 
-        return this.ctx.cache(ProblemMaterialCache).byId.load(assignment.problem.id());
+        return this.ctx.cache(ProblemMaterialCache).byId.load(instance.definition.id());
     }
 
     async getObjectiveAchievements() {
@@ -396,8 +396,8 @@ export class SubmissionCache extends ApiCache {
 
     byTackling = createSimpleLoader(async (id: string) => {
         const cpaut = ProblemTackling.fromId(id, this.ctx);
-        const problemName = cpaut.assignment.problem.name;
-        const contestId = cpaut.assignment.contest().id;
+        const problemName = cpaut.instance.definition.name;
+        const contestId = cpaut.instance.contest().id;
         const username = cpaut.user.username;
 
         return (

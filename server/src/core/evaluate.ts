@@ -47,13 +47,13 @@ export class LiveEvaluationService extends Service {
 export async function evaluateSubmission(ctx: ApiContext, submission: Submission) {
     console.log(`Evaluating submission ${submission.id}`);
 
-    const { assignment } = await submission.getTackling();
-    const { archiveId } = await ctx.cache(ContestCache).byId.load(assignment.problem.contest.id);
+    const { instance } = await submission.getTackling();
+    const { archiveId } = await ctx.cache(ContestCache).byId.load(instance.definition.contest.id);
     const contestDir = await extractArchive(ctx, archiveId);
 
-    const material = await ctx.cache(ProblemMaterialCache).byId.load(assignment.problem.id());
+    const material = await ctx.cache(ProblemMaterialCache).byId.load(instance.definition.id());
 
-    const problemDir = path.join(contestDir, assignment.problem.name);
+    const problemDir = path.join(contestDir, instance.definition.name);
 
     const submissionPath = await submission.extract(path.join(ctx.config.cachePath, 'submission'));
 

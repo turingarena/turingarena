@@ -47,12 +47,12 @@ export const problemTacklingSubmitModalFragment = gql`
   }
 
   fragment ProblemTacklingSubmitModal on ProblemTackling {
-    assignmentView {
-      assignment {
+    view {
+      instance {
         contest {
           id
         }
-        problem {
+        definition {
           name
           title {
             ...Text
@@ -100,11 +100,11 @@ export function ProblemTacklingSubmitModal({
     const submission = await submit({
       variables: {
         submission: {
-          contestId: data.assignmentView.assignment.contest.id,
-          problemName: data.assignmentView.assignment.problem.name,
+          contestId: data.view.instance.contest.id,
+          problemName: data.view.instance.definition.name,
           username: data.user.username,
           files: await Promise.all(
-            data.assignmentView.assignment.problem.submissionFields.map(async field => {
+            data.view.instance.definition.submissionFields.map(async field => {
               const file = formData.get(`${field.name}.file`) as File;
 
               return {
@@ -141,11 +141,11 @@ export function ProblemTacklingSubmitModal({
     >
       <Modal.Header>
         <h4>
-          {t('solutionOf')}: <strong>{data.assignmentView.assignment.problem.title.variant}</strong>
+          {t('solutionOf')}: <strong>{data.view.instance.definition.title.variant}</strong>
         </h4>
       </Modal.Header>
       <Modal.Body>
-        {data.assignmentView.assignment.problem.submissionFields.map(f => (
+        {data.view.instance.definition.submissionFields.map(f => (
           <FileInput
             key={f.name}
             data={data}
@@ -312,7 +312,7 @@ function getTypingRule({
   field: ProblemTacklingSubmitModalSubmissionFieldFragment;
   file: File;
 }) {
-  for (const rule of data.assignmentView.assignment.problem.submissionFileTypeRules) {
+  for (const rule of data.view.instance.definition.submissionFileTypeRules) {
     const { fields = null, extensions = null } = rule;
     if (fields !== null && fields.find(f => f.name === field.name) === undefined) continue;
     if (extensions !== null && extensions.find(e => file.name.endsWith(e)) === undefined) continue;

@@ -8,19 +8,19 @@ export const problemInstanceSchema = gql`
         id: ID!
 
         contest: Contest!
-        problem: ProblemDefinition!
+        definition: ProblemDefinition!
     }
 `;
 
 export class ProblemInstance implements ApiOutputValue<'ProblemInstance'> {
-    constructor(readonly problem: ProblemDefinition) {}
+    constructor(readonly definition: ProblemDefinition) {}
 
     __typename = 'ProblemInstance' as const;
     id() {
-        return `${this.problem.contest.id}/${this.problem.name}`;
+        return `${this.definition.contest.id}/${this.definition.name}`;
     }
     contest() {
-        return this.problem.contest;
+        return this.definition.contest;
     }
     static fromId(id: string, ctx: ApiContext): ProblemInstance {
         return new ProblemInstance(ProblemDefinition.fromId(id, ctx));

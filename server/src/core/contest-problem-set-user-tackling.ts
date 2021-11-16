@@ -12,43 +12,41 @@ export const problemSetTacklingSchema = gql`
     """
     type ProblemSetTackling {
         "The problem set."
-        problemSet: ProblemSetDefinition!
+        definition: ProblemSetDefinition!
         "The given user."
         user: User!
 
         "Same problem-set seen by same user."
         view: ProblemSetView!
 
-        assignmentTacklings: [ProblemTackling!]!
+        problems: [ProblemTackling!]!
 
         totalScoreGrade: ScoreGrade!
     }
 `;
 
 export class ProblemSetTackling {
-    constructor(readonly problemSet: ProblemSetDefinition, readonly user: User, readonly ctx: ApiContext) {}
+    constructor(readonly definition: ProblemSetDefinition, readonly user: User, readonly ctx: ApiContext) {}
 
     __typename = 'ProblemSetTackling' as const;
 
     view() {
-        return new ProblemSetView(this.problemSet, this.user, this.ctx);
+        return new ProblemSetView(this.definition, this.user, this.ctx);
     }
 
     async totalScoreGrade() {
-        const assignments = await this.problemSet.contest.getProblemAssignments();
+        const problems = await this.definition.contest.getProblems();
 
         return ScoreGrade.total(
             await Promise.all(
-                assignments.map(async assignment =>
-                    new ProblemTackling(assignment, this.user, this.ctx).scoreGrade(),
-                ),
+                problems.map(async problem => new ProblemTackling(problem, this.user, this.ctx).totalScoreGrade()),
             ),
         );
     }
 
-    async assignmentTacklings() {
-        const assignments = await this.problemSet.contest.getProblemAssignments();
+    async problems() {
+        const problems = await this.definition.contest.getProblems();
 
-        return assignments.map(assignment => new ProblemTackling(assignment, this.user, this.ctx));
+        return problems.map(problem => new ProblemTackling(problem, this.user, this.ctx));
     }
 }

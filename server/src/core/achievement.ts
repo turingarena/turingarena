@@ -12,7 +12,7 @@ import { Submission } from './submission';
 export const achievementSchema = gql`
     type Achievement {
         evaluation: Submission!
-        objectiveAssignment: ObjectiveInstance!
+        objective: ObjectiveInstance!
         grade: Grade!
     }
 `;
@@ -41,8 +41,8 @@ export class Achievement extends BaseModel<Achievement> {
     async getObjective(ctx: ApiContext) {
         const evaluation = await ctx.cache(EvaluationCache).byId.load(this.evaluationId);
         const submission = Submission.fromId(evaluation.submissionId, ctx);
-        const { assignment } = await submission.getTackling();
-        const material = await ctx.cache(ProblemMaterialCache).byId.load(assignment.problem.id());
+        const { instance } = await submission.getTackling();
+        const material = await ctx.cache(ProblemMaterialCache).byId.load(instance.definition.id());
 
         return material.objectives[this.objectiveIndex];
     }

@@ -19,9 +19,9 @@ export const problemTacklingSubmissionListFragment = gql`
       ...ProblemTacklingSubmissionListSubmission
     }
 
-    assignmentView {
-      assignment {
-        problem {
+    view {
+      instance {
+        definition {
           submissionListColumns {
             ...Column
           }
@@ -58,9 +58,7 @@ export const problemTacklingSubmissionListFragment = gql`
   ${recordFragment}
 `;
 
-export function ProblemTacklingSubmissionList({
-  data,
-}: FragmentProps<ProblemTacklingSubmissionListFragment>) {
+export function ProblemTacklingSubmissionList({ data }: FragmentProps<ProblemTacklingSubmissionListFragment>) {
   const basePath = useBasePath();
   const t = useT();
 
@@ -69,7 +67,7 @@ export function ProblemTacklingSubmissionList({
       <thead className="thead-light">
         <tr>
           <th>{t('submittedAt')}</th>
-          {data.assignmentView.assignment.problem.submissionListColumns.map((col, index) => (
+          {data.view.instance.definition.submissionListColumns.map((col, index) => (
             <th key={`submission-header-${index}`}>
               <Text data={col.title} />
             </th>

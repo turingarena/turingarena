@@ -7,10 +7,7 @@ import { ProblemViewAsideFragment } from '../generated/graphql-types';
 import { useT } from '../translations/main';
 import { badgeCss, getBadgeCssByValence } from '../util/components/badge';
 import { FragmentProps } from '../util/fragment-props';
-import {
-  ProblemTacklingAside,
-  problemTacklingAsideFragment,
-} from './contest-problem-assignment-user-tackling-aside';
+import { ProblemTacklingAside, problemTacklingAsideFragment } from './contest-problem-assignment-user-tackling-aside';
 import { Field, fieldFragment } from './fields/field';
 import { GradeField, gradeFieldFragment, scoreFieldFragment } from './fields/grade-field';
 import { MediaDownload, mediaDownloadFragment } from './media-download';
@@ -19,9 +16,9 @@ import { textFragment } from './text';
 
 export const problemViewAsideFragment = gql`
   fragment ProblemViewAside on ProblemView {
-    assignment {
+    instance {
       id
-      problem {
+      definition {
         id
         name
         title {
@@ -55,10 +52,10 @@ export const problemViewAsideFragment = gql`
       ...ScoreField
     }
 
-    objectiveAssignmentViews {
-      assignment {
+    objectives {
+      instance {
         id
-        objective {
+        definition {
           id
           name
           title {
@@ -133,7 +130,7 @@ export function ProblemViewAside({
           overflow-y: auto;
         `}
       >
-        {data.objectiveAssignmentViews.length > 0 && (
+        {data.objectives.length > 0 && (
           <>
             <h3 className={asideTitleCss}>{t('objectives')}</h3>
             <div
@@ -144,9 +141,9 @@ export function ProblemViewAside({
                 margin-bottom: 16px;
               `}
             >
-              {data.objectiveAssignmentViews.map((v) => (
+              {data.objectives.map(v => (
                 <div
-                  key={v.assignment.id}
+                  key={v.instance.id}
                   className={css`
                     height: 32px;
                     border-radius: 16px;
@@ -169,7 +166,7 @@ export function ProblemViewAside({
                       margin-top: 8px;
                     }
                   `}
-                  title={v.assignment.objective.title.variant}
+                  title={v.instance.definition.title.variant}
                 >
                   <span
                     className={css`
@@ -179,7 +176,7 @@ export function ProblemViewAside({
                       flex: 1 1 auto;
                     `}
                   >
-                    {v.assignment.objective.title.variant}
+                    {v.instance.definition.title.variant}
                   </span>
                   <span className={cx(badgeCss, getBadgeCssByValence(v.gradeField?.valence ?? null))}>
                     <GradeField data={v.gradeField} />
@@ -190,14 +187,14 @@ export function ProblemViewAside({
           </>
         )}
         <h3 className={asideTitleCss}>{t('info')}</h3>
-        {data.assignment.problem.attributes.length > 0 && (
+        {data.instance.definition.attributes.length > 0 && (
           <>
             <div
               className={css`
                 margin-bottom: 16px;
               `}
             >
-              {data.assignment.problem.attributes.map((a) => (
+              {data.instance.definition.attributes.map(a => (
                 <div
                   key={a.title.variant}
                   className={css`
@@ -253,10 +250,10 @@ export function ProblemViewAside({
               margin-bottom: 16px;
             `,
           )}
-          data={data.assignment.problem.statement}
+          data={data.instance.definition.statement}
           text={t('downloadStatement')}
         />
-        {data.assignment.problem.attachments.length > 0 && (
+        {data.instance.definition.attachments.length > 0 && (
           <>
             <h3 className={asideTitleCss}>{t('attachments')}</h3>
             <div
@@ -264,7 +261,7 @@ export function ProblemViewAside({
                 margin-bottom: 16px;
               `}
             >
-              {data.assignment.problem.attachments.map((a, i) => (
+              {data.instance.definition.attachments.map((a, i) => (
                 <MediaDownload
                   key={a.title.variant}
                   className={downloadLinkCss}

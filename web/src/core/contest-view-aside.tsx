@@ -109,7 +109,7 @@ export function ContestViewAside({ data }: FragmentProps<ContestViewAsideFragmen
             list-style: none;
           `}
         >
-          {data.problemSetView.assignmentViews.map((assignmentView, index) => (
+          {data.problemSetView.problems.map((view, index) => (
             <NavLink
               className={css`
                 overflow: hidden;
@@ -146,8 +146,8 @@ export function ContestViewAside({ data }: FragmentProps<ContestViewAsideFragmen
                 }
               `}
               key={index}
-              title={assignmentView.assignment.problem.title.variant}
-              to={`/${assignmentView.assignment.problem.name}`}
+              title={view.instance.definition.title.variant}
+              to={`/${view.instance.definition.name}`}
             >
               <span
                 className={css`
@@ -159,19 +159,19 @@ export function ContestViewAside({ data }: FragmentProps<ContestViewAsideFragmen
                   flex: 1 1 auto;
                 `}
               >
-                {assignmentView.assignment.problem.title.variant}
+                {view.instance.definition.title.variant}
               </span>
-              {/* <ContestProblemScore appValence={assignmentView.totalScoreField.valence}> */}
+              {/* <ContestProblemScore appValence={view.totalScoreField.valence}> */}
               <span
                 className={cx(
                   css`
                     white-space: nowrap;
                   `,
                   badgeCss,
-                  getBadgeCssByValence(assignmentView.totalScoreField.valence),
+                  getBadgeCssByValence(view.totalScoreField.valence),
                 )}
               >
-                <GradeField data={assignmentView.totalScoreField} />
+                <GradeField data={view.totalScoreField} />
               </span>
             </NavLink>
           ))}
@@ -188,10 +188,10 @@ export const contestViewAsideFragment = gql`
         ...ScoreField
       }
 
-      assignmentViews {
-        assignment {
+      problems {
+        instance {
           id
-          problem {
+          definition {
             id
             name
             title {

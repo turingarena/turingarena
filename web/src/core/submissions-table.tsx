@@ -16,9 +16,9 @@ const SUBMISSIONS_DATA = gql`
           user {
             username
           }
-          assignmentTacklings {
-            assignment {
-              problem {
+          problems {
+            instance {
+              definition {
                 name
               }
             }
@@ -86,12 +86,12 @@ export function SubmissionsTable() {
   useEffect(() => {
     const ptmp: PivotSubmission[] = [];
     data?.contests[0].problemSet.userTacklings.map((ut: ProblemSetTackling) =>
-      ut.assignmentTacklings.map(at => {
+      ut.problems.map(at => {
         if (at.submissions.length > 0) {
           at.submissions.map(sub =>
             ptmp.push({
               username: ut.user.username,
-              problem_name: at.assignment.problem.name,
+              problem_name: at.instance.definition.name,
               score: sub.totalScore?.score ?? 0,
               submission: sub.files[0].fileName,
               download: sub.files[0],

@@ -21,10 +21,10 @@ export const problemTacklingSchema = gql`
         user: User!
 
         "Same problem assigned in same contest"
-        assignment: ProblemInstance!
+        instance: ProblemInstance!
 
         "Same problem assigned in same contest as seen by same user"
-        assignmentView: ProblemView!
+        view: ProblemView!
 
         "List of submissions for this problem in this contest from this user"
         submissions: [Submission!]!
@@ -32,34 +32,30 @@ export const problemTacklingSchema = gql`
         "Whether new submissions (see 'submissions') are accepted at the moment"
         canSubmit: Boolean!
 
-        "Whether new submissions (see 'submissions') are accepted at the moment"
-        scoreGrade: ScoreGrade!
+        "Current total score on this problem"
+        totalScoreGrade: ScoreGrade!
     }
 `;
 
 export class ProblemTackling {
-    constructor(readonly assignment: ProblemInstance, readonly user: User, readonly ctx: ApiContext) {}
+    constructor(readonly instance: ProblemInstance, readonly user: User, readonly ctx: ApiContext) {}
 
     __typename = 'ProblemTackling' as const;
 
     id(): string {
-        return `${this.assignment.id()}/${this.user.id}`;
+        return `${this.instance.id()}/${this.user.id}`;
     }
 
     static fromId(id: string, ctx: ApiContext): ProblemTackling {
         const ids = id.split('/');
-        const assignmentId = ids.splice(0, 2).join('/');
+        const problemId = ids.splice(0, 2).join('/');
         const userId = ids.join('/');
 
-        return new ProblemTackling(
-            ProblemInstance.fromId(assignmentId, ctx),
-            User.fromId(userId, ctx),
-            ctx,
-        );
+        return new ProblemTackling(ProblemInstance.fromId(problemId, ctx), User.fromId(userId, ctx), ctx);
     }
 
     async canSubmit() {
-        const status = await this.assignment.problem.contest.getStatus();
+        const status = await this.instance.definition.contest.getStatus();
 
         return status === 'RUNNING';
     }
@@ -68,24 +64,19 @@ export class ProblemTackling {
         return this.ctx.cache(SubmissionCache).byTackling.load(this.id());
     }
 
-    assignmentView() {
-        return new ProblemView(this.assignment, this.user, this.ctx);
+    view() {
+        return new ProblemView(this.instance, this.user, this.ctx);
     }
 
     async getObjectiveTacklings() {
-        const material = await this.ctx.cache(ProblemMaterialCache).byId.load(this.assignment.problem.id());
+        const material = await this.ctx.cache(ProblemMaterialCache).byId.load(this.instance.definition.id());
 
         return material.objectives.map(
-            objective =>
-                new ObjectiveTackling(
-                    new ObjectiveInstance(this.assignment, objective),
-                    this.user,
-                    this.ctx,
-                ),
+            objective => new ObjectiveTackling(new ObjectiveInstance(this.instance, objective), this.user, this.ctx),
         );
     }
 
-    async scoreGrade() {
+    async totalScoreGrade() {
         const objectiveTacklings = await this.getObjectiveTacklings();
         const objectiveGrades = await Promise.all(objectiveTacklings.map(t2 => t2.getGrade()));
 

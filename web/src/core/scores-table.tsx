@@ -10,8 +10,8 @@ const SCORES_DATA = gql`
   query GetScoresData {
     contests {
       problemSet {
-        assignments {
-          problem {
+        problems {
+          definition {
             name
           }
         }
@@ -22,13 +22,8 @@ const SCORES_DATA = gql`
           totalScoreGrade {
             score
           }
-          assignmentTacklings {
-            assignment {
-              problem {
-                name
-              }
-            }
-            scoreGrade {
+          problems {
+            totalScoreGrade {
               score
             }
           }
@@ -63,7 +58,7 @@ export function ScoresTable() {
   useEffect(() => {
     if (data?.contests[0] !== undefined) {
       const tmpproblemnames: string[] = [];
-      data?.contests[0].problemSet.assignments.forEach((a: { problem: { name: any } }) =>
+      data?.contests[0].problemSet.problems.forEach((a: { problem: { name: any } }) =>
         tmpproblemnames.push(a.problem.name),
       );
       setProblemsNames(tmpproblemnames);
@@ -73,8 +68,8 @@ export function ScoresTable() {
         const toAdd: Scores = { username: '' };
         toAdd.username = ut.user.username;
         toAdd.totalScore = ut.totalScoreGrade.score.toString();
-        ut.assignmentTacklings.forEach((at, index) => {
-          toAdd[tmpproblemnames[index]] = at.scoreGrade.score.toString();
+        ut.problems.forEach((at, index) => {
+          toAdd[tmpproblemnames[index]] = at.totalScoreGrade.score.toString();
           console.log(tmpproblemnames);
         });
         tmpScores.push(toAdd);

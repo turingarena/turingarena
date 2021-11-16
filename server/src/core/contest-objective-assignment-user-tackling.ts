@@ -7,7 +7,7 @@ import { ScoreGrade, ScoreGradeDomain } from './feedback/score';
 import { User } from './user';
 
 export class ObjectiveTackling {
-    constructor(readonly assignment: ObjectiveInstance, readonly user: User, readonly ctx: ApiContext) {}
+    constructor(readonly instance: ObjectiveInstance, readonly user: User, readonly ctx: ApiContext) {}
 
     __typename = 'ObjectiveTackling' as const;
 
@@ -36,7 +36,7 @@ export class ObjectiveTackling {
                                 JOIN official_evaluations e ON a.evaluation_id = e.id
                                 JOIN submissions s ON e.submission_id = s.id
                     ),
-                    assignment_achievements AS (
+                    problem_achievements AS (
                         SELECT a.*
                         FROM submission_achievements a
                         WHERE a.submission_id = (
@@ -51,7 +51,7 @@ export class ObjectiveTackling {
                         )
                     )
                 SELECT *
-                FROM assignment_achievements
+                FROM problem_achievements
                 WHERE username = $username
                     AND contest_id = $contestId
                     AND problem_name = $problemName
@@ -59,10 +59,10 @@ export class ObjectiveTackling {
             `,
             {
                 bind: {
-                    contestId: this.assignment.problemAssignment.problem.contest.id,
-                    problemName: this.assignment.problemAssignment.problem.name,
+                    contestId: this.instance.problem.definition.contest.id,
+                    problemName: this.instance.problem.definition.name,
                     username: this.user.username,
-                    objectiveIndex: this.assignment.objective.index,
+                    objectiveIndex: this.instance.definition.index,
                 },
                 type: QueryTypes.SELECT,
                 mapToModel: true,
@@ -86,7 +86,7 @@ export class ObjectiveTackling {
     }
 
     async getGrade() {
-        const { gradeDomain: domain } = this.assignment.objective;
+        const { gradeDomain: domain } = this.instance.definition;
         if (domain instanceof FulfillmentGradeDomain) return (await this.getFulfillmentGrade()) ?? null;
         if (domain instanceof ScoreGradeDomain) return (await this.getScoreGrade(domain)) ?? null;
         throw new Error(`unexpected grade domain ${domain}`);

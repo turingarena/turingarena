@@ -139,17 +139,17 @@ export class Contest implements ApiOutputValue<'Contest'> {
         else return 'ENDED';
     }
 
-    async getProblemAssignments() {
+    async getProblems() {
         const metadata = await this.getMetadata();
 
         return metadata.problems.map(name => new ProblemInstance(new ProblemDefinition(this, name, this.ctx)));
     }
 
     async getProblemSetMaterial(): Promise<ProblemMaterial[]> {
-        const assignments = await this.getProblemAssignments();
+        const problems = await this.getProblems();
 
         return Promise.all(
-            assignments.map(async ({ problem }) => this.ctx.cache(ProblemMaterialCache).byId.load(problem.id())),
+            problems.map(async ({ definition }) => this.ctx.cache(ProblemMaterialCache).byId.load(definition.id())),
         );
     }
 

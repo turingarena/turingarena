@@ -16,7 +16,7 @@ export const problemViewSchema = gql`
     """
     type ProblemView {
         "Same problem assigned in same contest"
-        assignment: ProblemInstance!
+        instance: ProblemInstance!
         "Viewing user, or null if anonymous"
         user: User
 
@@ -34,40 +34,37 @@ export const problemViewSchema = gql`
         totalScoreField: ScoreField!
 
         "Objectives of this problem assigned in same contest as seen by same user (or anonymously)"
-        objectiveAssignmentViews: [ObjectiveView!]!
+        objectives: [ObjectiveView!]!
     }
 `;
 
 export class ProblemView {
-    constructor(readonly assignment: ProblemInstance, readonly user: User | null, readonly ctx: ApiContext) {}
+    constructor(readonly instance: ProblemInstance, readonly user: User | null, readonly ctx: ApiContext) {}
 
     __typename = 'ProblemView' as const;
 
     async problemSetView() {
-        return new ProblemSetView(new ProblemSetDefinition(this.assignment.problem.contest), this.user, this.ctx);
+        return new ProblemSetView(new ProblemSetDefinition(this.instance.definition.contest), this.user, this.ctx);
     }
 
     async tackling() {
-        return this.user !== null
-            ? new ProblemTackling(this.assignment, this.user, this.ctx)
-            : null;
+        return this.user !== null ? new ProblemTackling(this.instance, this.user, this.ctx) : null;
     }
 
     async totalScoreField() {
-        const { scoreRange } = await this.ctx.cache(ProblemMaterialCache).byId.load(this.assignment.problem.id());
+        const { scoreRange } = await this.ctx.cache(ProblemMaterialCache).byId.load(this.instance.definition.id());
         const tackling = await this.tackling();
 
-        const scoreGrade = tackling !== null ? await tackling.scoreGrade() : null;
+        const scoreGrade = tackling !== null ? await tackling.totalScoreGrade() : null;
 
         return new ScoreField(scoreRange, scoreGrade?.score ?? null);
     }
 
-    async objectiveAssignmentViews() {
-        const { objectives } = await this.ctx.cache(ProblemMaterialCache).byId.load(this.assignment.problem.id());
+    async objectives() {
+        const { objectives } = await this.ctx.cache(ProblemMaterialCache).byId.load(this.instance.definition.id());
 
         return objectives.map(
-            objective =>
-                new ObjectiveView(new ObjectiveInstance(this.assignment, objective), this.user, this.ctx),
+            objective => new ObjectiveView(new ObjectiveInstance(this.instance, objective), this.user, this.ctx),
         );
     }
 }

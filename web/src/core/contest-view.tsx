@@ -26,10 +26,10 @@ export const contestViewFragment = gql`
     }
 
     problemSetView {
-      assignmentViews {
-        assignment {
+      problems {
+        instance {
           id
-          problem {
+          definition {
             id
             name
             statement {
@@ -68,13 +68,13 @@ export function ContestView({ data }: FragmentProps<ContestViewFragment>) {
     >
       <ContestViewAside data={data} />
       {data.problemSetView !== null &&
-        data.problemSetView.assignmentViews.map(a => (
-          <PathRouter key={a.assignment.problem.id} path={`/${a.assignment.problem.name}`}>
+        data.problemSetView.problems.map(a => (
+          <PathRouter key={a.instance.definition.id} path={`/${a.instance.definition.name}`}>
             {({ match }) => (
               <>
                 <ProblemViewAside className={match !== null ? undefined : hiddenCss} data={a} />
                 <div className={match !== null ? activeMediaInlineCss : hiddenCss}>
-                  <MediaInline data={a.assignment.problem.statement} />
+                  <MediaInline data={a.instance.definition.statement} />
                 </div>
               </>
             )}

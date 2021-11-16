@@ -10,16 +10,16 @@ export const objectiveInstanceSchema = gql`
         id: ID!
 
         "The problem containing the given objective, assigned in the same contest."
-        problemAssignment: ProblemInstance!
+        problem: ProblemInstance!
         "The given objective."
-        objective: ObjectiveDefinition!
+        definition: ObjectiveDefinition!
     }
 `;
 
 export class ObjectiveInstance {
-    constructor(readonly problemAssignment: ProblemInstance, readonly objective: ObjectiveDefinition) {}
+    constructor(readonly problem: ProblemInstance, readonly definition: ObjectiveDefinition) {}
     __typename = 'ObjectiveInstance' as const;
     id() {
-        return `${this.problemAssignment.problem.contest.id}/${this.problemAssignment.problem.name}/${this.objective.index}`;
+        return `${this.problem.definition.contest.id}/${this.problem.definition.name}/${this.definition.index}`;
     }
 }

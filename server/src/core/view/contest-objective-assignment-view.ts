@@ -6,6 +6,7 @@ import { FulfillmentField, FulfillmentGradeDomain } from '../feedback/fulfillmen
 import { ScoreField, ScoreGradeDomain } from '../feedback/score';
 import { User } from '../user';
 import { ProblemView } from './contest-problem-assignment-view';
+import { ApiOutputValue } from '../../main/graphql-types';
 
 export const objectiveViewSchema = gql`
     """
@@ -13,28 +14,28 @@ export const objectiveViewSchema = gql`
     """
     type ObjectiveView {
         "Same objective assigned in same contest."
-        assignment: ObjectiveInstance!
+        instance: ObjectiveInstance!
         "User viewing this, or null if anonymous."
         user: User
         "The problem containing the given objective, assigned in same contest, as seen by same user or anonymously"
-        problemAssignmentView: ProblemView!
+        problemView: ProblemView!
 
         "Current grade for this objective in this contest, to show to the given user."
         gradeField: GradeField!
     }
 `;
 
-export class ObjectiveView {
-    constructor(readonly assignment: ObjectiveInstance, readonly user: User | null, readonly ctx: ApiContext) {}
+export class ObjectiveView implements ApiOutputValue<'ObjectiveView'> {
+    constructor(readonly instance: ObjectiveInstance, readonly user: User | null, readonly ctx: ApiContext) {}
 
     __typename = 'ObjectiveView' as const;
 
-    async problemAssignmentView() {
-        return new ProblemView(this.assignment.problemAssignment, this.user, this.ctx);
+    async problemView() {
+        return new ProblemView(this.instance.problem, this.user, this.ctx);
     }
 
     async gradeField() {
-        const { gradeDomain: domain } = this.assignment.objective;
+        const { gradeDomain: domain } = this.instance.definition;
         const tackling = this.getTackling();
 
         if (domain instanceof FulfillmentGradeDomain) {
@@ -55,6 +56,6 @@ export class ObjectiveView {
     getTackling() {
         if (this.user === null) return null;
 
-        return new ObjectiveTackling(this.assignment, this.user, this.ctx);
+        return new ObjectiveTackling(this.instance, this.user, this.ctx);
     }
 }

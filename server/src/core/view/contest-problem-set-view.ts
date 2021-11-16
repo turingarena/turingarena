@@ -19,7 +19,7 @@ export const problemSetViewSchema = gql`
         "Same contest, as seen by the same user (or anonymously)."
         contestView: ContestView!
         "The list of problems in the given problem-set, assigned in the same contest, as seen by the same user (or anonymously)."
-        assignmentViews: [ProblemView!]!
+        problems: [ProblemView!]!
 
         "Same contest as tackled by the same user, or null if anonymous."
         tackling: ProblemSetTackling
@@ -38,9 +38,9 @@ export class ProblemSetView {
         return new ContestView(this.problemSet.contest, this.user, this.ctx);
     }
 
-    async assignmentViews() {
-        return (await this.problemSet.contest.getProblemAssignments()).map(
-            assignment => new ProblemView(assignment, this.user, this.ctx),
+    async problems() {
+        return (await this.problemSet.contest.getProblems()).map(
+            instance => new ProblemView(instance, this.user, this.ctx),
         );
     }
 

@@ -19,7 +19,7 @@ export const problemSetSchema = gql`
         Items in this problem set.
         Each corresponds to a problem assigned in the contest.
         """
-        assignments: [ProblemInstance!]!
+        problems: [ProblemInstance!]!
 
         # TODO: grade domain
         userTacklings: [ProblemSetTackling!]!
@@ -34,8 +34,8 @@ export class ProblemSetDefinition implements ApiOutputValue<'ProblemSetDefinitio
 
     __typename = 'ProblemSetDefinition' as const;
 
-    async assignments() {
-        return this.contest.getProblemAssignments();
+    async problems() {
+        return this.contest.getProblems();
     }
 
     async userTacklings(): Promise<ProblemSetTackling[]> {
