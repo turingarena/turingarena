@@ -3,7 +3,7 @@ import { ApiContext } from '../main/api-context';
 import { ApiOutputValue } from '../main/graphql-types';
 import { Contest } from './contest';
 import { ScoreGradeDomain } from './feedback/score';
-import { ProblemMaterialCache } from './material/problem-material';
+import { ProblemMaterialCache } from './problem-definition-material';
 
 export const problemSchema = gql`
     type ProblemDefinition {

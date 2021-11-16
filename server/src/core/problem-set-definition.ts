@@ -2,7 +2,7 @@ import { gql } from 'apollo-server-core';
 import { ApiContext } from '../main/api-context';
 import { ApiOutputValue } from '../main/graphql-types';
 import { Contest } from './contest';
-import { ProblemSetTackling } from './contest-problem-set-user-tackling';
+import { ProblemSetTackling } from './problem-set-tackling';
 import { ScoreRange } from './feedback/score';
 
 export const problemSetSchema = gql`

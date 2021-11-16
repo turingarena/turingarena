@@ -1,7 +1,7 @@
 import { gql } from 'apollo-server-core';
 import { ApiContext } from '../main/api-context';
 import { ApiOutputValue } from '../main/graphql-types';
-import { ProblemDefinition } from './problem';
+import { ProblemDefinition } from './problem-definition';
 
 export const problemInstanceSchema = gql`
     type ProblemInstance {

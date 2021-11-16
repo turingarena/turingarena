@@ -1,12 +1,12 @@
 import { gql } from 'apollo-server-core';
-import { ApiContext } from '../../main/api-context';
-import { ApiOutputValue } from '../../main/graphql-types';
-import { ObjectiveInstance } from '../contest-objective-assignment';
-import { ObjectiveTackling } from '../contest-objective-assignment-user-tackling';
-import { FulfillmentField, FulfillmentGradeDomain } from '../feedback/fulfillment';
-import { ScoreField, ScoreGradeDomain } from '../feedback/score';
-import { User } from '../user';
-import { ProblemView } from './contest-problem-assignment-view';
+import { ApiContext } from '../main/api-context';
+import { ApiOutputValue } from '../main/graphql-types';
+import { ObjectiveInstance } from './objective-instance';
+import { ObjectiveTackling } from './objective-tackling';
+import { FulfillmentField, FulfillmentGradeDomain } from './feedback/fulfillment';
+import { ScoreField, ScoreGradeDomain } from './feedback/score';
+import { User } from './user';
+import { ProblemView } from './problem-view';
 
 export const objectiveViewSchema = gql`
     """

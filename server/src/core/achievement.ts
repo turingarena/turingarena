@@ -6,7 +6,7 @@ import { BaseModel, createSimpleLoader } from '../main/base-model';
 import { EvaluationCache, EvaluationData } from './evaluation';
 import { FulfillmentGrade } from './feedback/fulfillment';
 import { ScoreGrade, ScoreGradeDomain } from './feedback/score';
-import { ProblemMaterialCache } from './material/problem-material';
+import { ProblemMaterialCache } from './problem-definition-material';
 import { Submission } from './submission';
 
 export const outcomeSchema = gql`

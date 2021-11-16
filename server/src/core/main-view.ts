@@ -1,10 +1,10 @@
 import { gql } from 'apollo-server-core';
-import { ApiContext } from '../../main/api-context';
-import { Contest } from '../contest';
-import { Text } from '../material/text';
-import { SubmissionCache } from '../submission';
-import { User } from '../user';
+import { ApiContext } from '../main/api-context';
+import { Contest } from './contest';
 import { ContestView } from './contest-view';
+import { Text } from './text';
+import { SubmissionCache } from './submission';
+import { User } from './user';
 
 export const mainViewSchema = gql`
     """

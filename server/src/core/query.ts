@@ -6,7 +6,7 @@ import { Archive } from './files/archive';
 import { MessageApi } from './message';
 import { Submission } from './submission';
 import { User } from './user';
-import { MainView } from './view/main-view';
+import { MainView } from './main-view';
 
 export const querySchema = gql`
     type Query {

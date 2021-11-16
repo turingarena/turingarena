@@ -1,5 +1,5 @@
 import { gql } from 'apollo-server-core';
-import { ApiOutputValue } from '../../main/graphql-types';
+import { ApiOutputValue } from '../main/graphql-types';
 
 export const textSchema = gql`
     """

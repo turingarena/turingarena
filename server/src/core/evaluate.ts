@@ -9,7 +9,7 @@ import { OutcomeData } from './achievement';
 import { ContestCache } from './contest';
 import { EvaluationData } from './evaluation';
 import { extractArchive } from './files/archive';
-import { ProblemMaterialCache } from './material/problem-material';
+import { ProblemMaterialCache } from './problem-definition-material';
 import { Submission } from './submission';
 
 export interface LiveEvaluation {

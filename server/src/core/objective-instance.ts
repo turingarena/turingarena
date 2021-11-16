@@ -1,6 +1,6 @@
 import { gql } from 'apollo-server-core';
-import { ProblemInstance } from './contest-problem-assignment';
-import { ObjectiveDefinition } from './material/objective';
+import { ProblemInstance } from './problem-instance';
+import { ObjectiveDefinition } from './objective-definition';
 
 export const objectiveInstanceSchema = gql`
     """

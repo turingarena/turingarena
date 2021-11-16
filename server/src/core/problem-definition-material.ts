@@ -1,19 +1,19 @@
 import { gql } from 'apollo-server-core';
-import { ApiCache } from '../../main/api-cache';
-import { ApiContext } from '../../main/api-context';
-import { createSimpleLoader } from '../../main/base-model';
-import { ApiOutputValue } from '../../main/graphql-types';
-import { unreachable } from '../../util/unreachable';
-import { Contest, ContestCache } from '../contest';
-import { FulfillmentGradeDomain } from '../feedback/fulfillment';
-import { ScoreGradeDomain, ScoreRange } from '../feedback/score';
-import { ArchiveFileData } from '../files/archive';
-import { FileContent } from '../files/file-content';
-import { ProblemDefinition } from '../problem';
-import { ObjectiveDefinition } from './objective';
+import { ApiCache } from '../main/api-cache';
+import { ApiContext } from '../main/api-context';
+import { createSimpleLoader } from '../main/base-model';
+import { ApiOutputValue } from '../main/graphql-types';
+import { unreachable } from '../util/unreachable';
+import { Contest, ContestCache } from './contest';
+import { FulfillmentGradeDomain } from './feedback/fulfillment';
+import { ScoreGradeDomain, ScoreRange } from './feedback/score';
+import { ArchiveFileData } from './files/archive';
+import { FileContent } from './files/file-content';
 import { Media, MediaFile } from './media';
-import { getProblemTaskInfo, ProblemTaskInfo } from './problem-task-info';
+import { ObjectiveDefinition } from './objective-definition';
+import { ProblemDefinition } from './problem-definition';
 import { Text } from './text';
+import { getProblemTaskInfo, ProblemTaskInfo } from './problem-definition-task-info';
 
 export const problemMaterialSchema = gql`
     extend type ProblemDefinition {
@@ -239,7 +239,9 @@ export class ProblemMaterial {
         },
     ];
 
-    objectives = this.taskInfo.IOI.scoring.subtasks.map((subtask, index): ObjectiveDefinition => new ObjectiveDefinition(this, index));
+    objectives = this.taskInfo.IOI.scoring.subtasks.map(
+        (subtask, index): ObjectiveDefinition => new ObjectiveDefinition(this, index),
+    );
 
     submissionFields = [{ name: 'solution', title: new Text([{ value: 'Solution' }]) }];
     submissionFileTypes = Object.values(languages);
