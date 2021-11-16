@@ -166,6 +166,10 @@ export function ContestViewAside({ data }: FragmentProps<ContestViewAsideFragmen
                 className={cx(
                   css`
                     white-space: nowrap;
+
+                    & > small.score-range {
+                      font-weight: inherit;
+                    }
                   `,
                   badgeCss,
                   getBadgeCssByValence(view.totalScoreField.valence),

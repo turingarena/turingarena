@@ -48,10 +48,10 @@ export function ScoreField({ data }: FragmentProps<ScoreFieldFragment>) {
       ) : (
         <>
           <span className="score">{data.score.toFixed(data.scoreRange.decimalDigits)}</span>
-          <>
+          <small className="score-range">
             {' / '}
             {data.scoreRange.max.toFixed(data.scoreRange.decimalDigits)}
-          </>
+          </small>
         </>
       )}
     </>
@@ -59,13 +59,15 @@ export function ScoreField({ data }: FragmentProps<ScoreFieldFragment>) {
 }
 
 export const FulfillmentField = ({ data }: FragmentProps<FulfillmentFieldFragment>) => {
+  const check = <>&#x2713;</>;
+  const cross = <>&#x2717;</>;
+
   switch (data.fulfilled) {
     case null:
-      return <>+</>;
     case true:
-      return <>&#x2713;</>;
+      return check;
     case false:
-      return <>&#x2717;</>;
+      return cross;
     default:
       return unexpected(data.fulfilled);
   }

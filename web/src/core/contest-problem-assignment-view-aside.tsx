@@ -145,25 +145,16 @@ export function ProblemViewAside({
                 <div
                   key={v.instance.id}
                   className={css`
-                    height: 32px;
-                    border-radius: 16px;
-                    padding: 0 8px;
-                    cursor: pointer;
-
-                    background-color: rgba(0, 0, 0, 0.03);
-                    background-clip: padding-box;
-                    border: 1px solid rgba(0, 0, 0, 0.1);
-
-                    &:hover {
-                      background-color: rgba(0, 0, 0, 0.01);
-                    }
+                    height: 28px;
+                    margin: 0 -16px;
+                    padding: 0 16px;
 
                     display: flex;
                     flex-direction: row;
                     align-items: center;
 
-                    &:not(:first-of-type) {
-                      margin-top: 8px;
+                    &:hover {
+                      background-color: #e9ecef;
                     }
                   `}
                   title={v.instance.definition.title.variant}
@@ -178,7 +169,17 @@ export function ProblemViewAside({
                   >
                     {v.instance.definition.title.variant}
                   </span>
-                  <span className={cx(badgeCss, getBadgeCssByValence(v.gradeField?.valence ?? null))}>
+                  <span
+                    className={cx(
+                      badgeCss,
+                      getBadgeCssByValence(v.gradeField?.valence ?? null),
+                      css`
+                        & > small.score-range {
+                          font-weight: inherit;
+                        }
+                      `,
+                    )}
+                  >
                     <GradeField data={v.gradeField} />
                   </span>
                 </div>
@@ -243,16 +244,6 @@ export function ProblemViewAside({
             </div>
           </>
         )}
-        <MediaDownload
-          className={cx(
-            downloadLinkCss,
-            css`
-              margin-bottom: 16px;
-            `,
-          )}
-          data={data.instance.definition.statement}
-          text={t('downloadStatement')}
-        />
         {data.instance.definition.attachments.length > 0 && (
           <>
             <h3 className={asideTitleCss}>{t('attachments')}</h3>
@@ -269,6 +260,16 @@ export function ProblemViewAside({
                   text={a.title.variant}
                 />
               ))}
+              <MediaDownload
+                className={cx(
+                  downloadLinkCss,
+                  css`
+                    margin-top: 8px;
+                  `,
+                )}
+                data={data.instance.definition.statement}
+                text={t('downloadStatement')}
+              />
             </div>
           </>
         )}
