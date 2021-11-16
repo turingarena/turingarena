@@ -25,6 +25,7 @@ import { objectiveViewSchema } from './objective-view';
 import { outcomeSchema } from './outcome';
 import { participationSchema } from './participation';
 import { problemSchema } from './problem-definition';
+import { submissionFileTypeSchema } from './problem-definition-file-types';
 import { problemMaterialSchema } from './problem-definition-material';
 import { problemInstanceSchema } from './problem-instance';
 import { problemSetSchema } from './problem-set-definition';
@@ -40,18 +41,8 @@ import { dateTimeSchema } from './util/date-time';
 
 /** Full GraphQL schema document. Obtained combining schema parts from each components. */
 export const schema = gql`
-    ${outcomeSchema}
     ${archiveSchema}
     ${authSchema}
-    ${objectiveSchema}
-    ${objectiveInstanceSchema}
-    ${objectiveViewSchema}
-    ${problemInstanceSchema}
-    ${problemTacklingSchema}
-    ${problemViewSchema}
-    ${problemSetSchema}
-    ${problemSetTacklingSchema}
-    ${problemSetViewSchema}
     ${contestSchema}
     ${contestViewSchema}
     ${dateTimeSchema}
@@ -67,12 +58,23 @@ export const schema = gql`
     ${messageFieldSchema}
     ${messageSchema}
     ${mutationSchema}
+    ${objectiveInstanceSchema}
+    ${objectiveSchema}
+    ${objectiveViewSchema}
+    ${outcomeSchema}
     ${participationSchema}
+    ${problemInstanceSchema}
     ${problemMaterialSchema}
     ${problemSchema}
+    ${problemSetSchema}
+    ${problemSetTacklingSchema}
+    ${problemSetViewSchema}
+    ${problemTacklingSchema}
+    ${problemViewSchema}
     ${querySchema}
     ${scoreSchema}
     ${submissionFileSchema}
+    ${submissionFileTypeSchema}
     ${submissionSchema}
     ${textSchema}
     ${timeUsageSchema}

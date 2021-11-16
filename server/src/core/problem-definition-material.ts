@@ -13,6 +13,7 @@ import { ArchiveFileData } from './files/archive';
 import { FileContent } from './files/file-content';
 import { ObjectiveDefinition } from './objective-definition';
 import { ProblemDefinition } from './problem-definition';
+import { submissionFileTypeRules, submissionFileTypes } from './problem-definition-file-types';
 import { getProblemTaskInfo, ProblemTaskInfo } from './problem-definition-task-info';
 
 export const problemMaterialSchema = gql`
@@ -65,31 +66,6 @@ export const problemMaterialSchema = gql`
         name: String!
         title: Text!
     }
-
-    type SubmissionFileType {
-        name: String!
-        title: Text!
-    }
-
-    type SubmissionFileTypeRule {
-        """
-        Set of fields matched by this rule.
-        If null, matches all fields.
-        """
-        fields: [SubmissionField!]
-        """
-        Set of file extensions matched by this rule, including the initial dot.
-        If null, matches any extension.
-        """
-        extensions: [String!]
-
-        "Type tu use as default, if not null."
-        defaultType: SubmissionFileType
-        "List of recommended types the user can choose from. Should include the default type first, if any."
-        recommendedTypes: [SubmissionFileType!]!
-        "List of other types the user can choose from."
-        otherTypes: [SubmissionFileType!]!
-    }
 `;
 
 type Field = ApiOutputValue<'Field'>;
@@ -104,73 +80,6 @@ export interface ProblemAttribute {
     field: Field; // FIXME: should not use generated types here
     icon: string;
 }
-
-const languages = {
-    python2: {
-        name: 'python2',
-        title: new Text([{ value: 'Python 2 (cpython)' }]),
-    },
-    python3: {
-        name: 'py',
-        title: new Text([{ value: 'Python 3 (cpython)' }]),
-    },
-    c: {
-        name: 'c',
-        title: new Text([{ value: 'C (c11)' }]),
-    },
-    cpp: {
-        name: 'cpp',
-        title: new Text([{ value: 'C++ (c++17)' }]),
-    },
-    rust: {
-        name: 'rust',
-        title: new Text([{ value: 'Rust' }]),
-    },
-    java: {
-        name: 'java',
-        title: new Text([{ value: 'Java 8 (JDK)' }]),
-    },
-};
-
-type SubmissionFileTypeRule = ApiOutputValue<'SubmissionFileTypeRule'>;
-
-const fileRules: SubmissionFileTypeRule[] = [
-    {
-        extensions: ['.c', '.h'],
-        defaultType: languages.c,
-        recommendedTypes: [languages.c],
-        otherTypes: [languages.cpp],
-        fields: null,
-    },
-    {
-        extensions: ['.py'],
-        defaultType: languages.python3,
-        recommendedTypes: [languages.python3, languages.python2],
-        otherTypes: [],
-        fields: null,
-    },
-    {
-        extensions: ['.cpp', '.hpp', '.cc', '.cxx'],
-        defaultType: languages.cpp,
-        recommendedTypes: [languages.cpp],
-        otherTypes: [],
-        fields: null,
-    },
-    {
-        extensions: ['.java'],
-        defaultType: languages.java,
-        recommendedTypes: [languages.java],
-        otherTypes: [],
-        fields: null,
-    },
-    {
-        extensions: ['.rs'],
-        defaultType: languages.rust,
-        recommendedTypes: [languages.rust],
-        otherTypes: [],
-        fields: null,
-    },
-];
 
 const memoryUnitBytes = 1024 * 1024;
 
@@ -207,14 +116,8 @@ export class ProblemMaterial {
             title: new Text([{ value: 'Time limit' }]),
             field: {
                 __typename: 'TimeUsageField',
-                timeUsageMaxRelevant: {
-                    __typename: 'TimeUsage',
-                    seconds: this.timeLimitSeconds,
-                },
-                timeUsage: {
-                    __typename: 'TimeUsage',
-                    seconds: this.timeLimitSeconds,
-                },
+                timeUsageMaxRelevant: { __typename: 'TimeUsage', seconds: this.timeLimitSeconds },
+                timeUsage: { __typename: 'TimeUsage', seconds: this.timeLimitSeconds },
                 timeUsageWatermark: null,
                 valence: null,
             },
@@ -224,14 +127,8 @@ export class ProblemMaterial {
             title: new Text([{ value: 'Memory limit' }]),
             field: {
                 __typename: 'MemoryUsageField',
-                memoryUsageMaxRelevant: {
-                    __typename: 'MemoryUsage',
-                    bytes: this.memoryLimitBytes,
-                },
-                memoryUsage: {
-                    __typename: 'MemoryUsage',
-                    bytes: this.memoryLimitBytes,
-                },
+                memoryUsageMaxRelevant: { __typename: 'MemoryUsage', bytes: this.memoryLimitBytes },
+                memoryUsage: { __typename: 'MemoryUsage', bytes: this.memoryLimitBytes },
                 memoryUsageWatermark: null,
                 valence: null,
             },
@@ -244,8 +141,8 @@ export class ProblemMaterial {
     );
 
     submissionFields = [{ name: 'solution', title: new Text([{ value: 'Solution' }]) }];
-    submissionFileTypes = Object.values(languages);
-    submissionFileTypeRules = fileRules;
+    submissionFileTypes = submissionFileTypes;
+    submissionFileTypeRules = submissionFileTypeRules;
 
     scoreRange = ScoreRange.total(
         this.objectives
@@ -264,37 +161,16 @@ export class ProblemMaterial {
             }
             throw new Error(`unexpected grade domain ${gradeDomain}`);
         }),
-        {
-            __typename: 'ScoreColumn' as const,
-            title: new Text([{ value: 'Total score' }]),
-        },
+        { __typename: 'ScoreColumn' as const, title: new Text([{ value: 'Total score' }]) },
     ];
 
     evaluationFeedbackColumns: Array<ApiOutputValue<'Column'>> = [
-        {
-            __typename: 'HeaderColumn',
-            title: new Text([{ value: 'Subtask' }]),
-        },
-        {
-            __typename: 'HeaderColumn',
-            title: new Text([{ value: 'Case' }]),
-        },
-        {
-            __typename: 'TimeUsageColumn',
-            title: new Text([{ value: 'Time usage' }]),
-        },
-        {
-            __typename: 'MemoryUsageColumn',
-            title: new Text([{ value: 'Memory usage' }]),
-        },
-        {
-            __typename: 'MessageColumn',
-            title: new Text([{ value: 'Message' }]),
-        },
-        {
-            __typename: 'ScoreColumn',
-            title: new Text([{ value: 'Score' }]),
-        },
+        { __typename: 'HeaderColumn', title: new Text([{ value: 'Subtask' }]) },
+        { __typename: 'HeaderColumn', title: new Text([{ value: 'Case' }]) },
+        { __typename: 'TimeUsageColumn', title: new Text([{ value: 'Time usage' }]) },
+        { __typename: 'MemoryUsageColumn', title: new Text([{ value: 'Memory usage' }]) },
+        { __typename: 'MessageColumn', title: new Text([{ value: 'Message' }]) },
+        { __typename: 'ScoreColumn', title: new Text([{ value: 'Score' }]) },
     ];
 
     async loadContent(problem: ProblemDefinition, path: string) {
