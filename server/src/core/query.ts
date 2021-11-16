@@ -3,10 +3,10 @@ import { ApiOutputValue } from '../main/graphql-types';
 import { unreachable } from '../util/unreachable';
 import { Contest, ContestData } from './contest';
 import { Archive } from './files/archive';
+import { MainView } from './main-view';
 import { MessageApi } from './message';
 import { Submission } from './submission';
 import { User } from './user';
-import { MainView } from './main-view';
 
 export const querySchema = gql`
     type Query {

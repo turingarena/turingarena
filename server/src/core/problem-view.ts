@@ -1,12 +1,12 @@
 import { gql } from 'apollo-server-core';
 import { ApiContext } from '../main/api-context';
-import { ObjectiveView } from './objective-view';
-import { ProblemSetView } from './problem-set-view';
 import { ScoreField } from './data/score';
-import { ProblemMaterialCache } from './problem-definition-material';
 import { ObjectiveInstance } from './objective-instance';
+import { ObjectiveView } from './objective-view';
+import { ProblemMaterialCache } from './problem-definition-material';
 import { ProblemInstance } from './problem-instance';
 import { ProblemSetDefinition } from './problem-set-definition';
+import { ProblemSetView } from './problem-set-view';
 import { ProblemTackling } from './problem-tackling';
 import { User } from './user';
 

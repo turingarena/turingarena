@@ -6,13 +6,13 @@ import { ApiOutputValue } from '../main/graphql-types';
 import { unreachable } from '../util/unreachable';
 import { Contest, ContestCache } from './contest';
 import { FulfillmentGradeDomain } from './data/fulfillment';
+import { Media, MediaFile } from './data/media';
 import { ScoreGradeDomain, ScoreRange } from './data/score';
+import { Text } from './data/text';
 import { ArchiveFileData } from './files/archive';
 import { FileContent } from './files/file-content';
-import { Media, MediaFile } from './data/media';
 import { ObjectiveDefinition } from './objective-definition';
 import { ProblemDefinition } from './problem-definition';
-import { Text } from './data/text';
 import { getProblemTaskInfo, ProblemTaskInfo } from './problem-definition-task-info';
 
 export const problemMaterialSchema = gql`

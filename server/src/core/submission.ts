@@ -8,19 +8,19 @@ import { createSimpleLoader, UuidBaseModel } from '../main/base-model';
 import { ApiInputValue, ApiOutputValue } from '../main/graphql-types';
 import { typed } from '../util/types';
 import { unreachable } from '../util/unreachable';
-import { OutcomeCache } from './outcome';
 import { Contest, ContestData } from './contest';
-import { ProblemInstance } from './problem-instance';
-import { ProblemTackling } from './problem-tackling';
-import { LiveEvaluationService } from './evaluate';
-import { Evaluation, EvaluationCache } from './evaluation';
 import { FulfillmentField, FulfillmentGradeDomain } from './data/fulfillment';
 import { ScoreField, ScoreGrade, ScoreGradeDomain, ScoreRange } from './data/score';
-import { extractFile } from './files/file-content';
-import { ProblemMaterialCache } from './problem-definition-material';
 import { Text } from './data/text';
+import { LiveEvaluationService } from './evaluate';
+import { Evaluation, EvaluationCache } from './evaluation';
+import { extractFile } from './files/file-content';
+import { OutcomeCache } from './outcome';
 import { Participation } from './participation';
 import { ProblemDefinition } from './problem-definition';
+import { ProblemMaterialCache } from './problem-definition-material';
+import { ProblemInstance } from './problem-instance';
+import { ProblemTackling } from './problem-tackling';
 import { SubmissionFileCache } from './submission-file';
 import { User } from './user';
 import { ApiDateTime } from './util/date-time';
@@ -124,9 +124,7 @@ export class Submission implements ApiOutputValue<'Submission'> {
                     if (gradeDomain instanceof ScoreGradeDomain) {
                         return new ScoreField(
                             gradeDomain.scoreRange,
-                            outcomes !== null
-                                ? outcomes.get(objective)?.getScoreGrade(gradeDomain).score ?? 0
-                                : null,
+                            outcomes !== null ? outcomes.get(objective)?.getScoreGrade(gradeDomain).score ?? 0 : null,
                         );
                     }
                     if (gradeDomain instanceof FulfillmentGradeDomain) {
@@ -211,7 +209,10 @@ export class Submission implements ApiOutputValue<'Submission'> {
             __typename: 'FeedbackTable',
             columns: evaluationFeedbackColumns,
             rows: testCasesData.map(
-                ({ objectiveIndex, score, message, timeUsage, memoryUsage }, testCaseIndex): ApiOutputValue<'Record'> => ({
+                (
+                    { objectiveIndex, score, message, timeUsage, memoryUsage },
+                    testCaseIndex,
+                ): ApiOutputValue<'Record'> => ({
                     valence: score !== null ? (score >= 1 ? 'SUCCESS' : score > 0 ? 'PARTIAL' : 'FAILURE') : null,
                     fields: [
                         {

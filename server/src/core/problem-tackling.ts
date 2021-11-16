@@ -1,13 +1,13 @@
 import { gql } from 'apollo-server-core';
 import { ApiContext } from '../main/api-context';
+import { ScoreGrade } from './data/score';
 import { ObjectiveInstance } from './objective-instance';
 import { ObjectiveTackling } from './objective-tackling';
-import { ProblemInstance } from './problem-instance';
-import { ScoreGrade } from './data/score';
 import { ProblemMaterialCache } from './problem-definition-material';
+import { ProblemInstance } from './problem-instance';
+import { ProblemView } from './problem-view';
 import { SubmissionCache } from './submission';
 import { User } from './user';
-import { ProblemView } from './problem-view';
 
 export const problemTacklingSchema = gql`
     """

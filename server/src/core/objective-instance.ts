@@ -1,6 +1,6 @@
 import { gql } from 'apollo-server-core';
-import { ProblemInstance } from './problem-instance';
 import { ObjectiveDefinition } from './objective-definition';
+import { ProblemInstance } from './problem-instance';
 
 export const objectiveInstanceSchema = gql`
     """

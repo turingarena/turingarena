@@ -1,10 +1,10 @@
 import { gql } from 'apollo-server-core';
 import { ApiContext } from '../main/api-context';
-import { ProblemView } from './problem-view';
 import { ContestView } from './contest-view';
 import { ScoreField } from './data/score';
 import { ProblemSetDefinition } from './problem-set-definition';
 import { ProblemSetTackling } from './problem-set-tackling';
+import { ProblemView } from './problem-view';
 import { User } from './user';
 
 export const problemSetViewSchema = gql`

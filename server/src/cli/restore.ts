@@ -6,7 +6,7 @@ export function restoreContest() {
     const db = new sqlite3.Database('db.sqlite3', err => {
         if (err) {
             console.error(err.message);
-            throw Error('Can\'t restore the database due to previous error');
+            throw Error("Can't restore the database due to previous error");
         }
         console.log('Connected to the database.');
     });

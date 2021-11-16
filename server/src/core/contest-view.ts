@@ -1,8 +1,8 @@
 import { gql } from 'apollo-server-core';
 import { ApiContext } from '../main/api-context';
 import { Contest } from './contest';
-import { ProblemSetView } from './problem-set-view';
 import { ProblemSetDefinition } from './problem-set-definition';
+import { ProblemSetView } from './problem-set-view';
 import { User } from './user';
 
 export const contestViewSchema = gql`
