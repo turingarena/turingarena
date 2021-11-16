@@ -12,18 +12,21 @@ export function MemoryUsageField({ data }: FragmentProps<MemoryUsageFieldFragmen
     const kb = bytes / 1024;
     const mb = kb / 1024;
 
-    if (memoryUsageMaxRelevant.bytes > 100e6) {
-      return `${mb.toFixed(1)} MB`;
-    } else if (memoryUsageMaxRelevant.bytes > 10e6) {
-      return `${mb.toFixed(2)} MB`;
-    } else if (memoryUsageMaxRelevant.bytes > 1e6) {
-      return `${kb.toFixed(0)} KB`;
-    } else if (memoryUsageMaxRelevant.bytes > 100e3) {
-      return `${kb.toFixed(1)} KB`;
-    } else if (memoryUsageMaxRelevant.bytes > 10e3) {
-      return `${kb.toFixed(2)} KB`;
+    const truncate = memoryUsageMaxRelevant !== null;
+    const scale = memoryUsageMaxRelevant ?? memoryUsage;
+
+    if (scale.bytes > 100e6) {
+      return `${truncate ? mb.toFixed(1) : mb} MB`;
+    } else if (scale.bytes > 10e6) {
+      return `${truncate ? mb.toFixed(2) : mb} MB`;
+    } else if (scale.bytes > 1e6) {
+      return `${truncate ? kb.toFixed(0) : mb} KB`;
+    } else if (scale.bytes > 100e3) {
+      return `${truncate ? kb.toFixed(1) : mb} KB`;
+    } else if (scale.bytes > 10e3) {
+      return `${truncate ? kb.toFixed(2) : mb} KB`;
     } else {
-      return `${kb.toFixed(3)} KB`;
+      return `${truncate ? kb.toFixed(3) : mb} KB`;
     }
   };
 

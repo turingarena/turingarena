@@ -8,15 +8,20 @@ export function TimeUsageField({ data }: FragmentProps<TimeUsageFieldFragment>) 
   const displayTimeUsage = (timeUsage: TimeUsageFragment) => {
     const { timeUsageMaxRelevant } = data;
 
+    const truncate = timeUsageMaxRelevant !== null;
+    const scale = timeUsageMaxRelevant ?? timeUsage;
+
     const extraPrecision = 3;
-    const fractionDigits = Math.max(Math.round(-Math.log10(timeUsageMaxRelevant.seconds) + extraPrecision), 0);
+    const fractionDigits = Math.max(Math.round(-Math.log10(scale.seconds) + extraPrecision), 0);
     const millisPrecision = 3;
 
     const duration = Duration.fromObject({ seconds: timeUsage.seconds });
     if (fractionDigits > millisPrecision) {
-      return `${duration.as('milliseconds').toFixed(fractionDigits - millisPrecision)} ms`;
+      const ms = duration.as('milliseconds');
+      return `${truncate ? ms.toFixed(fractionDigits - millisPrecision) : ms} ms`;
     } else {
-      return `${duration.as('seconds').toFixed(fractionDigits)} s`;
+      const s = duration.as('seconds');
+      return `${truncate ? s.toFixed(fractionDigits) : s} s`;
     }
   };
 

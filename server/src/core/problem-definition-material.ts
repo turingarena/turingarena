@@ -116,7 +116,7 @@ export class ProblemMaterial {
             title: new Text([{ value: 'Time limit' }]),
             field: {
                 __typename: 'TimeUsageField',
-                timeUsageMaxRelevant: { __typename: 'TimeUsage', seconds: this.timeLimitSeconds },
+                timeUsageMaxRelevant: null,
                 timeUsage: { __typename: 'TimeUsage', seconds: this.timeLimitSeconds },
                 timeUsageWatermark: null,
                 valence: null,
@@ -127,7 +127,7 @@ export class ProblemMaterial {
             title: new Text([{ value: 'Memory limit' }]),
             field: {
                 __typename: 'MemoryUsageField',
-                memoryUsageMaxRelevant: { __typename: 'MemoryUsage', bytes: this.memoryLimitBytes },
+                memoryUsageMaxRelevant: null,
                 memoryUsage: { __typename: 'MemoryUsage', bytes: this.memoryLimitBytes },
                 memoryUsageWatermark: null,
                 valence: null,

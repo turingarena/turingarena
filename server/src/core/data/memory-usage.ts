@@ -11,8 +11,11 @@ export const memoryUsageSchema = gql`
     type MemoryUsageField implements HasValence {
         "The memory usage, if known."
         memoryUsage: MemoryUsage
-        "Maximum value over which the precise quantity of memory used is not relevant anymore."
-        memoryUsageMaxRelevant: MemoryUsage!
+        """
+        Maximum meaningful value, used to dermine the scale of the numeric representation.
+        Null if the value is to be represented exactly (e.g. a memory limit).
+        """
+        memoryUsageMaxRelevant: MemoryUsage
         "Main upper limit on this memory usage to show users, if any."
         memoryUsageWatermark: MemoryUsage
 

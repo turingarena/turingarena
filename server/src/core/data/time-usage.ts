@@ -11,8 +11,11 @@ export const timeUsageSchema = gql`
     type TimeUsageField implements HasValence {
         "The CPU time used, if known."
         timeUsage: TimeUsage
-        "Maximum value over which the precise quantity of CPU time used is not relevant anymore."
-        timeUsageMaxRelevant: TimeUsage!
+        """
+        Maximum meaningful value, used to dermine the scale of the numeric representation.
+        Null if the value is to be represented exactly (e.g. a time limit).
+        """
+        timeUsageMaxRelevant: TimeUsage
         "Main upper limit on this time usage to show users, if any."
         timeUsageWatermark: TimeUsage
 
