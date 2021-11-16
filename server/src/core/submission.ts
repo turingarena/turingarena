@@ -8,7 +8,7 @@ import { createSimpleLoader, UuidBaseModel } from '../main/base-model';
 import { ApiInputValue, ApiOutputValue } from '../main/graphql-types';
 import { typed } from '../util/types';
 import { unreachable } from '../util/unreachable';
-import { OutcomeCache } from './achievement';
+import { OutcomeCache } from './outcome';
 import { Contest, ContestData } from './contest';
 import { ProblemInstance } from './problem-instance';
 import { ProblemTackling } from './problem-tackling';

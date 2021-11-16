@@ -1,4 +1,4 @@
-import { OutcomeData } from './achievement';
+import { OutcomeData } from './outcome';
 import { ContestData } from './contest';
 import { EvaluationData } from './evaluation';
 import { ArchiveFileData } from './files/archive';

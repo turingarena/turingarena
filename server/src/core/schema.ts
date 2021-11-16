@@ -1,5 +1,5 @@
 import { gql } from 'apollo-server-core';
-import { outcomeSchema } from './achievement';
+import { outcomeSchema } from './outcome';
 import { authSchema } from './auth';
 import { contestSchema } from './contest';
 import { objectiveInstanceSchema } from './objective-instance';

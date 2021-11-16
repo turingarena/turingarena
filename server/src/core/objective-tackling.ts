@@ -1,6 +1,6 @@
 import { QueryTypes } from 'sequelize';
 import { ApiContext } from '../main/api-context';
-import { OutcomeData } from './achievement';
+import { OutcomeData } from './outcome';
 import { ObjectiveInstance } from './objective-instance';
 import { FulfillmentGrade, FulfillmentGradeDomain } from './feedback/fulfillment';
 import { ScoreGrade, ScoreGradeDomain } from './feedback/score';

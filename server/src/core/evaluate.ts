@@ -5,7 +5,7 @@ import { tap, toArray } from 'rxjs/operators';
 import { ApiContext } from '../main/api-context';
 import { Service } from '../main/service';
 import { unreachable } from '../util/unreachable';
-import { OutcomeData } from './achievement';
+import { OutcomeData } from './outcome';
 import { ContestCache } from './contest';
 import { EvaluationData } from './evaluation';
 import { extractArchive } from './files/archive';
