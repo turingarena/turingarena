@@ -1,55 +1,55 @@
 import { gql } from 'apollo-server-core';
 import { ApiContext } from '../../main/api-context';
-import { ContestObjectiveAssignment } from '../contest-objective-assignment';
-import { ContestProblemAssignment } from '../contest-problem-assignment';
-import { ContestProblemAssignmentUserTackling } from '../contest-problem-assignment-user-tackling';
-import { ContestProblemSet } from '../contest-problem-set';
+import { ObjectiveInstance } from '../contest-objective-assignment';
+import { ProblemInstance } from '../contest-problem-assignment';
+import { ProblemTackling } from '../contest-problem-assignment-user-tackling';
+import { ProblemSetDefinition } from '../contest-problem-set';
 import { ScoreField } from '../feedback/score';
 import { ProblemMaterialCache } from '../material/problem-material';
 import { User } from '../user';
-import { ContestObjectiveAssignmentView } from './contest-objective-assignment-view';
-import { ContestProblemSetView } from './contest-problem-set-view';
+import { ObjectiveView } from './contest-objective-assignment-view';
+import { ProblemSetView } from './contest-problem-set-view';
 
-export const contestProblemAssignmentViewSchema = gql`
+export const problemViewSchema = gql`
     """
     Refers to a given problem, assigned in a given contest, as seen by a given user or anonymously.
     """
-    type ContestProblemAssignmentView {
+    type ProblemView {
         "Same problem assigned in same contest"
-        assignment: ContestProblemAssignment!
+        assignment: ProblemInstance!
         "Viewing user, or null if anonymous"
         user: User
 
         "Set of problems in same contest, as seen by same user"
-        problemSetView: ContestProblemSetView!
+        problemSetView: ProblemSetView!
 
         """
         Same problem assigned in same contest tackled by same user,
         if the user is non-anonymous and allowed to have submissions for this problem in this contest,
         and null otherwise.
         """
-        tackling: ContestProblemAssignmentUserTackling
+        tackling: ProblemTackling
 
         "Current score seen by the user for this problem in this contest."
         totalScoreField: ScoreField!
 
         "Objectives of this problem assigned in same contest as seen by same user (or anonymously)"
-        objectiveAssignmentViews: [ContestObjectiveAssignmentView!]!
+        objectiveAssignmentViews: [ObjectiveView!]!
     }
 `;
 
-export class ContestProblemAssignmentView {
-    constructor(readonly assignment: ContestProblemAssignment, readonly user: User | null, readonly ctx: ApiContext) {}
+export class ProblemView {
+    constructor(readonly assignment: ProblemInstance, readonly user: User | null, readonly ctx: ApiContext) {}
 
-    __typename = 'ContestProblemAssignmentView' as const;
+    __typename = 'ProblemView' as const;
 
     async problemSetView() {
-        return new ContestProblemSetView(new ContestProblemSet(this.assignment.problem.contest), this.user, this.ctx);
+        return new ProblemSetView(new ProblemSetDefinition(this.assignment.problem.contest), this.user, this.ctx);
     }
 
     async tackling() {
         return this.user !== null
-            ? new ContestProblemAssignmentUserTackling(this.assignment, this.user, this.ctx)
+            ? new ProblemTackling(this.assignment, this.user, this.ctx)
             : null;
     }
 
@@ -67,7 +67,7 @@ export class ContestProblemAssignmentView {
 
         return objectives.map(
             objective =>
-                new ContestObjectiveAssignmentView(new ContestObjectiveAssignment(this.assignment, objective), this.user, this.ctx),
+                new ObjectiveView(new ObjectiveInstance(this.assignment, objective), this.user, this.ctx),
         );
     }
 }

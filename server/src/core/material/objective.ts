@@ -11,10 +11,10 @@ export const objectiveSchema = gql`
     For every objective of a problem, a progressively higher grade can be achieved during a contest.
     Corresponds to a subtask in IOI-like problems (assuming max-by-subtask scoring strategy).
     """
-    type Objective {
+    type ObjectiveDefinition {
         id: ID!
 
-        problem: Problem!
+        problem: ProblemDefinition!
 
         "Name used to identify this objective in this problem. Only for admins."
         name: String!
@@ -25,7 +25,7 @@ export const objectiveSchema = gql`
     }
 `;
 
-export class Objective implements ApiOutputValue<'Objective'> {
+export class ObjectiveDefinition implements ApiOutputValue<'ObjectiveDefinition'> {
     constructor(readonly material: ProblemMaterial, readonly index: number) {}
 
     private readonly subtaskInfo = this.material.taskInfo.IOI.scoring.subtasks[this.index];

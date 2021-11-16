@@ -1,28 +1,28 @@
 import { gql } from 'apollo-server-core';
 import { ApiContext } from '../main/api-context';
 import { ApiOutputValue } from '../main/graphql-types';
-import { Problem } from './problem';
+import { ProblemDefinition } from './problem';
 
-export const contestProblemAssignmentSchema = gql`
-    type ContestProblemAssignment {
+export const problemInstanceSchema = gql`
+    type ProblemInstance {
         id: ID!
 
         contest: Contest!
-        problem: Problem!
+        problem: ProblemDefinition!
     }
 `;
 
-export class ContestProblemAssignment implements ApiOutputValue<'ContestProblemAssignment'> {
-    constructor(readonly problem: Problem) {}
+export class ProblemInstance implements ApiOutputValue<'ProblemInstance'> {
+    constructor(readonly problem: ProblemDefinition) {}
 
-    __typename = 'ContestProblemAssignment' as const;
+    __typename = 'ProblemInstance' as const;
     id() {
         return `${this.problem.contest.id}/${this.problem.name}`;
     }
     contest() {
         return this.problem.contest;
     }
-    static fromId(id: string, ctx: ApiContext): ContestProblemAssignment {
-        return new ContestProblemAssignment(Problem.fromId(id, ctx));
+    static fromId(id: string, ctx: ApiContext): ProblemInstance {
+        return new ProblemInstance(ProblemDefinition.fromId(id, ctx));
     }
 }

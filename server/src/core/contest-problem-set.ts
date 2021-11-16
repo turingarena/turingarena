@@ -2,14 +2,14 @@ import { gql } from 'apollo-server-core';
 import { ApiContext } from '../main/api-context';
 import { ApiOutputValue } from '../main/graphql-types';
 import { Contest } from './contest';
-import { ContestProblemSetUserTackling } from './contest-problem-set-user-tackling';
+import { ProblemSetTackling } from './contest-problem-set-user-tackling';
 import { ScoreRange } from './feedback/score';
 
-export const contestProblemSetSchema = gql`
+export const problemSetSchema = gql`
     """
     Collection of problems in a contest.
     """
-    type ContestProblemSet {
+    type ProblemSetDefinition {
         """
         Contest containing this problem set.
         """
@@ -19,30 +19,30 @@ export const contestProblemSetSchema = gql`
         Items in this problem set.
         Each corresponds to a problem assigned in the contest.
         """
-        assignments: [ContestProblemAssignment!]!
+        assignments: [ProblemInstance!]!
 
         # TODO: grade domain
-        userTacklings: [ContestProblemSetUserTackling!]!
+        userTacklings: [ProblemSetTackling!]!
     }
 `;
 
-export class ContestProblemSet implements ApiOutputValue<'ContestProblemSet'> {
+export class ProblemSetDefinition implements ApiOutputValue<'ProblemSetDefinition'> {
     readonly ctx: ApiContext;
     constructor(readonly contest: Contest) {
         this.ctx = contest.ctx;
     }
 
-    __typename = 'ContestProblemSet' as const;
+    __typename = 'ProblemSetDefinition' as const;
 
     async assignments() {
         return this.contest.getProblemAssignments();
     }
 
-    async userTacklings(): Promise<ContestProblemSetUserTackling[]> {
+    async userTacklings(): Promise<ProblemSetTackling[]> {
         await this.ctx.authorizeAdmin();
 
         const users = await this.contest.getParticipatingUsers();
-        return users.map(user => new ContestProblemSetUserTackling(this, user, this.ctx));
+        return users.map(user => new ProblemSetTackling(this, user, this.ctx));
     }
 
     async getScoreRange(): Promise<ScoreRange> {

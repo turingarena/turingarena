@@ -3,13 +3,13 @@ import { IconProp } from '@fortawesome/fontawesome-svg-core';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { css, cx } from 'emotion';
 import React, { HTMLAttributes } from 'react';
-import { ContestProblemAssignmentViewAsideFragment } from '../generated/graphql-types';
+import { ProblemViewAsideFragment } from '../generated/graphql-types';
 import { useT } from '../translations/main';
 import { badgeCss, getBadgeCssByValence } from '../util/components/badge';
 import { FragmentProps } from '../util/fragment-props';
 import {
-  ContestProblemAssignmentUserTacklingAside,
-  contestProblemAssignmentUserTacklingAsideFragment,
+  ProblemTacklingAside,
+  problemTacklingAsideFragment,
 } from './contest-problem-assignment-user-tackling-aside';
 import { Field, fieldFragment } from './fields/field';
 import { GradeField, gradeFieldFragment, scoreFieldFragment } from './fields/grade-field';
@@ -17,8 +17,8 @@ import { MediaDownload, mediaDownloadFragment } from './media-download';
 import { mediaInlineFragment } from './media-inline';
 import { textFragment } from './text';
 
-export const contestProblemAssignmentViewAsideFragment = gql`
-  fragment ContestProblemAssignmentViewAside on ContestProblemAssignmentView {
+export const problemViewAsideFragment = gql`
+  fragment ProblemViewAside on ProblemView {
     assignment {
       id
       problem {
@@ -73,7 +73,7 @@ export const contestProblemAssignmentViewAsideFragment = gql`
     }
 
     tackling {
-      ...ContestProblemAssignmentUserTacklingAside
+      ...ProblemTacklingAside
     }
   }
 
@@ -83,7 +83,7 @@ export const contestProblemAssignmentViewAsideFragment = gql`
   ${fieldFragment}
   ${scoreFieldFragment}
   ${gradeFieldFragment}
-  ${contestProblemAssignmentUserTacklingAsideFragment}
+  ${problemTacklingAsideFragment}
 `;
 
 const asideTitleCss = css`
@@ -106,11 +106,11 @@ const downloadLinkCss = css`
   }
 `;
 
-export function ContestProblemAssignmentViewAside({
+export function ProblemViewAside({
   data,
   className,
   ...rest
-}: FragmentProps<ContestProblemAssignmentViewAsideFragment> & HTMLAttributes<HTMLDivElement>) {
+}: FragmentProps<ProblemViewAsideFragment> & HTMLAttributes<HTMLDivElement>) {
   const t = useT();
 
   return (
@@ -125,7 +125,7 @@ export function ContestProblemAssignmentViewAside({
       )}
       {...rest}
     >
-      {data.tackling !== null && <ContestProblemAssignmentUserTacklingAside data={data.tackling} />}
+      {data.tackling !== null && <ProblemTacklingAside data={data.tackling} />}
       <div
         className={css`
           padding: 16px;

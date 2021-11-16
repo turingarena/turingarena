@@ -1,37 +1,37 @@
 import { gql } from 'apollo-server-core';
 import { ApiContext } from '../main/api-context';
-import { ContestProblemAssignmentUserTackling } from './contest-problem-assignment-user-tackling';
-import { ContestProblemSet } from './contest-problem-set';
+import { ProblemTackling } from './contest-problem-assignment-user-tackling';
+import { ProblemSetDefinition } from './contest-problem-set';
 import { ScoreGrade } from './feedback/score';
 import { User } from './user';
-import { ContestProblemSetView } from './view/contest-problem-set-view';
+import { ProblemSetView } from './view/contest-problem-set-view';
 
-export const contestProblemSetUserTacklingSchema = gql`
+export const problemSetTacklingSchema = gql`
     """
     The problem set of a given contest, tackled by a given user.
     """
-    type ContestProblemSetUserTackling {
+    type ProblemSetTackling {
         "The problem set."
-        problemSet: ContestProblemSet!
+        problemSet: ProblemSetDefinition!
         "The given user."
         user: User!
 
         "Same problem-set seen by same user."
-        view: ContestProblemSetView!
+        view: ProblemSetView!
 
-        assignmentTacklings: [ContestProblemAssignmentUserTackling!]!
+        assignmentTacklings: [ProblemTackling!]!
 
         totalScoreGrade: ScoreGrade!
     }
 `;
 
-export class ContestProblemSetUserTackling {
-    constructor(readonly problemSet: ContestProblemSet, readonly user: User, readonly ctx: ApiContext) {}
+export class ProblemSetTackling {
+    constructor(readonly problemSet: ProblemSetDefinition, readonly user: User, readonly ctx: ApiContext) {}
 
-    __typename = 'ContestProblemSetUserTackling' as const;
+    __typename = 'ProblemSetTackling' as const;
 
     view() {
-        return new ContestProblemSetView(this.problemSet, this.user, this.ctx);
+        return new ProblemSetView(this.problemSet, this.user, this.ctx);
     }
 
     async totalScoreGrade() {
@@ -40,7 +40,7 @@ export class ContestProblemSetUserTackling {
         return ScoreGrade.total(
             await Promise.all(
                 assignments.map(async assignment =>
-                    new ContestProblemAssignmentUserTackling(assignment, this.user, this.ctx).scoreGrade(),
+                    new ProblemTackling(assignment, this.user, this.ctx).scoreGrade(),
                 ),
             ),
         );
@@ -49,6 +49,6 @@ export class ContestProblemSetUserTackling {
     async assignmentTacklings() {
         const assignments = await this.problemSet.contest.getProblemAssignments();
 
-        return assignments.map(assignment => new ContestProblemAssignmentUserTackling(assignment, this.user, this.ctx));
+        return assignments.map(assignment => new ProblemTackling(assignment, this.user, this.ctx));
     }
 }

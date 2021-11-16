@@ -5,7 +5,7 @@ import { DateTime } from 'luxon';
 import React from 'react';
 import { Table } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
-import { ContestProblemAssignmentUserTacklingSubmissionListFragment } from '../generated/graphql-types';
+import { ProblemTacklingSubmissionListFragment } from '../generated/graphql-types';
 import { useT } from '../translations/main';
 import { FragmentProps } from '../util/fragment-props';
 import { useBasePath } from '../util/paths';
@@ -13,10 +13,10 @@ import { columnFragment, getTableClassByValence, recordFragment } from './field-
 import { Field } from './fields/field';
 import { Text, textFragment } from './text';
 
-export const contestProblemAssignmentUserTacklingSubmissionListFragment = gql`
-  fragment ContestProblemAssignmentUserTacklingSubmissionList on ContestProblemAssignmentUserTackling {
+export const problemTacklingSubmissionListFragment = gql`
+  fragment ProblemTacklingSubmissionList on ProblemTackling {
     submissions {
-      ...ContestProblemAssignmentUserTacklingSubmissionListSubmission
+      ...ProblemTacklingSubmissionListSubmission
     }
 
     assignmentView {
@@ -30,7 +30,7 @@ export const contestProblemAssignmentUserTacklingSubmissionListFragment = gql`
     }
   }
 
-  fragment ContestProblemAssignmentUserTacklingSubmissionListSubmission on Submission {
+  fragment ProblemTacklingSubmissionListSubmission on Submission {
     id
     createdAt {
       local
@@ -58,9 +58,9 @@ export const contestProblemAssignmentUserTacklingSubmissionListFragment = gql`
   ${recordFragment}
 `;
 
-export function ContestProblemAssignmentUserTacklingSubmissionList({
+export function ProblemTacklingSubmissionList({
   data,
-}: FragmentProps<ContestProblemAssignmentUserTacklingSubmissionListFragment>) {
+}: FragmentProps<ProblemTacklingSubmissionListFragment>) {
   const basePath = useBasePath();
   const t = useT();
 

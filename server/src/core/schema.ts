@@ -2,11 +2,11 @@ import { gql } from 'apollo-server-core';
 import { achievementSchema } from './achievement';
 import { authSchema } from './auth';
 import { contestSchema } from './contest';
-import { contestObjectiveAssignmentSchema } from './contest-objective-assignment';
-import { contestProblemAssignmentSchema } from './contest-problem-assignment';
-import { contestProblemAssignmentUserTacklingSchema } from './contest-problem-assignment-user-tackling';
-import { contestProblemSetSchema } from './contest-problem-set';
-import { contestProblemSetUserTacklingSchema } from './contest-problem-set-user-tackling';
+import { objectiveInstanceSchema } from './contest-objective-assignment';
+import { problemInstanceSchema } from './contest-problem-assignment';
+import { problemTacklingSchema } from './contest-problem-assignment-user-tackling';
+import { problemSetSchema } from './contest-problem-set';
+import { problemSetTacklingSchema } from './contest-problem-set-user-tackling';
 import { evaluationSchema } from './evaluation';
 import { fieldSchema } from './feedback/field';
 import { fulfillmentSchema } from './feedback/fulfillment';
@@ -32,9 +32,9 @@ import { submissionSchema } from './submission';
 import { submissionFileSchema } from './submission-file';
 import { userSchema } from './user';
 import { dateTimeSchema } from './util/date-time';
-import { contestObjectiveAssignmentViewSchema } from './view/contest-objective-assignment-view';
-import { contestProblemAssignmentViewSchema } from './view/contest-problem-assignment-view';
-import { contestProblemSetViewSchema } from './view/contest-problem-set-view';
+import { objectiveViewSchema } from './view/contest-objective-assignment-view';
+import { problemViewSchema } from './view/contest-problem-assignment-view';
+import { problemSetViewSchema } from './view/contest-problem-set-view';
 import { contestViewSchema } from './view/contest-view';
 import { mainViewSchema } from './view/main-view';
 
@@ -44,14 +44,14 @@ export const schema = gql`
     ${archiveSchema}
     ${authSchema}
     ${objectiveSchema}
-    ${contestObjectiveAssignmentSchema}
-    ${contestObjectiveAssignmentViewSchema}
-    ${contestProblemAssignmentSchema}
-    ${contestProblemAssignmentUserTacklingSchema}
-    ${contestProblemAssignmentViewSchema}
-    ${contestProblemSetSchema}
-    ${contestProblemSetUserTacklingSchema}
-    ${contestProblemSetViewSchema}
+    ${objectiveInstanceSchema}
+    ${objectiveViewSchema}
+    ${problemInstanceSchema}
+    ${problemTacklingSchema}
+    ${problemViewSchema}
+    ${problemSetSchema}
+    ${problemSetTacklingSchema}
+    ${problemSetViewSchema}
     ${contestSchema}
     ${contestViewSchema}
     ${dateTimeSchema}

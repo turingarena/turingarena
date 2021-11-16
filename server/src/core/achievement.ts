@@ -12,7 +12,7 @@ import { Submission } from './submission';
 export const achievementSchema = gql`
     type Achievement {
         evaluation: Submission!
-        objectiveAssignment: ContestObjectiveAssignment!
+        objectiveAssignment: ObjectiveInstance!
         grade: Grade!
     }
 `;

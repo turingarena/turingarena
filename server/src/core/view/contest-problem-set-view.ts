@@ -1,38 +1,38 @@
 import { gql } from 'apollo-server-core';
 import { ApiContext } from '../../main/api-context';
-import { ContestProblemSet } from '../contest-problem-set';
-import { ContestProblemSetUserTackling } from '../contest-problem-set-user-tackling';
+import { ProblemSetDefinition } from '../contest-problem-set';
+import { ProblemSetTackling } from '../contest-problem-set-user-tackling';
 import { ScoreField } from '../feedback/score';
 import { User } from '../user';
-import { ContestProblemAssignmentView } from './contest-problem-assignment-view';
+import { ProblemView } from './contest-problem-assignment-view';
 import { ContestView } from './contest-view';
 
-export const contestProblemSetViewSchema = gql`
+export const problemSetViewSchema = gql`
     """
     The problem-set of a given contest, as seen by a given user or anonymously.
     """
-    type ContestProblemSetView {
+    type ProblemSetView {
         "The problem-set of the same contest."
-        problemSet: ContestProblemSet!
+        problemSet: ProblemSetDefinition!
         "The given user, if any, or null if anonymous."
         user: User
         "Same contest, as seen by the same user (or anonymously)."
         contestView: ContestView!
         "The list of problems in the given problem-set, assigned in the same contest, as seen by the same user (or anonymously)."
-        assignmentViews: [ContestProblemAssignmentView!]!
+        assignmentViews: [ProblemView!]!
 
         "Same contest as tackled by the same user, or null if anonymous."
-        tackling: ContestProblemSetUserTackling
+        tackling: ProblemSetTackling
 
         "Current total score visible to the given user."
         totalScoreField: ScoreField!
     }
 `;
 
-export class ContestProblemSetView {
-    constructor(readonly problemSet: ContestProblemSet, readonly user: User | null, readonly ctx: ApiContext) {}
+export class ProblemSetView {
+    constructor(readonly problemSet: ProblemSetDefinition, readonly user: User | null, readonly ctx: ApiContext) {}
 
-    __typename = 'ContestProblemSetView' as const;
+    __typename = 'ProblemSetView' as const;
 
     contestView() {
         return new ContestView(this.problemSet.contest, this.user, this.ctx);
@@ -40,14 +40,14 @@ export class ContestProblemSetView {
 
     async assignmentViews() {
         return (await this.problemSet.contest.getProblemAssignments()).map(
-            assignment => new ContestProblemAssignmentView(assignment, this.user, this.ctx),
+            assignment => new ProblemView(assignment, this.user, this.ctx),
         );
     }
 
     tackling() {
         if (this.user === null) return null;
 
-        return new ContestProblemSetUserTackling(this.problemSet, this.user, this.ctx);
+        return new ProblemSetTackling(this.problemSet, this.user, this.ctx);
     }
 
     async totalScoreField() {

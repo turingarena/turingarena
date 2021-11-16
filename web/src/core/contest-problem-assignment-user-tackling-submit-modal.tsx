@@ -3,8 +3,8 @@ import { css, cx } from 'emotion';
 import React, { InputHTMLAttributes, useRef, useState } from 'react';
 import { Modal } from 'react-bootstrap';
 import {
-  ContestProblemAssignmentUserTacklingSubmitModalFragment,
-  ContestProblemAssignmentUserTacklingSubmitModalSubmissionFieldFragment,
+  ProblemTacklingSubmitModalFragment,
+  ProblemTacklingSubmitModalSubmissionFieldFragment,
   SubmitMutation,
   SubmitMutationVariables,
 } from '../generated/graphql-types';
@@ -15,38 +15,38 @@ import { loadFileContent } from '../util/file-load';
 import { FragmentProps } from '../util/fragment-props';
 import { textFragment } from './text';
 
-export const contestProblemAssignmentUserTacklingSubmitModalFragment = gql`
-  fragment ContestProblemAssignmentUserTacklingSubmitModalSubmissionFileType on SubmissionFileType {
+export const problemTacklingSubmitModalFragment = gql`
+  fragment ProblemTacklingSubmitModalSubmissionFileType on SubmissionFileType {
     name
     title {
       ...Text
     }
   }
 
-  fragment ContestProblemAssignmentUserTacklingSubmitModalSubmissionField on SubmissionField {
+  fragment ProblemTacklingSubmitModalSubmissionField on SubmissionField {
     name
     title {
       ...Text
     }
   }
 
-  fragment ContestProblemAssignmentUserTacklingSubmitModalSubmissionFileTypeRule on SubmissionFileTypeRule {
+  fragment ProblemTacklingSubmitModalSubmissionFileTypeRule on SubmissionFileTypeRule {
     fields {
       name
     }
     extensions
     defaultType {
-      ...ContestProblemAssignmentUserTacklingSubmitModalSubmissionFileType
+      ...ProblemTacklingSubmitModalSubmissionFileType
     }
     recommendedTypes {
-      ...ContestProblemAssignmentUserTacklingSubmitModalSubmissionFileType
+      ...ProblemTacklingSubmitModalSubmissionFileType
     }
     otherTypes {
-      ...ContestProblemAssignmentUserTacklingSubmitModalSubmissionFileType
+      ...ProblemTacklingSubmitModalSubmissionFileType
     }
   }
 
-  fragment ContestProblemAssignmentUserTacklingSubmitModal on ContestProblemAssignmentUserTackling {
+  fragment ProblemTacklingSubmitModal on ProblemTackling {
     assignmentView {
       assignment {
         contest {
@@ -58,10 +58,10 @@ export const contestProblemAssignmentUserTacklingSubmitModalFragment = gql`
             ...Text
           }
           submissionFields {
-            ...ContestProblemAssignmentUserTacklingSubmitModalSubmissionField
+            ...ProblemTacklingSubmitModalSubmissionField
           }
           submissionFileTypeRules {
-            ...ContestProblemAssignmentUserTacklingSubmitModalSubmissionFileTypeRule
+            ...ProblemTacklingSubmitModalSubmissionFileTypeRule
           }
         }
       }
@@ -75,10 +75,10 @@ export const contestProblemAssignmentUserTacklingSubmitModalFragment = gql`
   ${textFragment}
 `;
 
-export function ContestProblemAssignmentUserTacklingSubmitModal({
+export function ProblemTacklingSubmitModal({
   data,
   onSubmitSuccessful,
-}: FragmentProps<ContestProblemAssignmentUserTacklingSubmitModalFragment> & {
+}: FragmentProps<ProblemTacklingSubmitModalFragment> & {
   onSubmitSuccessful: (submissionId: string) => void;
 }) {
   const t = useT();
@@ -173,8 +173,8 @@ function FileInput({
   field,
   onChange,
   ...rest
-}: FragmentProps<ContestProblemAssignmentUserTacklingSubmitModalFragment> & {
-  field: ContestProblemAssignmentUserTacklingSubmitModalSubmissionFieldFragment;
+}: FragmentProps<ProblemTacklingSubmitModalFragment> & {
+  field: ProblemTacklingSubmitModalSubmissionFieldFragment;
 } & InputHTMLAttributes<HTMLInputElement>) {
   const fileFieldId = `${field.name}.file`;
 
@@ -254,8 +254,8 @@ function FileTypeInfo({
   data,
   field,
   file,
-}: FragmentProps<ContestProblemAssignmentUserTacklingSubmitModalFragment> & {
-  field: ContestProblemAssignmentUserTacklingSubmitModalSubmissionFieldFragment;
+}: FragmentProps<ProblemTacklingSubmitModalFragment> & {
+  field: ProblemTacklingSubmitModalSubmissionFieldFragment;
   file: File;
 }) {
   const rule = getTypingRule({ data, field, file });
@@ -308,8 +308,8 @@ function getTypingRule({
   data,
   field,
   file,
-}: FragmentProps<ContestProblemAssignmentUserTacklingSubmitModalFragment> & {
-  field: ContestProblemAssignmentUserTacklingSubmitModalSubmissionFieldFragment;
+}: FragmentProps<ProblemTacklingSubmitModalFragment> & {
+  field: ProblemTacklingSubmitModalSubmissionFieldFragment;
   file: File;
 }) {
   for (const rule of data.assignmentView.assignment.problem.submissionFileTypeRules) {

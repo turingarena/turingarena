@@ -10,8 +10,8 @@ import { typed } from '../util/types';
 import { unreachable } from '../util/unreachable';
 import { AchievementCache } from './achievement';
 import { Contest, ContestData } from './contest';
-import { ContestProblemAssignment } from './contest-problem-assignment';
-import { ContestProblemAssignmentUserTackling } from './contest-problem-assignment-user-tackling';
+import { ProblemInstance } from './contest-problem-assignment';
+import { ProblemTackling } from './contest-problem-assignment-user-tackling';
 import { LiveEvaluationService } from './evaluate';
 import { Evaluation, EvaluationCache } from './evaluation';
 import { FulfillmentField, FulfillmentGradeDomain } from './feedback/fulfillment';
@@ -20,7 +20,7 @@ import { extractFile } from './files/file-content';
 import { ProblemMaterialCache } from './material/problem-material';
 import { Text } from './material/text';
 import { Participation } from './participation';
-import { Problem } from './problem';
+import { ProblemDefinition } from './problem';
 import { SubmissionFileCache } from './submission-file';
 import { User } from './user';
 import { ApiDateTime } from './util/date-time';
@@ -29,11 +29,11 @@ export const submissionSchema = gql`
     type Submission {
         id: ID!
 
-        problem: Problem!
+        problem: ProblemDefinition!
         user: User!
         contest: Contest!
 
-        contestProblemAssigment: ContestProblemAssignment!
+        contestProblemAssigment: ProblemInstance!
         participation: Participation!
 
         files: [SubmissionFile!]!
@@ -315,8 +315,8 @@ export class Submission implements ApiOutputValue<'Submission'> {
 
         const contest = new Contest(contestId, this.ctx);
 
-        return new ContestProblemAssignmentUserTackling(
-            new ContestProblemAssignment(new Problem(contest, problemName, this.ctx)),
+        return new ProblemTackling(
+            new ProblemInstance(new ProblemDefinition(contest, problemName, this.ctx)),
             new User(contest, username, this.ctx),
             this.ctx,
         );
@@ -395,7 +395,7 @@ export class SubmissionCache extends ApiCache {
     byId = createSimpleLoader((id: string) => this.ctx.table(SubmissionData).findByPk(id));
 
     byTackling = createSimpleLoader(async (id: string) => {
-        const cpaut = ContestProblemAssignmentUserTackling.fromId(id, this.ctx);
+        const cpaut = ProblemTackling.fromId(id, this.ctx);
         const problemName = cpaut.assignment.problem.name;
         const contestId = cpaut.assignment.contest().id;
         const username = cpaut.user.username;

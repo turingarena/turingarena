@@ -3,7 +3,7 @@ import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-alpine.css';
 import { AgGridColumn, AgGridReact } from 'ag-grid-react';
 import React, { useEffect, useState } from 'react';
-import { ContestProblemSetUserTackling } from '../generated/graphql-types';
+import { ProblemSetTackling } from '../generated/graphql-types';
 import './dashboard.css';
 
 const SCORES_DATA = gql`
@@ -69,7 +69,7 @@ export function ScoresTable() {
       setProblemsNames(tmpproblemnames);
 
       const tmpScores: Scores[] = [];
-      data?.contests[0].problemSet.userTacklings.map((ut: ContestProblemSetUserTackling) => {
+      data?.contests[0].problemSet.userTacklings.map((ut: ProblemSetTackling) => {
         const toAdd: Scores = { username: '' };
         toAdd.username = ut.user.username;
         toAdd.totalScore = ut.totalScoreGrade.score.toString();

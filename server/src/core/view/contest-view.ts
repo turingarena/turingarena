@@ -1,9 +1,9 @@
 import { gql } from 'apollo-server-core';
 import { ApiContext } from '../../main/api-context';
 import { Contest } from '../contest';
-import { ContestProblemSet } from '../contest-problem-set';
+import { ProblemSetDefinition } from '../contest-problem-set';
 import { User } from '../user';
-import { ContestProblemSetView } from './contest-problem-set-view';
+import { ProblemSetView } from './contest-problem-set-view';
 
 export const contestViewSchema = gql`
     """
@@ -16,7 +16,7 @@ export const contestViewSchema = gql`
         user: User
 
         "The problem-set of the given contest, as seen by the same user, if it is currently visible, and null otherwise."
-        problemSetView: ContestProblemSetView
+        problemSetView: ProblemSetView
     }
 `;
 
@@ -28,7 +28,7 @@ export class ContestView {
         switch (status) {
             case 'RUNNING':
             case 'ENDED':
-                return new ContestProblemSetView(new ContestProblemSet(this.contest), this.user, this.ctx);
+                return new ProblemSetView(new ProblemSetDefinition(this.contest), this.user, this.ctx);
             case 'NOT_STARTED':
             default:
                 return null;

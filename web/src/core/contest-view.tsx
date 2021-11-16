@@ -6,8 +6,8 @@ import { hiddenCss } from '../util/components/hidden';
 import { FragmentProps } from '../util/fragment-props';
 import { PathRouter } from '../util/paths';
 import {
-  ContestProblemAssignmentViewAside,
-  contestProblemAssignmentViewAsideFragment,
+  ProblemViewAside,
+  problemViewAsideFragment,
 } from './contest-problem-assignment-view-aside';
 import { ContestViewAside, contestViewAsideFragment } from './contest-view-aside';
 import { MediaInline, mediaInlineFragment } from './media-inline';
@@ -37,7 +37,7 @@ export const contestViewFragment = gql`
             }
           }
         }
-        ...ContestProblemAssignmentViewAside
+        ...ProblemViewAside
       }
     }
 
@@ -47,7 +47,7 @@ export const contestViewFragment = gql`
   ${textFragment}
   ${mediaInlineFragment}
   ${contestViewAsideFragment}
-  ${contestProblemAssignmentViewAsideFragment}
+  ${problemViewAsideFragment}
 `;
 
 const activeMediaInlineCss = css`
@@ -72,7 +72,7 @@ export function ContestView({ data }: FragmentProps<ContestViewFragment>) {
           <PathRouter key={a.assignment.problem.id} path={`/${a.assignment.problem.name}`}>
             {({ match }) => (
               <>
-                <ContestProblemAssignmentViewAside className={match !== null ? undefined : hiddenCss} data={a} />
+                <ProblemViewAside className={match !== null ? undefined : hiddenCss} data={a} />
                 <div className={match !== null ? activeMediaInlineCss : hiddenCss}>
                   <MediaInline data={a.assignment.problem.statement} />
                 </div>

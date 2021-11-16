@@ -1,30 +1,30 @@
 import { gql } from 'apollo-server-core';
 import { ApiContext } from '../main/api-context';
-import { ContestObjectiveAssignment } from './contest-objective-assignment';
-import { ContestObjectiveAssignmentUserTackling } from './contest-objective-assignment-user-tackling';
-import { ContestProblemAssignment } from './contest-problem-assignment';
+import { ObjectiveInstance } from './contest-objective-assignment';
+import { ObjectiveTackling } from './contest-objective-assignment-user-tackling';
+import { ProblemInstance } from './contest-problem-assignment';
 import { ScoreGrade } from './feedback/score';
 import { ProblemMaterialCache } from './material/problem-material';
 import { SubmissionCache } from './submission';
 import { User } from './user';
-import { ContestProblemAssignmentView } from './view/contest-problem-assignment-view';
+import { ProblemView } from './view/contest-problem-assignment-view';
 
-export const contestProblemAssignmentUserTacklingSchema = gql`
+export const problemTacklingSchema = gql`
     """
     Refers to a given problem, assigned in a given contest, tackled by a given user.
     Tackling means having a collection of submissions, and possibly submit a new one.
-    This is separate from ContestProblemAssignmentView since a ContestProblemAssignmentUserTackling
+    This is separate from ProblemView since a ProblemTackling
     is available only for non-anonymous users who are allowed to have submissions (e.g., only after the contest is started).
     """
-    type ContestProblemAssignmentUserTackling {
+    type ProblemTackling {
         "User tackling the problem"
         user: User!
 
         "Same problem assigned in same contest"
-        assignment: ContestProblemAssignment!
+        assignment: ProblemInstance!
 
         "Same problem assigned in same contest as seen by same user"
-        assignmentView: ContestProblemAssignmentView!
+        assignmentView: ProblemView!
 
         "List of submissions for this problem in this contest from this user"
         submissions: [Submission!]!
@@ -37,22 +37,22 @@ export const contestProblemAssignmentUserTacklingSchema = gql`
     }
 `;
 
-export class ContestProblemAssignmentUserTackling {
-    constructor(readonly assignment: ContestProblemAssignment, readonly user: User, readonly ctx: ApiContext) {}
+export class ProblemTackling {
+    constructor(readonly assignment: ProblemInstance, readonly user: User, readonly ctx: ApiContext) {}
 
-    __typename = 'ContestProblemAssignmentUserTackling' as const;
+    __typename = 'ProblemTackling' as const;
 
     id(): string {
         return `${this.assignment.id()}/${this.user.id}`;
     }
 
-    static fromId(id: string, ctx: ApiContext): ContestProblemAssignmentUserTackling {
+    static fromId(id: string, ctx: ApiContext): ProblemTackling {
         const ids = id.split('/');
         const assignmentId = ids.splice(0, 2).join('/');
         const userId = ids.join('/');
 
-        return new ContestProblemAssignmentUserTackling(
-            ContestProblemAssignment.fromId(assignmentId, ctx),
+        return new ProblemTackling(
+            ProblemInstance.fromId(assignmentId, ctx),
             User.fromId(userId, ctx),
             ctx,
         );
@@ -69,7 +69,7 @@ export class ContestProblemAssignmentUserTackling {
     }
 
     assignmentView() {
-        return new ContestProblemAssignmentView(this.assignment, this.user, this.ctx);
+        return new ProblemView(this.assignment, this.user, this.ctx);
     }
 
     async getObjectiveTacklings() {
@@ -77,8 +77,8 @@ export class ContestProblemAssignmentUserTackling {
 
         return material.objectives.map(
             objective =>
-                new ContestObjectiveAssignmentUserTackling(
-                    new ContestObjectiveAssignment(this.assignment, objective),
+                new ObjectiveTackling(
+                    new ObjectiveInstance(this.assignment, objective),
                     this.user,
                     this.ctx,
                 ),

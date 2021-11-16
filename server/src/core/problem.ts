@@ -6,7 +6,7 @@ import { ScoreGradeDomain } from './feedback/score';
 import { ProblemMaterialCache } from './material/problem-material';
 
 export const problemSchema = gql`
-    type Problem {
+    type ProblemDefinition {
         id: ID!
         name: ID!
     }
@@ -17,14 +17,14 @@ export const problemSchema = gql`
     }
 `;
 
-export class Problem implements ApiOutputValue<'Problem'> {
+export class ProblemDefinition implements ApiOutputValue<'ProblemDefinition'> {
     constructor(readonly contest: Contest, readonly name: string, readonly ctx: ApiContext) {}
-    __typename = 'Problem' as const;
+    __typename = 'ProblemDefinition' as const;
 
-    static fromId(id: string, ctx: ApiContext): Problem {
+    static fromId(id: string, ctx: ApiContext): ProblemDefinition {
         const [contestId, problemName] = id.split('/');
 
-        return new Problem(new Contest(contestId, ctx), problemName, ctx);
+        return new ProblemDefinition(new Contest(contestId, ctx), problemName, ctx);
     }
 
     id() {

@@ -1,15 +1,15 @@
 import { QueryTypes } from 'sequelize';
 import { ApiContext } from '../main/api-context';
 import { Achievement } from './achievement';
-import { ContestObjectiveAssignment } from './contest-objective-assignment';
+import { ObjectiveInstance } from './contest-objective-assignment';
 import { FulfillmentGrade, FulfillmentGradeDomain } from './feedback/fulfillment';
 import { ScoreGrade, ScoreGradeDomain } from './feedback/score';
 import { User } from './user';
 
-export class ContestObjectiveAssignmentUserTackling {
-    constructor(readonly assignment: ContestObjectiveAssignment, readonly user: User, readonly ctx: ApiContext) {}
+export class ObjectiveTackling {
+    constructor(readonly assignment: ObjectiveInstance, readonly user: User, readonly ctx: ApiContext) {}
 
-    __typename = 'ContestObjectiveAssignmentUserTackling' as const;
+    __typename = 'ObjectiveTackling' as const;
 
     async getBestAchievement() {
         const achievements = await this.ctx.db.query<Achievement>(

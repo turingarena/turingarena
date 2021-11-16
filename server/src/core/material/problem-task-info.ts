@@ -2,7 +2,7 @@ import { ApiContext } from '../../main/api-context';
 import { ContestCache } from '../contest';
 import { ArchiveFileData } from '../files/archive';
 import { FileContent } from '../files/file-content';
-import { Problem } from '../problem';
+import { ProblemDefinition } from '../problem';
 
 export interface ProblemTaskInfo {
     IOI: IOITaskInfo;
@@ -36,7 +36,7 @@ export interface IOITaskInfo {
     }>;
 }
 
-export async function getProblemTaskInfo(ctx: ApiContext, problem: Problem): Promise<ProblemTaskInfo> {
+export async function getProblemTaskInfo(ctx: ApiContext, problem: ProblemDefinition): Promise<ProblemTaskInfo> {
     const { archiveId } = await ctx.cache(ContestCache).byId.load(problem.contest.id);
     const metadataPath = `${problem.name}/.task-info.json`;
 

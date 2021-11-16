@@ -9,14 +9,14 @@ import { ApiContext } from '../main/api-context';
 import { createSimpleLoader, UuidBaseModel } from '../main/base-model';
 import { ApiOutputValue } from '../main/graphql-types';
 import { ContestMetadata } from './contest-metadata';
-import { ContestProblemAssignment } from './contest-problem-assignment';
-import { ContestProblemSet } from './contest-problem-set';
+import { ProblemInstance } from './contest-problem-assignment';
+import { ProblemSetDefinition } from './contest-problem-set';
 import { Archive, ArchiveFileData } from './files/archive';
 import { FileContent } from './files/file-content';
 import { Media, MediaFile } from './material/media';
 import { ProblemMaterial, ProblemMaterialCache } from './material/problem-material';
 import { Text } from './material/text';
-import { Problem } from './problem';
+import { ProblemDefinition } from './problem';
 import { User } from './user';
 import { ApiDateTime } from './util/date-time';
 
@@ -33,7 +33,7 @@ export const contestSchema = gql`
         end: DateTime
 
         status: ContestStatus!
-        problemSet: ContestProblemSet!
+        problemSet: ProblemSetDefinition!
         archive: Archive!
     }
 
@@ -85,7 +85,7 @@ export class Contest implements ApiOutputValue<'Contest'> {
     async problemSet() {
         await this.ctx.authorizeAdmin();
 
-        return (new ContestProblemSet(this) as unknown) as ApiOutputValue<'ContestProblemSet'>;
+        return (new ProblemSetDefinition(this) as unknown) as ApiOutputValue<'ProblemSetDefinition'>;
     }
     async archive() {
         await this.ctx.authorizeAdmin();
@@ -142,7 +142,7 @@ export class Contest implements ApiOutputValue<'Contest'> {
     async getProblemAssignments() {
         const metadata = await this.getMetadata();
 
-        return metadata.problems.map(name => new ContestProblemAssignment(new Problem(this, name, this.ctx)));
+        return metadata.problems.map(name => new ProblemInstance(new ProblemDefinition(this, name, this.ctx)));
     }
 
     async getProblemSetMaterial(): Promise<ProblemMaterial[]> {

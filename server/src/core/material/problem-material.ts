@@ -9,14 +9,14 @@ import { FulfillmentGradeDomain } from '../feedback/fulfillment';
 import { ScoreGradeDomain, ScoreRange } from '../feedback/score';
 import { ArchiveFileData } from '../files/archive';
 import { FileContent } from '../files/file-content';
-import { Problem } from '../problem';
-import { Objective } from './objective';
+import { ProblemDefinition } from '../problem';
+import { ObjectiveDefinition } from './objective';
 import { Media, MediaFile } from './media';
 import { getProblemTaskInfo, ProblemTaskInfo } from './problem-task-info';
 import { Text } from './text';
 
 export const problemMaterialSchema = gql`
-    extend type Problem {
+    extend type ProblemDefinition {
         "Name of this problem to show to users"
         title: Text!
         "Statement of this problem"
@@ -26,7 +26,7 @@ export const problemMaterialSchema = gql`
         "List of attributes of this problem"
         attributes: [ProblemAttribute!]!
         "List of objectives of this problem"
-        objectives: [Objective]!
+        objectives: [ObjectiveDefinition]!
         "List of fields that constitute a submission for this problem"
         submissionFields: [SubmissionField!]!
         "List of types that can be associated to files in a submission for this problem"
@@ -175,7 +175,7 @@ const fileRules: SubmissionFileTypeRule[] = [
 const memoryUnitBytes = 1024 * 1024;
 
 export class ProblemMaterial {
-    constructor(readonly problem: Problem, readonly taskInfo: ProblemTaskInfo, readonly ctx: ApiContext) {}
+    constructor(readonly problem: ProblemDefinition, readonly taskInfo: ProblemTaskInfo, readonly ctx: ApiContext) {}
 
     title = new Text([{ value: this.taskInfo.IOI.title }]);
 
@@ -239,7 +239,7 @@ export class ProblemMaterial {
         },
     ];
 
-    objectives = this.taskInfo.IOI.scoring.subtasks.map((subtask, index): Objective => new Objective(this, index));
+    objectives = this.taskInfo.IOI.scoring.subtasks.map((subtask, index): ObjectiveDefinition => new ObjectiveDefinition(this, index));
 
     submissionFields = [{ name: 'solution', title: new Text([{ value: 'Solution' }]) }];
     submissionFileTypes = Object.values(languages);
@@ -295,7 +295,7 @@ export class ProblemMaterial {
         },
     ];
 
-    async loadContent(problem: Problem, path: string) {
+    async loadContent(problem: ProblemDefinition, path: string) {
         const contest = new Contest(problem.contest.id, this.ctx);
         const { archiveId } = await this.ctx.cache(ContestCache).byId.load(contest.id);
         const file = await this.ctx.table(ArchiveFileData).findOne({
@@ -315,8 +315,8 @@ export class ProblemMaterialCache extends ApiCache {
     byId = createSimpleLoader(
         async (id: string) =>
             new ProblemMaterial(
-                Problem.fromId(id, this.ctx),
-                await getProblemTaskInfo(this.ctx, Problem.fromId(id, this.ctx)),
+                ProblemDefinition.fromId(id, this.ctx),
+                await getProblemTaskInfo(this.ctx, ProblemDefinition.fromId(id, this.ctx)),
                 this.ctx,
             ),
     );
