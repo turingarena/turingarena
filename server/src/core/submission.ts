@@ -8,7 +8,7 @@ import { createSimpleLoader, UuidBaseModel } from '../main/base-model';
 import { ApiInputValue, ApiOutputValue } from '../main/graphql-types';
 import { typed } from '../util/types';
 import { unreachable } from '../util/unreachable';
-import { AchievementCache } from './achievement';
+import { OutcomeCache } from './achievement';
 import { Contest, ContestData } from './contest';
 import { ProblemInstance } from './contest-problem-assignment';
 import { ProblemTackling } from './contest-problem-assignment-user-tackling';
@@ -111,7 +111,7 @@ export class Submission implements ApiOutputValue<'Submission'> {
     async summaryRow(): Promise<ApiOutputValue<'Record'>> {
         const scoreRange = (await this.getMaterial()).scoreRange;
         const score = (await this.getTotalScore())?.score;
-        const achievements = await this.getObjectiveAchievements();
+        const outcomes = await this.getObjectiveOutcomes();
         const material = await this.getMaterial();
 
         return {
@@ -124,15 +124,15 @@ export class Submission implements ApiOutputValue<'Submission'> {
                     if (gradeDomain instanceof ScoreGradeDomain) {
                         return new ScoreField(
                             gradeDomain.scoreRange,
-                            achievements !== null
-                                ? achievements.get(objective)?.getScoreGrade(gradeDomain).score ?? 0
+                            outcomes !== null
+                                ? outcomes.get(objective)?.getScoreGrade(gradeDomain).score ?? 0
                                 : null,
                         );
                     }
                     if (gradeDomain instanceof FulfillmentGradeDomain) {
                         return new FulfillmentField(
-                            achievements !== null
-                                ? achievements.get(objective)?.getFulfillmentGrade().fulfilled ?? false
+                            outcomes !== null
+                                ? outcomes.get(objective)?.getFulfillmentGrade().fulfilled ?? false
                                 : null,
                         );
                     }
@@ -355,31 +355,31 @@ export class Submission implements ApiOutputValue<'Submission'> {
         return this.ctx.cache(ProblemMaterialCache).byId.load(instance.definition.id());
     }
 
-    async getObjectiveAchievements() {
+    async getObjectiveOutcomes() {
         const evaluation = await this.getOfficialEvaluationData();
         if (evaluation === null) return null;
 
-        const achievements = await this.ctx.cache(AchievementCache).byEvaluation.load(evaluation.id);
+        const outcomes = await this.ctx.cache(OutcomeCache).byEvaluation.load(evaluation.id);
         const material = await this.getMaterial();
 
         return new Map(
             material.objectives.map((objective, objectiveIndex) => [
                 objective,
-                achievements.find(a => a.objectiveIndex === objectiveIndex) ?? null,
+                outcomes.find(a => a.objectiveIndex === objectiveIndex) ?? null,
             ]),
         );
     }
 
     async getTotalScore() {
-        const achievements = await this.getObjectiveAchievements();
-        if (!achievements) return null;
+        const outcomes = await this.getObjectiveOutcomes();
+        if (!outcomes) return null;
         const material = await this.getMaterial();
 
         return ScoreGrade.total(
             material.objectives
                 .map(objective => {
                     if (objective.gradeDomain instanceof ScoreGradeDomain) {
-                        return achievements.get(objective)?.getScoreGrade(objective.gradeDomain) ?? null;
+                        return outcomes.get(objective)?.getScoreGrade(objective.gradeDomain) ?? null;
                     }
 
                     return null;

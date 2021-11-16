@@ -1,5 +1,5 @@
 import { gql } from 'apollo-server-core';
-import { achievementSchema } from './achievement';
+import { outcomeSchema } from './achievement';
 import { authSchema } from './auth';
 import { contestSchema } from './contest';
 import { objectiveInstanceSchema } from './contest-objective-assignment';
@@ -40,7 +40,7 @@ import { mainViewSchema } from './view/main-view';
 
 /** Full GraphQL schema document. Obtained combining schema parts from each components. */
 export const schema = gql`
-    ${achievementSchema}
+    ${outcomeSchema}
     ${archiveSchema}
     ${authSchema}
     ${objectiveSchema}

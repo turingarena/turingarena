@@ -17,7 +17,7 @@ export function restoreContest() {
     db.exec('INSERT INTO message SELECT * FROM backup.message;');
     db.exec('INSERT INTO evaluations SELECT * FROM backup.evaluations;');
     db.exec('INSERT INTO evaluation_events SELECT * FROM backup.evaluation_events;');
-    db.exec('INSERT INTO achievements SELECT * FROM backup.achievements;');
+    db.exec('INSERT INTO outcomes SELECT * FROM backup.outcomes;');
 
     db.get('SELECT id FROM contest_data;', (err, row) => {
         db.run('UPDATE submissions SET contest_id = ?', [row.id]);

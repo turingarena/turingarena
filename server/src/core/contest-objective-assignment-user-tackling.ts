@@ -1,6 +1,6 @@
 import { QueryTypes } from 'sequelize';
 import { ApiContext } from '../main/api-context';
-import { AchievementData } from './achievement';
+import { OutcomeData } from './achievement';
 import { ObjectiveInstance } from './contest-objective-assignment';
 import { FulfillmentGrade, FulfillmentGradeDomain } from './feedback/fulfillment';
 import { ScoreGrade, ScoreGradeDomain } from './feedback/score';
@@ -11,8 +11,8 @@ export class ObjectiveTackling {
 
     __typename = 'ObjectiveTackling' as const;
 
-    async getBestAchievement() {
-        const achievements = await this.ctx.db.query<AchievementData>(
+    async getBestOutcome() {
+        const outcomes = await this.ctx.db.query<OutcomeData>(
             `
                 WITH
                     successful_evaluations AS (
@@ -30,18 +30,18 @@ export class ObjectiveTackling {
                             LIMIT 1
                         )
                     ),
-                    submission_achievements AS (
+                    submission_outcomes AS (
                         SELECT a.*, s.id as submission_id, s.username, s.contest_id, s.problem_name, s.created_at
-                        FROM achievements a
+                        FROM outcomes a
                                 JOIN official_evaluations e ON a.evaluation_id = e.id
                                 JOIN submissions s ON e.submission_id = s.id
                     ),
-                    problem_achievements AS (
+                    problem_outcomes AS (
                         SELECT a.*
-                        FROM submission_achievements a
+                        FROM submission_outcomes a
                         WHERE a.submission_id = (
                             SELECT a2.submission_id
-                            FROM submission_achievements a2
+                            FROM submission_outcomes a2
                             WHERE a2.username = a.username
                             AND a2.contest_id = a.contest_id
                             AND a2.problem_name = a.problem_name
@@ -51,7 +51,7 @@ export class ObjectiveTackling {
                         )
                     )
                 SELECT *
-                FROM problem_achievements
+                FROM problem_outcomes
                 WHERE username = $username
                     AND contest_id = $contestId
                     AND problem_name = $problemName
@@ -66,23 +66,23 @@ export class ObjectiveTackling {
                 },
                 type: QueryTypes.SELECT,
                 mapToModel: true,
-                instance: this.ctx.table(AchievementData).build(),
+                instance: this.ctx.table(OutcomeData).build(),
             },
         );
 
-        return achievements.length > 0 ? achievements[0] : null;
+        return outcomes.length > 0 ? outcomes[0] : null;
     }
 
     async getScoreGrade(domain: ScoreGradeDomain) {
-        const bestAchievement = await this.getBestAchievement();
+        const bestOutcome = await this.getBestOutcome();
 
-        return bestAchievement !== null ? bestAchievement.getScoreGrade(domain) : new ScoreGrade(domain.scoreRange, 0);
+        return bestOutcome !== null ? bestOutcome.getScoreGrade(domain) : new ScoreGrade(domain.scoreRange, 0);
     }
 
     async getFulfillmentGrade() {
-        const bestAchievement = await this.getBestAchievement();
+        const bestOutcome = await this.getBestOutcome();
 
-        return bestAchievement !== null ? bestAchievement.getFulfillmentGrade() : new FulfillmentGrade(false);
+        return bestOutcome !== null ? bestOutcome.getFulfillmentGrade() : new FulfillmentGrade(false);
     }
 
     async getGrade() {

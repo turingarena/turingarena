@@ -9,19 +9,19 @@ import { ScoreGrade, ScoreGradeDomain } from './feedback/score';
 import { ProblemMaterialCache } from './material/problem-material';
 import { Submission } from './submission';
 
-export const achievementSchema = gql`
+export const outcomeSchema = gql`
     """
     A grade obtained by a submission for a certain objective of a problem.
     """
-    type Achievement {
+    type Outcome {
         submission: Submission!
         objective: ObjectiveInstance!
         grade: Grade!
     }
 `;
 
-@Table({ tableName: 'achievements' })
-export class AchievementData extends BaseModel<AchievementData> {
+@Table({ tableName: 'outcomes' })
+export class OutcomeData extends BaseModel<OutcomeData> {
     @PrimaryKey
     @ForeignKey(() => EvaluationData)
     @AllowNull(false)
@@ -54,9 +54,9 @@ export class AchievementData extends BaseModel<AchievementData> {
     }
 }
 
-export class AchievementCache extends ApiCache {
+export class OutcomeCache extends ApiCache {
     byEvaluation = createSimpleLoader((evaluationId: string) =>
-        this.ctx.table(AchievementData).findAll({
+        this.ctx.table(OutcomeData).findAll({
             where: { evaluationId },
         }),
     );
