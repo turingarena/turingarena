@@ -43,7 +43,7 @@ export class OutcomeData extends BaseModel<OutcomeData> {
     async getObjective(ctx: ApiContext) {
         const evaluation = await ctx.cache(EvaluationCache).byId.load(this.evaluationId);
         const submission = Submission.fromId(evaluation.submissionId, ctx);
-        const { instance } = await submission.getTackling();
+        const { instance } = await submission.getUndertaking();
         const material = await ctx.cache(ProblemMaterialCache).byId.load(instance.definition.id());
 
         return material.objectives[this.objectiveIndex];

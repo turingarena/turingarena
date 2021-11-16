@@ -5,7 +5,7 @@ import { DateTime } from 'luxon';
 import React from 'react';
 import { Table } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
-import { ProblemTacklingSubmissionListFragment } from '../generated/graphql-types';
+import { ProblemUndertakingSubmissionListFragment } from '../generated/graphql-types';
 import { useT } from '../translations/main';
 import { FragmentProps } from '../util/fragment-props';
 import { useBasePath } from '../util/paths';
@@ -13,10 +13,10 @@ import { columnFragment, getTableClassByValence, recordFragment } from './field-
 import { Field } from './fields/field';
 import { Text, textFragment } from './text';
 
-export const problemTacklingSubmissionListFragment = gql`
-  fragment ProblemTacklingSubmissionList on ProblemTackling {
+export const problemUndertakingSubmissionListFragment = gql`
+  fragment ProblemUndertakingSubmissionList on ProblemUndertaking {
     submissions {
-      ...ProblemTacklingSubmissionListSubmission
+      ...ProblemUndertakingSubmissionListSubmission
     }
 
     view {
@@ -30,7 +30,7 @@ export const problemTacklingSubmissionListFragment = gql`
     }
   }
 
-  fragment ProblemTacklingSubmissionListSubmission on Submission {
+  fragment ProblemUndertakingSubmissionListSubmission on Submission {
     id
     createdAt {
       local
@@ -58,7 +58,7 @@ export const problemTacklingSubmissionListFragment = gql`
   ${recordFragment}
 `;
 
-export function ProblemTacklingSubmissionList({ data }: FragmentProps<ProblemTacklingSubmissionListFragment>) {
+export function ProblemUndertakingSubmissionList({ data }: FragmentProps<ProblemUndertakingSubmissionListFragment>) {
   const basePath = useBasePath();
   const t = useT();
 

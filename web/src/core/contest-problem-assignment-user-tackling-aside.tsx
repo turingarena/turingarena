@@ -4,7 +4,7 @@ import { css, cx } from 'emotion';
 import React from 'react';
 import { Modal } from 'react-bootstrap';
 import { Link, Route, useHistory } from 'react-router-dom';
-import { ProblemTacklingAsideFragment } from '../generated/graphql-types';
+import { ProblemUndertakingAsideFragment } from '../generated/graphql-types';
 import { useT } from '../translations/main';
 import {
   buttonBlockCss,
@@ -16,17 +16,17 @@ import {
 import { FragmentProps } from '../util/fragment-props';
 import { SetBasePath, useBasePath } from '../util/paths';
 import {
-  ProblemTacklingSubmissionList,
-  problemTacklingSubmissionListFragment,
+  ProblemUndertakingSubmissionList,
+  problemUndertakingSubmissionListFragment,
 } from './contest-problem-assignment-user-tackling-submission-list';
 import {
-  ProblemTacklingSubmitModal,
-  problemTacklingSubmitModalFragment,
+  ProblemUndertakingSubmitModal,
+  problemUndertakingSubmitModalFragment,
 } from './contest-problem-assignment-user-tackling-submit-modal';
 import { SubmissionLoader } from './submission-loader';
 
-export const problemTacklingAsideFragment = gql`
-  fragment ProblemTacklingAside on ProblemTackling {
+export const problemUndertakingAsideFragment = gql`
+  fragment ProblemUndertakingAside on ProblemUndertaking {
     canSubmit
     submissions {
       id
@@ -35,15 +35,15 @@ export const problemTacklingAsideFragment = gql`
       }
     }
 
-    ...ProblemTacklingSubmitModal
-    ...ProblemTacklingSubmissionList
+    ...ProblemUndertakingSubmitModal
+    ...ProblemUndertakingSubmissionList
   }
 
-  ${problemTacklingSubmitModalFragment}
-  ${problemTacklingSubmissionListFragment}
+  ${problemUndertakingSubmitModalFragment}
+  ${problemUndertakingSubmissionListFragment}
 `;
 
-export function ProblemTacklingAside({ data }: FragmentProps<ProblemTacklingAsideFragment>) {
+export function ProblemUndertakingAside({ data }: FragmentProps<ProblemUndertakingAsideFragment>) {
   const basePath = useBasePath();
   const history = useHistory();
   const t = useT();
@@ -66,7 +66,7 @@ export function ProblemTacklingAside({ data }: FragmentProps<ProblemTacklingAsid
           <Route path={`${basePath}/submit`}>
             {({ match }) => (
               <Modal show={match !== null} onHide={() => history.replace(basePath)}>
-                <ProblemTacklingSubmitModal
+                <ProblemUndertakingSubmitModal
                   data={data}
                   onSubmitSuccessful={id => history.replace(`${basePath}/submission/${id}`)}
                 />
@@ -123,7 +123,7 @@ export function ProblemTacklingAside({ data }: FragmentProps<ProblemTacklingAsid
                   </h4>
                 </Modal.Header>
                 <Modal.Body style={{ padding: 0 }}>
-                  <ProblemTacklingSubmissionList data={data} />
+                  <ProblemUndertakingSubmissionList data={data} />
                 </Modal.Body>
                 <Modal.Footer>
                   <button onClick={() => history.replace(basePath)} className={cx(buttonCss, buttonPrimaryCss)}>

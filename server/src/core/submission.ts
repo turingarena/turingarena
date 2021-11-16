@@ -6,7 +6,6 @@ import { ApiCache } from '../main/api-cache';
 import { ApiContext } from '../main/api-context';
 import { createSimpleLoader, UuidBaseModel } from '../main/base-model';
 import { ApiInputValue, ApiOutputValue } from '../main/graphql-types';
-import { typed } from '../util/types';
 import { unreachable } from '../util/unreachable';
 import { Contest, ContestData } from './contest';
 import { FulfillmentField, FulfillmentGradeDomain } from './data/fulfillment';
@@ -16,11 +15,10 @@ import { LiveEvaluationService } from './evaluate';
 import { Evaluation, EvaluationCache } from './evaluation';
 import { extractFile } from './files/file-content';
 import { OutcomeCache } from './outcome';
-import { Participation } from './participation';
 import { ProblemDefinition } from './problem-definition';
 import { ProblemMaterialCache } from './problem-definition-material';
 import { ProblemInstance } from './problem-instance';
-import { ProblemTackling } from './problem-tackling';
+import { ProblemUndertaking } from './problem-undertaking';
 import { SubmissionFileCache } from './submission-file';
 import { User } from './user';
 import { ApiDateTime } from './util/date-time';
@@ -34,7 +32,6 @@ export const submissionSchema = gql`
         contest: Contest!
 
         contestProblemAssigment: ProblemInstance!
-        participation: Participation!
 
         files: [SubmissionFile!]!
         createdAt: DateTime!
@@ -76,29 +73,19 @@ export class Submission implements ApiOutputValue<'Submission'> {
     __typename = 'Submission' as const;
 
     async contest() {
-        return (await this.getTackling()).instance.definition.contest;
+        return (await this.getUndertaking()).instance.definition.contest;
     }
 
     async user() {
-        return (await this.getTackling()).user;
+        return (await this.getUndertaking()).user;
     }
 
     async problem() {
-        return (await this.getTackling()).instance.definition;
-    }
-
-    async participation() {
-        const tackling = await this.getTackling();
-
-        return typed<Participation>({
-            __typename: 'Participation',
-            contest: tackling.instance.definition.contest,
-            user: tackling.user,
-        });
+        return (await this.getUndertaking()).instance.definition;
     }
 
     async contestProblemAssigment() {
-        return (await this.getTackling()).instance;
+        return (await this.getUndertaking()).instance;
     }
 
     async officialEvaluation() {
@@ -311,12 +298,12 @@ export class Submission implements ApiOutputValue<'Submission'> {
         return this.ctx.cache(SubmissionFileCache).bySubmission.load(this.id);
     }
 
-    async getTackling() {
+    async getUndertaking() {
         const { contestId, problemName, username } = await this.ctx.cache(SubmissionCache).byId.load(this.id);
 
         const contest = new Contest(contestId, this.ctx);
 
-        return new ProblemTackling(
+        return new ProblemUndertaking(
             new ProblemInstance(new ProblemDefinition(contest, problemName, this.ctx)),
             new User(contest, username, this.ctx),
             this.ctx,
@@ -351,7 +338,7 @@ export class Submission implements ApiOutputValue<'Submission'> {
     }
 
     async getMaterial() {
-        const { instance } = await this.getTackling();
+        const { instance } = await this.getUndertaking();
 
         return this.ctx.cache(ProblemMaterialCache).byId.load(instance.definition.id());
     }
@@ -395,8 +382,8 @@ export type SubmissionInput = ApiInputValue<'SubmissionInput'>;
 export class SubmissionCache extends ApiCache {
     byId = createSimpleLoader((id: string) => this.ctx.table(SubmissionData).findByPk(id));
 
-    byTackling = createSimpleLoader(async (id: string) => {
-        const cpaut = ProblemTackling.fromId(id, this.ctx);
+    byUndertaking = createSimpleLoader(async (id: string) => {
+        const cpaut = ProblemUndertaking.fromId(id, this.ctx);
         const problemName = cpaut.instance.definition.name;
         const contestId = cpaut.instance.contest().id;
         const username = cpaut.user.username;

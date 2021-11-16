@@ -3,14 +3,14 @@ import { ApiContext } from '../main/api-context';
 import { ScoreGrade } from './data/score';
 import { ProblemSetDefinition } from './problem-set-definition';
 import { ProblemSetView } from './problem-set-view';
-import { ProblemTackling } from './problem-tackling';
+import { ProblemUndertaking } from './problem-undertaking';
 import { User } from './user';
 
-export const problemSetTacklingSchema = gql`
+export const problemSetUndertakingSchema = gql`
     """
     The problem set of a given contest, tackled by a given user.
     """
-    type ProblemSetTackling {
+    type ProblemSetUndertaking {
         "The problem set."
         definition: ProblemSetDefinition!
         "The given user."
@@ -19,16 +19,16 @@ export const problemSetTacklingSchema = gql`
         "Same problem-set seen by same user."
         view: ProblemSetView!
 
-        problems: [ProblemTackling!]!
+        problems: [ProblemUndertaking!]!
 
         totalScoreGrade: ScoreGrade!
     }
 `;
 
-export class ProblemSetTackling {
+export class ProblemSetUndertaking {
     constructor(readonly definition: ProblemSetDefinition, readonly user: User, readonly ctx: ApiContext) {}
 
-    __typename = 'ProblemSetTackling' as const;
+    __typename = 'ProblemSetUndertaking' as const;
 
     view() {
         return new ProblemSetView(this.definition, this.user, this.ctx);
@@ -39,7 +39,7 @@ export class ProblemSetTackling {
 
         return ScoreGrade.total(
             await Promise.all(
-                problems.map(async problem => new ProblemTackling(problem, this.user, this.ctx).totalScoreGrade()),
+                problems.map(async problem => new ProblemUndertaking(problem, this.user, this.ctx).totalScoreGrade()),
             ),
         );
     }
@@ -47,6 +47,6 @@ export class ProblemSetTackling {
     async problems() {
         const problems = await this.definition.contest.getProblems();
 
-        return problems.map(problem => new ProblemTackling(problem, this.user, this.ctx));
+        return problems.map(problem => new ProblemUndertaking(problem, this.user, this.ctx));
     }
 }

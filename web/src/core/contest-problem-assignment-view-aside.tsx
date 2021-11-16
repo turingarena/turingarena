@@ -7,7 +7,7 @@ import { ProblemViewAsideFragment } from '../generated/graphql-types';
 import { useT } from '../translations/main';
 import { badgeCss, getBadgeCssByValence } from '../util/components/badge';
 import { FragmentProps } from '../util/fragment-props';
-import { ProblemTacklingAside, problemTacklingAsideFragment } from './contest-problem-assignment-user-tackling-aside';
+import { ProblemUndertakingAside, problemUndertakingAsideFragment } from './contest-problem-assignment-user-tackling-aside';
 import { Field, fieldFragment } from './fields/field';
 import { GradeField, gradeFieldFragment, scoreFieldFragment } from './fields/grade-field';
 import { MediaDownload, mediaDownloadFragment } from './media-download';
@@ -69,8 +69,8 @@ export const problemViewAsideFragment = gql`
       }
     }
 
-    tackling {
-      ...ProblemTacklingAside
+    undertaking {
+      ...ProblemUndertakingAside
     }
   }
 
@@ -80,7 +80,7 @@ export const problemViewAsideFragment = gql`
   ${fieldFragment}
   ${scoreFieldFragment}
   ${gradeFieldFragment}
-  ${problemTacklingAsideFragment}
+  ${problemUndertakingAsideFragment}
 `;
 
 const asideTitleCss = css`
@@ -122,7 +122,7 @@ export function ProblemViewAside({
       )}
       {...rest}
     >
-      {data.tackling !== null && <ProblemTacklingAside data={data.tackling} />}
+      {data.undertaking !== null && <ProblemUndertakingAside data={data.undertaking} />}
       <div
         className={css`
           padding: 16px;

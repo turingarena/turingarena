@@ -119,7 +119,7 @@ export const queryResolvers: Resolvers = {
         submission: async ({}, { id }, ctx) => {
             const sub = await ctx.api(SubmissionApi).validate({ __typename: 'Submission', id });
 
-            const username = await (await ctx.api(SubmissionApi).getTackling(sub)).user.username;
+            const username = await (await ctx.api(SubmissionApi).getUndertaking(sub)).user.username;
             await ctx.authorizeUser(username);
             return sub;
         },
@@ -130,7 +130,7 @@ export const queryResolvers: Resolvers = {
 
 E' il codice che espone la query per ottenere una `submission`. Una `submission` rappresenta la sottomissione di una soluzione da parte di un utente ad un dato problema.
 
-Dopo aver recuperato la sottomissione corrispondente all'`id` richiesto viene estrapolato tramite la funzione `getTackling` l'utente che ha effettuato la sottomissione. 
+Dopo aver recuperato la sottomissione corrispondente all'`id` richiesto viene estrapolato tramite la funzione `getUndertaking` l'utente che ha effettuato la sottomissione. 
 Viene quindi chiamata la funzione `authorizeUser` passando come parametro l'owner della submission. Si ottiene quindi che un user che non sia admin non può richiedere al server le sottomissioni effettuate dagli altri utenti ma solamente le proprie.
 
 ### Autorizzazioni necessarie per le varie query

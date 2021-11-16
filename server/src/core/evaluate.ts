@@ -47,7 +47,7 @@ export class LiveEvaluationService extends Service {
 export async function evaluateSubmission(ctx: ApiContext, submission: Submission) {
     console.log(`Evaluating submission ${submission.id}`);
 
-    const { instance } = await submission.getTackling();
+    const { instance } = await submission.getUndertaking();
     const { archiveId } = await ctx.cache(ContestCache).byId.load(instance.definition.contest.id);
     const contestDir = await extractArchive(ctx, archiveId);
 

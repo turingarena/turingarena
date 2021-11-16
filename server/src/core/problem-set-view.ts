@@ -3,7 +3,7 @@ import { ApiContext } from '../main/api-context';
 import { ContestView } from './contest-view';
 import { ScoreField } from './data/score';
 import { ProblemSetDefinition } from './problem-set-definition';
-import { ProblemSetTackling } from './problem-set-tackling';
+import { ProblemSetUndertaking } from './problem-set-undertaking';
 import { ProblemView } from './problem-view';
 import { User } from './user';
 
@@ -22,7 +22,7 @@ export const problemSetViewSchema = gql`
         problems: [ProblemView!]!
 
         "Same contest as tackled by the same user, or null if anonymous."
-        tackling: ProblemSetTackling
+        undertaking: ProblemSetUndertaking
 
         "Current total score visible to the given user."
         totalScoreField: ScoreField!
@@ -44,17 +44,17 @@ export class ProblemSetView {
         );
     }
 
-    tackling() {
+    undertaking() {
         if (this.user === null) return null;
 
-        return new ProblemSetTackling(this.problemSet, this.user, this.ctx);
+        return new ProblemSetUndertaking(this.problemSet, this.user, this.ctx);
     }
 
     async totalScoreField() {
-        const tackling = this.tackling();
+        const undertaking = this.undertaking();
 
         const scoreRange = await this.problemSet.getScoreRange();
-        const scoreGrade = tackling !== null ? await tackling.totalScoreGrade() : null;
+        const scoreGrade = undertaking !== null ? await undertaking.totalScoreGrade() : null;
 
         return new ScoreField(scoreRange, scoreGrade?.score ?? null);
     }

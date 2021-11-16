@@ -6,10 +6,10 @@ import { ObjectiveInstance } from './objective-instance';
 import { OutcomeData } from './outcome';
 import { User } from './user';
 
-export class ObjectiveTackling {
+export class ObjectiveUndertaking {
     constructor(readonly instance: ObjectiveInstance, readonly user: User, readonly ctx: ApiContext) {}
 
-    __typename = 'ObjectiveTackling' as const;
+    __typename = 'ObjectiveUndertaking' as const;
 
     async getBestOutcome() {
         const outcomes = await this.ctx.db.query<OutcomeData>(

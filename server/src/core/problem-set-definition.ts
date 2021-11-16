@@ -3,7 +3,7 @@ import { ApiContext } from '../main/api-context';
 import { ApiOutputValue } from '../main/graphql-types';
 import { Contest } from './contest';
 import { ScoreRange } from './data/score';
-import { ProblemSetTackling } from './problem-set-tackling';
+import { ProblemSetUndertaking } from './problem-set-undertaking';
 
 export const problemSetSchema = gql`
     """
@@ -22,7 +22,7 @@ export const problemSetSchema = gql`
         problems: [ProblemInstance!]!
 
         # TODO: grade domain
-        userTacklings: [ProblemSetTackling!]!
+        undertakings: [ProblemSetUndertaking!]!
     }
 `;
 
@@ -38,11 +38,11 @@ export class ProblemSetDefinition implements ApiOutputValue<'ProblemSetDefinitio
         return this.contest.getProblems();
     }
 
-    async userTacklings(): Promise<ProblemSetTackling[]> {
+    async undertakings(): Promise<ProblemSetUndertaking[]> {
         await this.ctx.authorizeAdmin();
 
         const users = await this.contest.getParticipatingUsers();
-        return users.map(user => new ProblemSetTackling(this, user, this.ctx));
+        return users.map(user => new ProblemSetUndertaking(this, user, this.ctx));
     }
 
     async getScoreRange(): Promise<ScoreRange> {

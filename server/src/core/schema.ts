@@ -23,15 +23,14 @@ import { objectiveSchema } from './objective-definition';
 import { objectiveInstanceSchema } from './objective-instance';
 import { objectiveViewSchema } from './objective-view';
 import { outcomeSchema } from './outcome';
-import { participationSchema } from './participation';
 import { problemSchema } from './problem-definition';
 import { submissionFileTypeSchema } from './problem-definition-file-types';
 import { problemMaterialSchema } from './problem-definition-material';
 import { problemInstanceSchema } from './problem-instance';
 import { problemSetSchema } from './problem-set-definition';
-import { problemSetTacklingSchema } from './problem-set-tackling';
+import { problemSetUndertakingSchema } from './problem-set-undertaking';
 import { problemSetViewSchema } from './problem-set-view';
-import { problemTacklingSchema } from './problem-tackling';
+import { problemUndertakingSchema } from './problem-undertaking';
 import { problemViewSchema } from './problem-view';
 import { querySchema } from './query';
 import { submissionSchema } from './submission';
@@ -62,14 +61,13 @@ export const schema = gql`
     ${objectiveSchema}
     ${objectiveViewSchema}
     ${outcomeSchema}
-    ${participationSchema}
     ${problemInstanceSchema}
     ${problemMaterialSchema}
     ${problemSchema}
     ${problemSetSchema}
-    ${problemSetTacklingSchema}
+    ${problemSetUndertakingSchema}
     ${problemSetViewSchema}
-    ${problemTacklingSchema}
+    ${problemUndertakingSchema}
     ${problemViewSchema}
     ${querySchema}
     ${scoreSchema}

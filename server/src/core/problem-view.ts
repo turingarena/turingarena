@@ -7,7 +7,7 @@ import { ProblemMaterialCache } from './problem-definition-material';
 import { ProblemInstance } from './problem-instance';
 import { ProblemSetDefinition } from './problem-set-definition';
 import { ProblemSetView } from './problem-set-view';
-import { ProblemTackling } from './problem-tackling';
+import { ProblemUndertaking } from './problem-undertaking';
 import { User } from './user';
 
 export const problemViewSchema = gql`
@@ -28,7 +28,7 @@ export const problemViewSchema = gql`
         if the user is non-anonymous and allowed to have submissions for this problem in this contest,
         and null otherwise.
         """
-        tackling: ProblemTackling
+        undertaking: ProblemUndertaking
 
         "Current score seen by the user for this problem in this contest."
         totalScoreField: ScoreField!
@@ -47,15 +47,15 @@ export class ProblemView {
         return new ProblemSetView(new ProblemSetDefinition(this.instance.definition.contest), this.user, this.ctx);
     }
 
-    async tackling() {
-        return this.user !== null ? new ProblemTackling(this.instance, this.user, this.ctx) : null;
+    async undertaking() {
+        return this.user !== null ? new ProblemUndertaking(this.instance, this.user, this.ctx) : null;
     }
 
     async totalScoreField() {
         const { scoreRange } = await this.ctx.cache(ProblemMaterialCache).byId.load(this.instance.definition.id());
-        const tackling = await this.tackling();
+        const undertaking = await this.undertaking();
 
-        const scoreGrade = tackling !== null ? await tackling.totalScoreGrade() : null;
+        const scoreGrade = undertaking !== null ? await undertaking.totalScoreGrade() : null;
 
         return new ScoreField(scoreRange, scoreGrade?.score ?? null);
     }

@@ -55,7 +55,7 @@ export const queryRoot: ApiOutputValue<'Query'> = {
         // Get the username of who had made the submission and verify if
         // the current user has teh permission to made the query.
         // The query is valid if is made by the owner or by an admin user.
-        const username = (await submission.getTackling()).user.username;
+        const username = (await submission.getUndertaking()).user.username;
         await ctx.authorizeUser(username);
 
         return submission;

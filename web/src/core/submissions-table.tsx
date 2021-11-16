@@ -5,14 +5,14 @@ import 'ag-grid-community/dist/styles/ag-theme-alpine.css';
 import { AgGridColumn, AgGridReact } from 'ag-grid-react';
 import React, { useEffect, useState } from 'react';
 import { Button, Col, Form } from 'react-bootstrap';
-import { ProblemSetTackling } from '../generated/graphql-types';
+import { ProblemSetUndertaking } from '../generated/graphql-types';
 import './dashboard.css';
 
 const SUBMISSIONS_DATA = gql`
   query GetSubmissionsData {
     contests {
       problemSet {
-        userTacklings {
+        undertakings {
           user {
             username
           }
@@ -85,7 +85,7 @@ export function SubmissionsTable() {
 
   useEffect(() => {
     const ptmp: PivotSubmission[] = [];
-    data?.contests[0].problemSet.userTacklings.map((ut: ProblemSetTackling) =>
+    data?.contests[0].problemSet.undertakings.map((ut: ProblemSetUndertaking) =>
       ut.problems.map(at => {
         if (at.submissions.length > 0) {
           at.submissions.map(sub =>

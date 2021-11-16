@@ -3,8 +3,8 @@ import { css, cx } from 'emotion';
 import React, { InputHTMLAttributes, useRef, useState } from 'react';
 import { Modal } from 'react-bootstrap';
 import {
-  ProblemTacklingSubmitModalFragment,
-  ProblemTacklingSubmitModalSubmissionFieldFragment,
+  ProblemUndertakingSubmitModalFragment,
+  ProblemUndertakingSubmitModalSubmissionFieldFragment,
   SubmitMutation,
   SubmitMutationVariables,
 } from '../generated/graphql-types';
@@ -15,38 +15,38 @@ import { loadFileContent } from '../util/file-load';
 import { FragmentProps } from '../util/fragment-props';
 import { textFragment } from './text';
 
-export const problemTacklingSubmitModalFragment = gql`
-  fragment ProblemTacklingSubmitModalSubmissionFileType on SubmissionFileType {
+export const problemUndertakingSubmitModalFragment = gql`
+  fragment ProblemUndertakingSubmitModalSubmissionFileType on SubmissionFileType {
     name
     title {
       ...Text
     }
   }
 
-  fragment ProblemTacklingSubmitModalSubmissionField on SubmissionField {
+  fragment ProblemUndertakingSubmitModalSubmissionField on SubmissionField {
     name
     title {
       ...Text
     }
   }
 
-  fragment ProblemTacklingSubmitModalSubmissionFileTypeRule on SubmissionFileTypeRule {
+  fragment ProblemUndertakingSubmitModalSubmissionFileTypeRule on SubmissionFileTypeRule {
     fields {
       name
     }
     extensions
     defaultType {
-      ...ProblemTacklingSubmitModalSubmissionFileType
+      ...ProblemUndertakingSubmitModalSubmissionFileType
     }
     recommendedTypes {
-      ...ProblemTacklingSubmitModalSubmissionFileType
+      ...ProblemUndertakingSubmitModalSubmissionFileType
     }
     otherTypes {
-      ...ProblemTacklingSubmitModalSubmissionFileType
+      ...ProblemUndertakingSubmitModalSubmissionFileType
     }
   }
 
-  fragment ProblemTacklingSubmitModal on ProblemTackling {
+  fragment ProblemUndertakingSubmitModal on ProblemUndertaking {
     view {
       instance {
         contest {
@@ -58,10 +58,10 @@ export const problemTacklingSubmitModalFragment = gql`
             ...Text
           }
           submissionFields {
-            ...ProblemTacklingSubmitModalSubmissionField
+            ...ProblemUndertakingSubmitModalSubmissionField
           }
           submissionFileTypeRules {
-            ...ProblemTacklingSubmitModalSubmissionFileTypeRule
+            ...ProblemUndertakingSubmitModalSubmissionFileTypeRule
           }
         }
       }
@@ -75,10 +75,10 @@ export const problemTacklingSubmitModalFragment = gql`
   ${textFragment}
 `;
 
-export function ProblemTacklingSubmitModal({
+export function ProblemUndertakingSubmitModal({
   data,
   onSubmitSuccessful,
-}: FragmentProps<ProblemTacklingSubmitModalFragment> & {
+}: FragmentProps<ProblemUndertakingSubmitModalFragment> & {
   onSubmitSuccessful: (submissionId: string) => void;
 }) {
   const t = useT();
@@ -173,8 +173,8 @@ function FileInput({
   field,
   onChange,
   ...rest
-}: FragmentProps<ProblemTacklingSubmitModalFragment> & {
-  field: ProblemTacklingSubmitModalSubmissionFieldFragment;
+}: FragmentProps<ProblemUndertakingSubmitModalFragment> & {
+  field: ProblemUndertakingSubmitModalSubmissionFieldFragment;
 } & InputHTMLAttributes<HTMLInputElement>) {
   const fileFieldId = `${field.name}.file`;
 
@@ -254,8 +254,8 @@ function FileTypeInfo({
   data,
   field,
   file,
-}: FragmentProps<ProblemTacklingSubmitModalFragment> & {
-  field: ProblemTacklingSubmitModalSubmissionFieldFragment;
+}: FragmentProps<ProblemUndertakingSubmitModalFragment> & {
+  field: ProblemUndertakingSubmitModalSubmissionFieldFragment;
   file: File;
 }) {
   const rule = getTypingRule({ data, field, file });
@@ -308,8 +308,8 @@ function getTypingRule({
   data,
   field,
   file,
-}: FragmentProps<ProblemTacklingSubmitModalFragment> & {
-  field: ProblemTacklingSubmitModalSubmissionFieldFragment;
+}: FragmentProps<ProblemUndertakingSubmitModalFragment> & {
+  field: ProblemUndertakingSubmitModalSubmissionFieldFragment;
   file: File;
 }) {
   for (const rule of data.view.instance.definition.submissionFileTypeRules) {

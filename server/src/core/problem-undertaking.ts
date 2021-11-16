@@ -2,22 +2,22 @@ import { gql } from 'apollo-server-core';
 import { ApiContext } from '../main/api-context';
 import { ScoreGrade } from './data/score';
 import { ObjectiveInstance } from './objective-instance';
-import { ObjectiveTackling } from './objective-tackling';
+import { ObjectiveUndertaking } from './objective-undertaking';
 import { ProblemMaterialCache } from './problem-definition-material';
 import { ProblemInstance } from './problem-instance';
 import { ProblemView } from './problem-view';
 import { SubmissionCache } from './submission';
 import { User } from './user';
 
-export const problemTacklingSchema = gql`
+export const problemUndertakingSchema = gql`
     """
     Refers to a given problem, assigned in a given contest, tackled by a given user.
-    Tackling means having a collection of submissions, and possibly submit a new one.
-    This is separate from ProblemView since a ProblemTackling
+    Undertaking means having a collection of submissions, and possibly submit a new one.
+    This is separate from ProblemView since a ProblemUndertaking
     is available only for non-anonymous users who are allowed to have submissions (e.g., only after the contest is started).
     """
-    type ProblemTackling {
-        "User tackling the problem"
+    type ProblemUndertaking {
+        "User undertaking the problem"
         user: User!
 
         "Same problem assigned in same contest"
@@ -37,21 +37,21 @@ export const problemTacklingSchema = gql`
     }
 `;
 
-export class ProblemTackling {
+export class ProblemUndertaking {
     constructor(readonly instance: ProblemInstance, readonly user: User, readonly ctx: ApiContext) {}
 
-    __typename = 'ProblemTackling' as const;
+    __typename = 'ProblemUndertaking' as const;
 
     id(): string {
         return `${this.instance.id()}/${this.user.id}`;
     }
 
-    static fromId(id: string, ctx: ApiContext): ProblemTackling {
+    static fromId(id: string, ctx: ApiContext): ProblemUndertaking {
         const ids = id.split('/');
         const problemId = ids.splice(0, 2).join('/');
         const userId = ids.join('/');
 
-        return new ProblemTackling(ProblemInstance.fromId(problemId, ctx), User.fromId(userId, ctx), ctx);
+        return new ProblemUndertaking(ProblemInstance.fromId(problemId, ctx), User.fromId(userId, ctx), ctx);
     }
 
     async canSubmit() {
@@ -61,24 +61,24 @@ export class ProblemTackling {
     }
 
     async submissions() {
-        return this.ctx.cache(SubmissionCache).byTackling.load(this.id());
+        return this.ctx.cache(SubmissionCache).byUndertaking.load(this.id());
     }
 
     view() {
         return new ProblemView(this.instance, this.user, this.ctx);
     }
 
-    async getObjectiveTacklings() {
+    async getObjectiveUndertakings() {
         const material = await this.ctx.cache(ProblemMaterialCache).byId.load(this.instance.definition.id());
 
         return material.objectives.map(
-            objective => new ObjectiveTackling(new ObjectiveInstance(this.instance, objective), this.user, this.ctx),
+            objective => new ObjectiveUndertaking(new ObjectiveInstance(this.instance, objective), this.user, this.ctx),
         );
     }
 
     async totalScoreGrade() {
-        const objectiveTacklings = await this.getObjectiveTacklings();
-        const objectiveGrades = await Promise.all(objectiveTacklings.map(t2 => t2.getGrade()));
+        const objectiveUndertakings = await this.getObjectiveUndertakings();
+        const objectiveGrades = await Promise.all(objectiveUndertakings.map(t2 => t2.getGrade()));
 
         return ScoreGrade.total(objectiveGrades.filter((g): g is ScoreGrade => g instanceof ScoreGrade));
     }

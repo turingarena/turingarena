@@ -4,7 +4,7 @@ import { ApiOutputValue } from '../main/graphql-types';
 import { FulfillmentField, FulfillmentGradeDomain } from './data/fulfillment';
 import { ScoreField, ScoreGradeDomain } from './data/score';
 import { ObjectiveInstance } from './objective-instance';
-import { ObjectiveTackling } from './objective-tackling';
+import { ObjectiveUndertaking } from './objective-undertaking';
 import { ProblemView } from './problem-view';
 import { User } from './user';
 
@@ -36,16 +36,16 @@ export class ObjectiveView implements ApiOutputValue<'ObjectiveView'> {
 
     async gradeField() {
         const { gradeDomain: domain } = this.instance.definition;
-        const tackling = this.getTackling();
+        const undertaking = this.getUndertaking();
 
         if (domain instanceof FulfillmentGradeDomain) {
-            const grade = tackling !== null ? await tackling.getFulfillmentGrade() : null;
+            const grade = undertaking !== null ? await undertaking.getFulfillmentGrade() : null;
 
             return new FulfillmentField(grade?.fulfilled ?? null);
         }
 
         if (domain instanceof ScoreGradeDomain) {
-            const grade = tackling !== null ? await tackling.getScoreGrade(domain) : null;
+            const grade = undertaking !== null ? await undertaking.getScoreGrade(domain) : null;
 
             return new ScoreField(domain.scoreRange, grade?.score ?? null);
         }
@@ -53,9 +53,9 @@ export class ObjectiveView implements ApiOutputValue<'ObjectiveView'> {
         throw new Error(`unexpected grade domain ${domain}`);
     }
 
-    getTackling() {
+    getUndertaking() {
         if (this.user === null) return null;
 
-        return new ObjectiveTackling(this.instance, this.user, this.ctx);
+        return new ObjectiveUndertaking(this.instance, this.user, this.ctx);
     }
 }
