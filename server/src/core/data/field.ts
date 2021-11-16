@@ -18,7 +18,7 @@ export const fieldSchema = gql`
         valence: Valence
     }
 
-    type FeedbackTable {
+    type Table {
         columns: [Column!]!
         rows: [Record!]!
     }

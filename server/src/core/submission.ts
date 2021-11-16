@@ -36,7 +36,7 @@ export const submissionSchema = gql`
         evaluations: [Evaluation!]!
 
         summaryRow: Record!
-        feedbackTable: FeedbackTable!
+        feedbackTable: Table!
 
         totalScore: ScoreGrade
     }
@@ -117,7 +117,7 @@ export class Submission implements ApiOutputValue<'Submission'> {
         };
     }
 
-    async feedbackTable(): Promise<ApiOutputValue<'FeedbackTable'>> {
+    async feedbackTable(): Promise<ApiOutputValue<'Table'>> {
         const {
             objectives,
             taskInfo,
@@ -182,7 +182,7 @@ export class Submission implements ApiOutputValue<'Submission'> {
         }
 
         return {
-            __typename: 'FeedbackTable',
+            __typename: 'Table',
             columns: evaluationFeedbackColumns,
             rows: testCasesData.map(
                 (
