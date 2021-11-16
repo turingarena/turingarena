@@ -16,8 +16,8 @@ export const dateTimeSchema = gql`
         local: String!
 
         secondsFromEpochDecimal: Float!
-        secondsFromEpochInteger: Float!
-        millisFromEpochInteger: Float!
+        secondsFromEpochInteger: Int!
+        millisFromEpochInteger: Int!
 
         utcOffsetMinutes: Int!
     }
