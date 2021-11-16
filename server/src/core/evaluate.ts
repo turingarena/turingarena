@@ -5,7 +5,7 @@ import { tap, toArray } from 'rxjs/operators';
 import { ApiContext } from '../main/api-context';
 import { Service } from '../main/service';
 import { unreachable } from '../util/unreachable';
-import { Achievement } from './achievement';
+import { AchievementData } from './achievement';
 import { ContestCache } from './contest';
 import { EvaluationData } from './evaluation';
 import { extractArchive } from './files/archive';
@@ -98,7 +98,7 @@ export async function evaluateSubmission(ctx: ApiContext, submission: Submission
                     if (subtask !== objective.index) continue;
                     if (normalized_score === 0) continue;
 
-                    await ctx.table(Achievement).create({
+                    await ctx.table(AchievementData).create({
                         evaluationId: evaluation.id,
                         objectiveIndex: subtask,
                         grade: objective.gradeDomain.__typename === 'FulfillmentGradeDomain' ? normalized_score : score,

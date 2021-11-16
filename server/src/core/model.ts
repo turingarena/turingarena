@@ -1,4 +1,4 @@
-import { Achievement } from './achievement';
+import { AchievementData } from './achievement';
 import { ContestData } from './contest';
 import { EvaluationData } from './evaluation';
 import { ArchiveFileData } from './files/archive';
@@ -9,7 +9,7 @@ import { SubmissionFile } from './submission-file';
 
 /** All model classes constructors. */
 export const modelConstructors = {
-    Achievement,
+    AchievementData,
     ArchiveFileData,
     ContestData,
     EvaluationData,

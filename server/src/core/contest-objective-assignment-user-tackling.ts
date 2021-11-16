@@ -1,6 +1,6 @@
 import { QueryTypes } from 'sequelize';
 import { ApiContext } from '../main/api-context';
-import { Achievement } from './achievement';
+import { AchievementData } from './achievement';
 import { ObjectiveInstance } from './contest-objective-assignment';
 import { FulfillmentGrade, FulfillmentGradeDomain } from './feedback/fulfillment';
 import { ScoreGrade, ScoreGradeDomain } from './feedback/score';
@@ -12,7 +12,7 @@ export class ObjectiveTackling {
     __typename = 'ObjectiveTackling' as const;
 
     async getBestAchievement() {
-        const achievements = await this.ctx.db.query<Achievement>(
+        const achievements = await this.ctx.db.query<AchievementData>(
             `
                 WITH
                     successful_evaluations AS (
@@ -66,7 +66,7 @@ export class ObjectiveTackling {
                 },
                 type: QueryTypes.SELECT,
                 mapToModel: true,
-                instance: this.ctx.table(Achievement).build(),
+                instance: this.ctx.table(AchievementData).build(),
             },
         );
 
