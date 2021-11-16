@@ -20,12 +20,6 @@ export const submissionFragment = gql`
     officialEvaluation {
       id
     }
-    problem {
-      id
-      title {
-        ...Text
-      }
-    }
     feedbackTable {
       columns {
         ...Column

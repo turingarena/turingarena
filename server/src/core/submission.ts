@@ -27,11 +27,8 @@ export const submissionSchema = gql`
     type Submission {
         id: ID!
 
-        problem: ProblemDefinition!
+        problem: ProblemInstance!
         user: User!
-        contest: Contest!
-
-        contestProblemAssigment: ProblemInstance!
 
         files: [SubmissionFile!]!
         createdAt: DateTime!
@@ -72,19 +69,11 @@ export class Submission implements ApiOutputValue<'Submission'> {
     constructor(readonly id: string, readonly ctx: ApiContext) {}
     __typename = 'Submission' as const;
 
-    async contest() {
-        return (await this.getUndertaking()).instance.definition.contest;
-    }
-
     async user() {
         return (await this.getUndertaking()).user;
     }
 
     async problem() {
-        return (await this.getUndertaking()).instance.definition;
-    }
-
-    async contestProblemAssigment() {
         return (await this.getUndertaking()).instance;
     }
 
