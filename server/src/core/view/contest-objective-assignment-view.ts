@@ -1,12 +1,12 @@
 import { gql } from 'apollo-server-core';
 import { ApiContext } from '../../main/api-context';
+import { ApiOutputValue } from '../../main/graphql-types';
 import { ObjectiveInstance } from '../contest-objective-assignment';
 import { ObjectiveTackling } from '../contest-objective-assignment-user-tackling';
 import { FulfillmentField, FulfillmentGradeDomain } from '../feedback/fulfillment';
 import { ScoreField, ScoreGradeDomain } from '../feedback/score';
 import { User } from '../user';
 import { ProblemView } from './contest-problem-assignment-view';
-import { ApiOutputValue } from '../../main/graphql-types';
 
 export const objectiveViewSchema = gql`
     """
@@ -18,7 +18,7 @@ export const objectiveViewSchema = gql`
         "User viewing this, or null if anonymous."
         user: User
         "The problem containing the given objective, assigned in same contest, as seen by same user or anonymously"
-        problemView: ProblemView!
+        problem: ProblemView!
 
         "Current grade for this objective in this contest, to show to the given user."
         gradeField: GradeField!
@@ -30,7 +30,7 @@ export class ObjectiveView implements ApiOutputValue<'ObjectiveView'> {
 
     __typename = 'ObjectiveView' as const;
 
-    async problemView() {
+    async problem() {
         return new ProblemView(this.instance.problem, this.user, this.ctx);
     }
 

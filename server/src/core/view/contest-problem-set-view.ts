@@ -17,7 +17,7 @@ export const problemSetViewSchema = gql`
         "The given user, if any, or null if anonymous."
         user: User
         "Same contest, as seen by the same user (or anonymously)."
-        contestView: ContestView!
+        contest: ContestView!
         "The list of problems in the given problem-set, assigned in the same contest, as seen by the same user (or anonymously)."
         problems: [ProblemView!]!
 
@@ -34,7 +34,7 @@ export class ProblemSetView {
 
     __typename = 'ProblemSetView' as const;
 
-    contestView() {
+    contest() {
         return new ContestView(this.problemSet.contest, this.user, this.ctx);
     }
 

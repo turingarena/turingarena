@@ -9,7 +9,7 @@ import { TopBar, topBarFragment } from './top-bar';
 export const mainViewFragment = gql`
   fragment MainView on MainView {
     ...TopBar
-    contestView {
+    contest {
       ...ContestView
     }
   }
@@ -33,11 +33,11 @@ export function MainView({ data }: { data: MainViewFragment }) {
         `}
       >
         <TopBar data={data} />
-        {data.contestView !== null ? (
+        {data.contest !== null ? (
           <Switch>
             <Route path="/dashboard"><Dashboard/></Route>
             <Route path="/">
-              <ContestView data={data.contestView} />
+              <ContestView data={data.contest} />
             </Route>
           </Switch>
         ) : (

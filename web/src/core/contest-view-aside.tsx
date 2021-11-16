@@ -26,7 +26,7 @@ export function ContestViewAside({ data }: FragmentProps<ContestViewAsideFragmen
   const [visible, setVisible] = useState(true);
   const t = useT();
 
-  if (data.problemSetView === null) {
+  if (data.problemSet === null) {
     return null;
   }
 
@@ -79,7 +79,7 @@ export function ContestViewAside({ data }: FragmentProps<ContestViewAsideFragmen
               `
         }
       >
-        {data.problemSetView.totalScoreField.score !== null && (
+        {data.problemSet.totalScoreField.score !== null && (
           <div>
             <h2 className={headerClass}>{t('score')}</h2>
 
@@ -95,7 +95,7 @@ export function ContestViewAside({ data }: FragmentProps<ContestViewAsideFragmen
                 }
               `}
             >
-              <GradeField data={data.problemSetView.totalScoreField} />
+              <GradeField data={data.problemSet.totalScoreField} />
             </div>
           </div>
         )}
@@ -109,7 +109,7 @@ export function ContestViewAside({ data }: FragmentProps<ContestViewAsideFragmen
             list-style: none;
           `}
         >
-          {data.problemSetView.problems.map((view, index) => (
+          {data.problemSet.problems.map((view, index) => (
             <NavLink
               className={css`
                 overflow: hidden;
@@ -183,7 +183,7 @@ export function ContestViewAside({ data }: FragmentProps<ContestViewAsideFragmen
 
 export const contestViewAsideFragment = gql`
   fragment ContestViewAside on ContestView {
-    problemSetView {
+    problemSet {
       totalScoreField {
         ...ScoreField
       }

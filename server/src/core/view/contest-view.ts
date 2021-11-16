@@ -16,14 +16,14 @@ export const contestViewSchema = gql`
         user: User
 
         "The problem-set of the given contest, as seen by the same user, if it is currently visible, and null otherwise."
-        problemSetView: ProblemSetView
+        problemSet: ProblemSetView
     }
 `;
 
 export class ContestView {
     constructor(readonly contest: Contest, readonly user: User | null, readonly ctx: ApiContext) {}
     __typename = 'ContestView' as const;
-    async problemSetView() {
+    async problemSet() {
         const status = await this.contest.getStatus();
         switch (status) {
             case 'RUNNING':

@@ -21,7 +21,7 @@ export const problemViewSchema = gql`
         user: User
 
         "Set of problems in same contest, as seen by same user"
-        problemSetView: ProblemSetView!
+        problemSet: ProblemSetView!
 
         """
         Same problem assigned in same contest tackled by same user,
@@ -43,7 +43,7 @@ export class ProblemView {
 
     __typename = 'ProblemView' as const;
 
-    async problemSetView() {
+    async problemSet() {
         return new ProblemSetView(new ProblemSetDefinition(this.instance.definition.contest), this.user, this.ctx);
     }
 

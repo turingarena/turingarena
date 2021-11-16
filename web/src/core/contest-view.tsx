@@ -25,7 +25,7 @@ export const contestViewFragment = gql`
       }
     }
 
-    problemSetView {
+    problemSet {
       problems {
         instance {
           id
@@ -67,8 +67,8 @@ export function ContestView({ data }: FragmentProps<ContestViewFragment>) {
       `}
     >
       <ContestViewAside data={data} />
-      {data.problemSetView !== null &&
-        data.problemSetView.problems.map(a => (
+      {data.problemSet !== null &&
+        data.problemSet.problems.map(a => (
           <PathRouter key={a.instance.definition.id} path={`/${a.instance.definition.name}`}>
             {({ match }) => (
               <>

@@ -18,7 +18,7 @@ export const mainViewSchema = gql`
         title: Text!
 
         "The contest to show by default, or null if there is no default contest."
-        contestView: ContestView
+        contest: ContestView
 
         """
         Relevant submissions that are currently pending.
@@ -29,17 +29,17 @@ export const mainViewSchema = gql`
 `;
 
 export class MainView {
-    constructor(readonly contest: Contest, readonly user: User | null, readonly ctx: ApiContext) {}
+    constructor(readonly contestInstance: Contest, readonly user: User | null, readonly ctx: ApiContext) {}
     async title() {
-        return new Text([{ value: (await this.contest.getMetadata()).title ?? 'TuringArena' }]);
+        return new Text([{ value: (await this.contestInstance.getMetadata()).title ?? 'TuringArena' }]);
     }
-    contestView() {
-        return new ContestView(this.contest, this.user, this.ctx);
+    contest() {
+        return new ContestView(this.contestInstance, this.user, this.ctx);
     }
     async pendingSubmissions() {
         return this.user !== null
             ? this.ctx.cache(SubmissionCache).pendingByContestAndUser.load({
-                  contestId: this.contest.id,
+                  contestId: this.contestInstance.id,
                   username: this.user.username,
               })
             : [];
