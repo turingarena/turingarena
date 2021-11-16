@@ -36,7 +36,7 @@ import { querySchema } from './query';
 import { submissionSchema } from './submission';
 import { submissionFileSchema } from './submission-file';
 import { userSchema } from './user';
-import { dateTimeSchema } from './util/date-time';
+import { dateTimeSchema } from './data/date-time';
 
 /** Full GraphQL schema document. Obtained combining schema parts from each components. */
 export const schema = gql`

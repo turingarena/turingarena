@@ -18,7 +18,7 @@ import { ProblemMaterial, ProblemMaterialCache } from './problem-definition-mate
 import { ProblemInstance } from './problem-instance';
 import { ProblemSetDefinition } from './problem-set-definition';
 import { User } from './user';
-import { ApiDateTime } from './util/date-time';
+import { ApiDateTime } from './data/date-time';
 
 export const contestSchema = gql`
     type Contest {

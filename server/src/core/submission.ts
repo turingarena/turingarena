@@ -21,7 +21,7 @@ import { ProblemInstance } from './problem-instance';
 import { ProblemUndertaking } from './problem-undertaking';
 import { SubmissionFileCache } from './submission-file';
 import { User } from './user';
-import { ApiDateTime } from './util/date-time';
+import { ApiDateTime } from './data/date-time';
 
 export const submissionSchema = gql`
     type Submission {
