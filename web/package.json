@@ -42,9 +42,9 @@
     "i18next-browser-languagedetector": "^4.1.1",
     "katex": "^0.11.1",
     "luxon": "^1.23.0",
-    "react": "^16.14.0",
+    "react": "^17.0.2",
     "react-bootstrap": "^1.0.0",
-    "react-dom": "^16.14.0",
+    "react-dom": "^17.0.2",
     "react-i18next": "^11.3.4",
     "react-markdown": "^4.3.1",
     "react-pivottable": "^0.10.0",
@@ -66,9 +66,9 @@
     "@types/jest": "^24.9.1",
     "@types/luxon": "^1.22.0",
     "@types/node": "^12.12.35",
-    "@types/react": "^16.9.34",
+    "@types/react": "^17.0.35",
     "@types/react-bootstrap": "^1.0.0",
-    "@types/react-dom": "^16.9.6",
+    "@types/react-dom": "^17.0.11",
     "@types/react-router-dom": "^5.1.4",
     "@types/react-syntax-highlighter": "^11.0.4",
     "eslint-plugin-import": "^2.22.1",
@@ -79,7 +79,7 @@
     "tslint": "^6.1.1",
     "tslint-config-prettier": "^1.18.0",
     "tslint-plugin-prettier": "^2.3.0",
-    "typescript": "^3.7.5"
+    "typescript": "^4.5.2"
   },
   "proxy": "http://localhost:3000/"
 }
