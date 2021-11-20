@@ -2,13 +2,13 @@ import { gql, useMutation } from '@apollo/client';
 import { css, cx } from 'emotion';
 import React, { InputHTMLAttributes, useRef, useState } from 'react';
 import { Modal } from 'react-bootstrap';
+import { FormattedMessage } from 'react-intl';
 import {
   ProblemUndertakingSubmitModalFragment,
   ProblemUndertakingSubmitModalSubmissionFieldFragment,
   SubmitMutation,
   SubmitMutationVariables,
 } from '../generated/graphql-types';
-import { useT } from '../translations/main';
 import { useAsync } from '../util/async-hook';
 import { buttonCss, buttonNormalizeCss, buttonPrimaryCss } from '../util/components/button';
 import { loadFileContent } from '../util/file-load';
@@ -81,7 +81,6 @@ export function ProblemUndertakingSubmitModal({
 }: FragmentProps<ProblemUndertakingSubmitModalFragment> & {
   onSubmitSuccessful: (submissionId: string) => void;
 }) {
-  const t = useT();
   const [submit] = useMutation<SubmitMutation, SubmitMutationVariables>(
     gql`
       mutation Submit($submission: SubmissionInput!) {
@@ -141,7 +140,11 @@ export function ProblemUndertakingSubmitModal({
     >
       <Modal.Header>
         <h4>
-          {t('solutionOf')}: <strong>{data.view.instance.definition.title.variant}</strong>
+          <FormattedMessage
+            id="submit-modal-header"
+            defaultMessage="New submission for {title}"
+            values={{ title: <strong>{data.view.instance.definition.title.variant}</strong> }}
+          />
         </h4>
       </Modal.Header>
       <Modal.Body>
@@ -154,14 +157,16 @@ export function ProblemUndertakingSubmitModal({
           />
         ))}
         {error !== undefined && (
-          <>
-            {t('submissionError')}: {error.message}
-          </>
+          <FormattedMessage
+            id="submit-modal-generic-error-message"
+            defaultMessage="An unexpected error occurred while submitting: {message}"
+            values={{ message: error.message }}
+          />
         )}
       </Modal.Body>
       <Modal.Footer>
         <button className={cx(buttonCss, buttonPrimaryCss)} disabled={loading || !valid} type="submit">
-          {t('submit')}
+          <FormattedMessage id="submit-modal-submit-button-label" defaultMessage="Submit" />
         </button>
       </Modal.Footer>
     </form>
@@ -178,7 +183,6 @@ function FileInput({
 } & InputHTMLAttributes<HTMLInputElement>) {
   const fileFieldId = `${field.name}.file`;
 
-  const t = useT();
   const fileInput = useRef<HTMLInputElement>(null);
   const [file, setFile] = useState<File | null>(null);
 
@@ -214,7 +218,7 @@ function FileInput({
           e.preventDefault();
         }}
       >
-        {t('chooseFile')}
+        <FormattedMessage id="submit-modal-choose-file-button-label" defaultMessage="Choose a file..." />
       </button>
       {file !== null && (
         <dl
@@ -235,14 +239,20 @@ function FileInput({
             }
           `}
         >
-          <dt>{t('name')}:</dt>
+          <dt>
+            <FormattedMessage id="submit-modal-file-name-label" defaultMessage="Name:" />
+          </dt>
           <dd>{file.name}</dd>
-          <dt>{t('type')}:</dt>
+          <dt>
+            <FormattedMessage id="submit-modal-file-type-label" defaultMessage="Type:" />
+          </dt>
           <dd>
             <FileTypeInfo data={data} field={field} file={file} />
           </dd>
 
-          <dt>{t('size')}:</dt>
+          <dt>
+            <FormattedMessage id="submit-modal-file-size-label" defaultMessage="Size:" />
+          </dt>
           <dd>{file.size}</dd>
         </dl>
       )}
@@ -259,7 +269,6 @@ function FileTypeInfo({
   file: File;
 }) {
   const rule = getTypingRule({ data, field, file });
-  const t = useT();
   const [overrideType, setOverrideType] = useState(false);
   const defaultType = overrideType ? null : rule.defaultType;
 
@@ -269,12 +278,12 @@ function FileTypeInfo({
     return (
       <select name={typeInputId}>
         {rule.recommendedTypes.map(type => (
-          <option key={t.name} value={type.name}>
+          <option key={type.name} value={type.name}>
             {type.title.variant}
           </option>
         ))}
         {rule.otherTypes.map(type => (
-          <option key={t.name} value={type.name}>
+          <option key={type.name} value={type.name}>
             {type.title.variant}
           </option>
         ))}
@@ -295,7 +304,7 @@ function FileTypeInfo({
           )}
           onClick={() => setOverrideType(true)}
         >
-          {t('change')}
+          <FormattedMessage id="submit-modal-file-type-change-button-label" defaultMessage="change" />
         </button>
         )
         <input type="hidden" name={typeInputId} value={defaultType.name} />

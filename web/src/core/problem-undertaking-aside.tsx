@@ -3,9 +3,9 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { css, cx } from 'emotion';
 import React from 'react';
 import { Modal } from 'react-bootstrap';
+import { FormattedMessage } from 'react-intl';
 import { Link, Route, useHistory, useRouteMatch } from 'react-router-dom';
 import { ProblemUndertakingAsideFragment } from '../generated/graphql-types';
-import { useT } from '../translations/main';
 import {
   buttonBlockCss,
   buttonCss,
@@ -46,7 +46,6 @@ export function ProblemUndertakingAside({ data }: FragmentProps<ProblemUndertaki
   const routeMatch = useRouteMatch();
   const path = routeMatch?.path;
   const history = useHistory();
-  const t = useT();
 
   const lastSubmission = data.submissions.length > 0 ? data.submissions[0] : null;
 
@@ -61,7 +60,8 @@ export function ProblemUndertakingAside({ data }: FragmentProps<ProblemUndertaki
       {data.canSubmit && (
         <>
           <Link className={cx(buttonCss, buttonBlockCss, buttonSuccessCss)} to={`${path}/submit`} replace>
-            <FontAwesomeIcon icon="paper-plane" /> {t('submitASolution')}
+            <FontAwesomeIcon icon="paper-plane" />{' '}
+            <FormattedMessage id="submit-start-button-label" defaultMessage="Submit a solution" />
           </Link>
           <Route path={`${path}/submit`}>
             {({ match }) => (
@@ -91,7 +91,7 @@ export function ProblemUndertakingAside({ data }: FragmentProps<ProblemUndertaki
           >
             {lastSubmission.officialEvaluation !== null && <FontAwesomeIcon icon="history" />}
             {lastSubmission.officialEvaluation === null && <FontAwesomeIcon icon="spinner" pulse={true} />}{' '}
-            {t('lastSubmission')}
+            <FormattedMessage id="last-submission-button-label" defaultMessage="Last submission" />
           </Link>
 
           <Link
@@ -106,7 +106,8 @@ export function ProblemUndertakingAside({ data }: FragmentProps<ProblemUndertaki
               `,
             )}
           >
-            <FontAwesomeIcon icon="list" /> {t('allSubmissions')}
+            <FontAwesomeIcon icon="list" />{' '}
+            <FormattedMessage id="submission-list-button-label" defaultMessage="All submissions" />
           </Link>
           <Route path={`${path}/submissions`}>
             {({ match }) => (
@@ -119,7 +120,13 @@ export function ProblemUndertakingAside({ data }: FragmentProps<ProblemUndertaki
               >
                 <Modal.Header>
                   <h4>
-                    {t('submissionsFor')}: <strong>{data.view.instance.definition.title.variant}</strong>
+                    <FormattedMessage
+                      id="submission-list-modal-header"
+                      defaultMessage="All submissions for {title}"
+                      values={{
+                        title: <strong>{data.view.instance.definition.title.variant}</strong>,
+                      }}
+                    />
                   </h4>
                 </Modal.Header>
                 <Modal.Body style={{ padding: 0 }}>
@@ -127,7 +134,7 @@ export function ProblemUndertakingAside({ data }: FragmentProps<ProblemUndertaki
                 </Modal.Body>
                 <Modal.Footer>
                   <button onClick={() => history.replace(path)} className={cx(buttonCss, buttonPrimaryCss)}>
-                    Close
+                    <FormattedMessage id="submission-list-modal-close-button-label" defaultMessage="Close" />
                   </button>
                 </Modal.Footer>
               </Modal>
@@ -141,8 +148,13 @@ export function ProblemUndertakingAside({ data }: FragmentProps<ProblemUndertaki
             <Modal onHide={() => history.replace(path)} show={true} animation={false} size="xl" scrollable={true}>
               <Modal.Header>
                 <h5>
-                  {/* TODO: submission index, e.g., Submission #6 for: My Problem */}
-                  {t('submissionsFor')}: <strong>{data.view.instance.definition.title.variant}</strong>
+                  <FormattedMessage
+                    id="submission-modal-header"
+                    defaultMessage="Submission for {title}"
+                    values={{
+                      title: <strong>{data.view.instance.definition.title.variant}</strong>,
+                    }}
+                  />
                 </h5>
               </Modal.Header>
               <Modal.Body style={{ padding: 0 }}>
@@ -150,7 +162,7 @@ export function ProblemUndertakingAside({ data }: FragmentProps<ProblemUndertaki
               </Modal.Body>
               <Modal.Footer>
                 <button onClick={() => history.replace(path)} className={cx(buttonCss, buttonPrimaryCss)}>
-                  {t('close')}
+                  <FormattedMessage id="submission-modal-close-button-label" defaultMessage="Close" />
                 </button>
               </Modal.Footer>
             </Modal>

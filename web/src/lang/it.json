@@ -1,0 +1,294 @@
+{
+  "contest-status-ended-message": [
+    {
+      "type": 0,
+      "value": "Finita"
+    }
+  ],
+  "contest-status-not-started-message": [
+    {
+      "type": 0,
+      "value": "Non iniziata"
+    }
+  ],
+  "contest-status-running-message": [
+    {
+      "type": 0,
+      "value": "In corso"
+    }
+  ],
+  "contest-view-aside-problems-header": [
+    {
+      "type": 0,
+      "value": "Problemi"
+    }
+  ],
+  "contest-view-aside-score-header": [
+    {
+      "type": 0,
+      "value": "Punteggio"
+    }
+  ],
+  "language-auto-option": [
+    {
+      "type": 0,
+      "value": "Auto: "
+    },
+    {
+      "type": 1,
+      "value": "value"
+    }
+  ],
+  "language-en": [
+    {
+      "type": 0,
+      "value": "English (inglese)"
+    }
+  ],
+  "language-it": [
+    {
+      "type": 0,
+      "value": "italiano"
+    }
+  ],
+  "last-submission-button-label": [
+    {
+      "type": 0,
+      "value": "Ultimo invio"
+    }
+  ],
+  "log-in-button-label": [
+    {
+      "type": 0,
+      "value": "Accedi"
+    }
+  ],
+  "log-out-button-label": [
+    {
+      "type": 0,
+      "value": "Esci"
+    }
+  ],
+  "login-cancel-button-label": [
+    {
+      "type": 0,
+      "value": "Annulla"
+    }
+  ],
+  "login-generic-error-message": [
+    {
+      "type": 0,
+      "value": "Si è verificato un errore imprevisto:"
+    },
+    {
+      "type": 1,
+      "value": "message"
+    },
+    {
+      "type": 0,
+      "value": "."
+    }
+  ],
+  "login-invalid-token-message": [
+    {
+      "type": 0,
+      "value": "Token non valido, riprova."
+    }
+  ],
+  "login-pending-message": [
+    {
+      "type": 0,
+      "value": "Accesso in corso..."
+    }
+  ],
+  "login-submit-button-label": [
+    {
+      "type": 0,
+      "value": "Accedi"
+    }
+  ],
+  "login-success-message": [
+    {
+      "type": 0,
+      "value": "Effettua l'accesso."
+    }
+  ],
+  "login-token-prompt-message": [
+    {
+      "type": 0,
+      "value": "Inserisci il token o la password che ti sono stati forniti. Nessun nome utente necessario."
+    }
+  ],
+  "messages-button-label": [
+    {
+      "type": 0,
+      "value": "Messaggi"
+    }
+  ],
+  "messages-close-button-label": [
+    {
+      "type": 0,
+      "value": "chiudi"
+    }
+  ],
+  "messages-header": [
+    {
+      "type": 0,
+      "value": "Messaggi"
+    }
+  ],
+  "messages-loading-message": [
+    {
+      "type": 0,
+      "value": "Caricamento..."
+    }
+  ],
+  "messages-new-message-send-button-label": [
+    {
+      "type": 0,
+      "value": "Invia"
+    }
+  ],
+  "messages-new-message-text-placeholder": [
+    {
+      "type": 0,
+      "value": "Scrivi il tuo messaggio..."
+    }
+  ],
+  "problem-aside-details-header": [
+    {
+      "type": 0,
+      "value": "Dettagli"
+    }
+  ],
+  "problem-aside-downloads-header": [
+    {
+      "type": 0,
+      "value": "Download"
+    }
+  ],
+  "problem-aside-objectives-header": [
+    {
+      "type": 0,
+      "value": "Obiettivi"
+    }
+  ],
+  "problem-aside-statement-download-label": [
+    {
+      "type": 0,
+      "value": "Scarica il testo"
+    }
+  ],
+  "submission-evaluating-message": [
+    {
+      "type": 0,
+      "value": "Valutazione in corso..."
+    }
+  ],
+  "submission-list-button-label": [
+    {
+      "type": 0,
+      "value": "Tutte le sottoposizioni"
+    }
+  ],
+  "submission-list-modal-close-button-label": [
+    {
+      "type": 0,
+      "value": "chiudi"
+    }
+  ],
+  "submission-list-modal-header": [
+    {
+      "type": 0,
+      "value": "Tutte le sottoposizioni per "
+    },
+    {
+      "type": 1,
+      "value": "title"
+    }
+  ],
+  "submission-modal-close-button-label": [
+    {
+      "type": 0,
+      "value": "chiudi"
+    }
+  ],
+  "submission-modal-header": [
+    {
+      "type": 0,
+      "value": "Sottoposizione per "
+    },
+    {
+      "type": 1,
+      "value": "title"
+    }
+  ],
+  "submission-submitted-at-column-header": [
+    {
+      "type": 0,
+      "value": "Inviato"
+    }
+  ],
+  "submit-modal-choose-file-button-label": [
+    {
+      "type": 0,
+      "value": "Scegli un file..."
+    }
+  ],
+  "submit-modal-file-name-label": [
+    {
+      "type": 0,
+      "value": "Nome:"
+    }
+  ],
+  "submit-modal-file-size-label": [
+    {
+      "type": 0,
+      "value": "Dimensioni:"
+    }
+  ],
+  "submit-modal-file-type-change-button-label": [
+    {
+      "type": 0,
+      "value": "cambia"
+    }
+  ],
+  "submit-modal-file-type-label": [
+    {
+      "type": 0,
+      "value": "Tipo:"
+    }
+  ],
+  "submit-modal-generic-error-message": [
+    {
+      "type": 0,
+      "value": "Si è verificato un errore imprevisto durante l'invio: "
+    },
+    {
+      "type": 1,
+      "value": "message"
+    }
+  ],
+  "submit-modal-header": [
+    {
+      "type": 0,
+      "value": "Nuova sottoposizione per "
+    },
+    {
+      "type": 1,
+      "value": "title"
+    }
+  ],
+  "submit-modal-submit-button-label": [
+    {
+      "type": 0,
+      "value": "Invia"
+    }
+  ],
+  "submit-start-button-label": [
+    {
+      "type": 0,
+      "value": "Invia una soluzione"
+    }
+  ]
+}

@@ -3,8 +3,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { css } from 'emotion';
 import React from 'react';
 import { Table } from 'react-bootstrap';
+import { FormattedMessage } from 'react-intl';
 import { SubmissionFragment } from '../generated/graphql-types';
-import { useT } from '../translations/main';
 import { FragmentProps } from '../util/fragment-props';
 import { Field } from './data/field';
 import { Text, textFragment } from './data/text';
@@ -36,8 +36,6 @@ export const submissionFragment = gql`
 `;
 
 export function Submission({ data }: FragmentProps<SubmissionFragment>) {
-  const t = useT();
-
   return (
     <>
       {
@@ -48,7 +46,7 @@ export function Submission({ data }: FragmentProps<SubmissionFragment>) {
               text-align: center;
             `}
           >
-            {t('compileError')}
+            Compilation error
           </div>
         )
       }
@@ -64,7 +62,8 @@ export function Submission({ data }: FragmentProps<SubmissionFragment>) {
               `
         }
       >
-        <FontAwesomeIcon icon="spinner" pulse /> {t('evaluating')}...
+        <FontAwesomeIcon icon="spinner" pulse />{' '}
+        <FormattedMessage id="submission-evaluating-message" defaultMessage="Evaluating..." />
       </div>
       <Table hover responsive striped style={{ marginBottom: 0 }}>
         <thead className="thead-light">

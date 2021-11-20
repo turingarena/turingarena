@@ -3,8 +3,8 @@ import { IconProp } from '@fortawesome/fontawesome-svg-core';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { css, cx } from 'emotion';
 import React, { HTMLAttributes } from 'react';
+import { defineMessage, useIntl, FormattedMessage } from 'react-intl';
 import { ProblemViewAsideFragment } from '../generated/graphql-types';
-import { useT } from '../translations/main';
 import { badgeCss, getBadgeCssByValence } from '../util/components/badge';
 import { FragmentProps } from '../util/fragment-props';
 import { Field, fieldFragment } from './data/field';
@@ -108,7 +108,7 @@ export function ProblemViewAside({
   className,
   ...rest
 }: FragmentProps<ProblemViewAsideFragment> & HTMLAttributes<HTMLDivElement>) {
-  const t = useT();
+  const intl = useIntl();
 
   return (
     <div
@@ -132,7 +132,9 @@ export function ProblemViewAside({
       >
         {data.objectives.length > 0 && (
           <>
-            <h3 className={asideTitleCss}>{t('objectives')}</h3>
+            <h3 className={asideTitleCss}>
+              <FormattedMessage id="problem-aside-objectives-header" defaultMessage="Objectives" />
+            </h3>
             <div
               className={css`
                 padding: 0;
@@ -187,7 +189,9 @@ export function ProblemViewAside({
             </div>
           </>
         )}
-        <h3 className={asideTitleCss}>{t('info')}</h3>
+        <h3 className={asideTitleCss}>
+          <FormattedMessage id="problem-aside-details-header" defaultMessage="Details" />
+        </h3>
         {data.instance.definition.attributes.length > 0 && (
           <>
             <div
@@ -246,7 +250,9 @@ export function ProblemViewAside({
         )}
         {data.instance.definition.attachments.length > 0 && (
           <>
-            <h3 className={asideTitleCss}>{t('attachments')}</h3>
+            <h3 className={asideTitleCss}>
+              <FormattedMessage id="problem-aside-downloads-header" defaultMessage="Downloads" />
+            </h3>
             <div
               className={css`
                 margin-bottom: 16px;
@@ -268,7 +274,12 @@ export function ProblemViewAside({
                   `,
                 )}
                 data={data.instance.definition.statement}
-                text={t('downloadStatement')}
+                text={intl.formatMessage(
+                  defineMessage({
+                    id: 'problem-aside-statement-download-label',
+                    defaultMessage: `Download statement`,
+                  }),
+                )}
               />
             </div>
           </>

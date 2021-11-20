@@ -1,0 +1,294 @@
+{
+  "contest-status-ended-message": [
+    {
+      "type": 0,
+      "value": "Ended"
+    }
+  ],
+  "contest-status-not-started-message": [
+    {
+      "type": 0,
+      "value": "Not started"
+    }
+  ],
+  "contest-status-running-message": [
+    {
+      "type": 0,
+      "value": "Running"
+    }
+  ],
+  "contest-view-aside-problems-header": [
+    {
+      "type": 0,
+      "value": "Problems"
+    }
+  ],
+  "contest-view-aside-score-header": [
+    {
+      "type": 0,
+      "value": "Score"
+    }
+  ],
+  "language-auto-option": [
+    {
+      "type": 0,
+      "value": "Auto: "
+    },
+    {
+      "type": 1,
+      "value": "value"
+    }
+  ],
+  "language-en": [
+    {
+      "type": 0,
+      "value": "English"
+    }
+  ],
+  "language-it": [
+    {
+      "type": 0,
+      "value": "Italian"
+    }
+  ],
+  "last-submission-button-label": [
+    {
+      "type": 0,
+      "value": "Last submission"
+    }
+  ],
+  "log-in-button-label": [
+    {
+      "type": 0,
+      "value": "Log in"
+    }
+  ],
+  "log-out-button-label": [
+    {
+      "type": 0,
+      "value": "Log out"
+    }
+  ],
+  "login-cancel-button-label": [
+    {
+      "type": 0,
+      "value": "Cancel"
+    }
+  ],
+  "login-generic-error-message": [
+    {
+      "type": 0,
+      "value": "An unexpected error occurred: "
+    },
+    {
+      "type": 1,
+      "value": "message"
+    },
+    {
+      "type": 0,
+      "value": "."
+    }
+  ],
+  "login-invalid-token-message": [
+    {
+      "type": 0,
+      "value": "Invalid token, please try again."
+    }
+  ],
+  "login-pending-message": [
+    {
+      "type": 0,
+      "value": "Logging in..."
+    }
+  ],
+  "login-submit-button-label": [
+    {
+      "type": 0,
+      "value": "Log in"
+    }
+  ],
+  "login-success-message": [
+    {
+      "type": 0,
+      "value": "Log-in successful."
+    }
+  ],
+  "login-token-prompt-message": [
+    {
+      "type": 0,
+      "value": "Insert the token or password provided to you. No username needed."
+    }
+  ],
+  "messages-button-label": [
+    {
+      "type": 0,
+      "value": "Messages"
+    }
+  ],
+  "messages-close-button-label": [
+    {
+      "type": 0,
+      "value": "Close"
+    }
+  ],
+  "messages-header": [
+    {
+      "type": 0,
+      "value": "Messages"
+    }
+  ],
+  "messages-loading-message": [
+    {
+      "type": 0,
+      "value": "Loading..."
+    }
+  ],
+  "messages-new-message-send-button-label": [
+    {
+      "type": 0,
+      "value": "Send"
+    }
+  ],
+  "messages-new-message-text-placeholder": [
+    {
+      "type": 0,
+      "value": "Write your message..."
+    }
+  ],
+  "problem-aside-details-header": [
+    {
+      "type": 0,
+      "value": "Details"
+    }
+  ],
+  "problem-aside-downloads-header": [
+    {
+      "type": 0,
+      "value": "Downloads"
+    }
+  ],
+  "problem-aside-objectives-header": [
+    {
+      "type": 0,
+      "value": "Objectives"
+    }
+  ],
+  "problem-aside-statement-download-label": [
+    {
+      "type": 0,
+      "value": "Download statement"
+    }
+  ],
+  "submission-evaluating-message": [
+    {
+      "type": 0,
+      "value": "Evaluating..."
+    }
+  ],
+  "submission-list-button-label": [
+    {
+      "type": 0,
+      "value": "All submissions"
+    }
+  ],
+  "submission-list-modal-close-button-label": [
+    {
+      "type": 0,
+      "value": "Close"
+    }
+  ],
+  "submission-list-modal-header": [
+    {
+      "type": 0,
+      "value": "All submissions for "
+    },
+    {
+      "type": 1,
+      "value": "title"
+    }
+  ],
+  "submission-modal-close-button-label": [
+    {
+      "type": 0,
+      "value": "Close"
+    }
+  ],
+  "submission-modal-header": [
+    {
+      "type": 0,
+      "value": "Submission for "
+    },
+    {
+      "type": 1,
+      "value": "title"
+    }
+  ],
+  "submission-submitted-at-column-header": [
+    {
+      "type": 0,
+      "value": "Submitted at"
+    }
+  ],
+  "submit-modal-choose-file-button-label": [
+    {
+      "type": 0,
+      "value": "Choose a file..."
+    }
+  ],
+  "submit-modal-file-name-label": [
+    {
+      "type": 0,
+      "value": "Name:"
+    }
+  ],
+  "submit-modal-file-size-label": [
+    {
+      "type": 0,
+      "value": "Size:"
+    }
+  ],
+  "submit-modal-file-type-change-button-label": [
+    {
+      "type": 0,
+      "value": "change"
+    }
+  ],
+  "submit-modal-file-type-label": [
+    {
+      "type": 0,
+      "value": "Type:"
+    }
+  ],
+  "submit-modal-generic-error-message": [
+    {
+      "type": 0,
+      "value": "An unexpected error occurred while submitting: "
+    },
+    {
+      "type": 1,
+      "value": "message"
+    }
+  ],
+  "submit-modal-header": [
+    {
+      "type": 0,
+      "value": "New submission for "
+    },
+    {
+      "type": 1,
+      "value": "title"
+    }
+  ],
+  "submit-modal-submit-button-label": [
+    {
+      "type": 0,
+      "value": "Submit"
+    }
+  ],
+  "submit-start-button-label": [
+    {
+      "type": 0,
+      "value": "Submit a solution"
+    }
+  ]
+}

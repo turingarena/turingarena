@@ -1,12 +1,12 @@
 import { gql } from '@apollo/client';
 import { css } from 'emotion';
 import { DateTime, Duration } from 'luxon';
-import React from 'react';
+import React, { ReactElement } from 'react';
+import { FormattedMessage } from 'react-intl';
 import { interval } from 'rxjs';
 import { useObservable } from 'rxjs-hooks';
 import { map, startWith } from 'rxjs/operators';
 import { ContestStatus, ContestViewClockFragment } from '../generated/graphql-types';
-import { useT } from '../translations/main';
 import { unexpected } from '../util/check';
 
 export const contestViewClockFragment = gql`
@@ -23,22 +23,7 @@ export const contestViewClockFragment = gql`
   }
 `;
 
-const getContestStatus = (status: ContestStatus) => {
-  switch (status) {
-    case 'NOT_STARTED':
-      return 'startingIn';
-    case 'RUNNING':
-      return 'remainingTime';
-    case 'ENDED':
-      return 'ended';
-    default:
-      return unexpected(status);
-  }
-};
-
 export function ContestViewClock({ data }: { data: ContestViewClockFragment }) {
-  const t = useT();
-
   const clock = useObservable(() =>
     interval(Duration.fromObject({ seconds: 1 }).as('milliseconds')).pipe(
       startWith(0),
@@ -72,6 +57,12 @@ export function ContestViewClock({ data }: { data: ContestViewClockFragment }) {
     ),
   );
 
+  const statusMessages: Record<ContestStatus, ReactElement> = {
+    ENDED: <FormattedMessage id="contest-status-ended-message" defaultMessage="Ended" />,
+    NOT_STARTED: <FormattedMessage id="contest-status-not-started-message" defaultMessage="Not started" />,
+    RUNNING: <FormattedMessage id="contest-status-running-message" defaultMessage="Running" />,
+  };
+
   return (
     <div>
       <div
@@ -83,7 +74,7 @@ export function ContestViewClock({ data }: { data: ContestViewClockFragment }) {
           line-height: 1.2;
         `}
       >
-        {t(getContestStatus(data.contest.status))}
+        {statusMessages[data.contest.status]}
       </div>
 
       {clock !== null && (

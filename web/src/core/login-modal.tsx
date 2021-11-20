@@ -3,19 +3,12 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { css, cx } from 'emotion';
 import React, { useState } from 'react';
 import { Modal } from 'react-bootstrap';
+import { FormattedMessage } from 'react-intl';
 import { LoginMutation, LoginMutationVariables } from '../generated/graphql-types';
-import { useT } from '../translations/main';
 import { useAsync } from '../util/async-hook';
 import { useAuth } from '../util/auth';
 import { buttonCss, buttonOutlineSecondaryCss, buttonPrimaryCss, buttonSecondaryCss } from '../util/components/button';
-import {
-  formControlCss,
-  formTextCss,
-  inputGroupAppendCss,
-  inputGroupCss,
-  invalidCss,
-  invalidFeedbackCss,
-} from '../util/components/form';
+import { formControlCss, formTextCss, inputGroupAppendCss, inputGroupCss, invalidCss, invalidFeedbackCss } from '../util/components/form';
 
 class InvalidTokenError extends Error {}
 
@@ -23,7 +16,6 @@ export function LoginModal({ onClose }: { onClose: () => void }) {
   const [showPassword, setShowPassword] = useState(false);
   const auth = useAuth();
   const [token, setToken] = useState('');
-  const t = useT();
 
   const [logInMutate] = useMutation<LoginMutation, LoginMutationVariables>(gql`
     mutation Login($token: String!) {
@@ -109,15 +101,32 @@ export function LoginModal({ onClose }: { onClose: () => void }) {
             </div>
           </div>
           {loading ? (
-            <small className={cx(formTextCss)}>{t('loggingIn')}...</small>
+            <small className={cx(formTextCss)}>
+              <FormattedMessage id="login-pending-message" defaultMessage="Logging in..." />
+            </small>
           ) : error instanceof InvalidTokenError ? (
-            <small className={cx(invalidFeedbackCss)}>{t('invalidToken')}</small>
+            <small className={cx(invalidFeedbackCss)}>
+              <FormattedMessage id="login-invalid-token-message" defaultMessage="Invalid token, please try again." />
+            </small>
           ) : error !== undefined ? (
-            <small className={cx(invalidFeedbackCss)}>{error.message}</small>
+            <small className={cx(invalidFeedbackCss)}>
+              <FormattedMessage
+                id="login-generic-error-message"
+                defaultMessage="An unexpected error occurred: {message}."
+                values={{ message: error.message }}
+              />
+            </small>
           ) : successful ? (
-            <small className={cx(formTextCss)}>{t('loggedIn')}</small>
+            <small className={cx(formTextCss)}>
+              <FormattedMessage id="login-success-message" defaultMessage="Log-in successful." />
+            </small>
           ) : (
-            <small className={cx(formTextCss)}>{t('tokenRequest')}</small>
+            <small className={cx(formTextCss)}>
+              <FormattedMessage
+                id="login-token-prompt-message"
+                defaultMessage="Insert the token or password provided to you. No username needed."
+              />
+            </small>
           )}
         </div>
       </Modal.Body>
@@ -137,10 +146,10 @@ export function LoginModal({ onClose }: { onClose: () => void }) {
           disabled={loading}
           type="button"
         >
-          {t('cancel')}
+          <FormattedMessage id="login-cancel-button-label" defaultMessage="Cancel" />
         </button>
         <button className={cx(buttonCss, buttonPrimaryCss)} disabled={loading} type="submit">
-          {t('logIn')}
+          <FormattedMessage id="login-submit-button-label" defaultMessage="Log in" />
         </button>
       </Modal.Footer>
     </form>

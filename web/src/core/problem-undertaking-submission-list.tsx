@@ -4,9 +4,9 @@ import { css } from 'emotion';
 import { DateTime } from 'luxon';
 import React from 'react';
 import { Table } from 'react-bootstrap';
+import { FormattedMessage } from 'react-intl';
 import { Link, useRouteMatch } from 'react-router-dom';
 import { ProblemUndertakingSubmissionListFragment } from '../generated/graphql-types';
-import { useT } from '../translations/main';
 import { FragmentProps } from '../util/fragment-props';
 import { Field } from './data/field';
 import { Text, textFragment } from './data/text';
@@ -59,13 +59,14 @@ export const problemUndertakingSubmissionListFragment = gql`
 
 export function ProblemUndertakingSubmissionList({ data }: FragmentProps<ProblemUndertakingSubmissionListFragment>) {
   const { path } = useRouteMatch();
-  const t = useT();
 
   return (
     <Table hover striped responsive style={{ marginBottom: 0 }}>
       <thead className="thead-light">
         <tr>
-          <th>{t('submittedAt')}</th>
+          <th>
+            <FormattedMessage id="submission-submitted-at-column-header" defaultMessage="Submitted at" />
+          </th>
           {data.view.instance.definition.submissionListColumns.map((col, index) => (
             <th key={`submission-header-${index}`}>
               <Text data={col.title} />

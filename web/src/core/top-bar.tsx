@@ -3,22 +3,32 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { css, cx } from 'emotion';
 import React, { useState } from 'react';
 import { Modal } from 'react-bootstrap';
-import { useTranslation } from 'react-i18next';
+import { defineMessage, FormattedMessage, MessageDescriptor, useIntl } from 'react-intl';
 import { Link } from 'react-router-dom';
 import { TopBarFragment } from '../generated/graphql-types';
 import { useAuth } from '../util/auth';
 import { buttonCss, buttonLightCss, buttonSmallCss } from '../util/components/button';
 import { FragmentProps } from '../util/fragment-props';
+import { SupportedLanguage, supportedLanguageList, useLanguageSettings } from '../util/intl';
 import { Theme } from '../util/theme';
 import { textFragment } from './data/text';
 import { LoginModal } from './login-modal';
 import { MessagesModal } from './messages-modal';
 
+const languageLabels: Record<SupportedLanguage, MessageDescriptor> = {
+  en: defineMessage({ id: 'language-en', defaultMessage: `English` }),
+  it: defineMessage({ id: 'language-it', defaultMessage: `Italian` }),
+};
+
 export function TopBar({ data }: FragmentProps<TopBarFragment>) {
   const [showLogInModal, setShowLogInModal] = useState(false);
   const [showMessagesModal, setShowMessagesModal] = useState(false);
   const auth = useAuth();
-  const { t, i18n } = useTranslation();
+  const languageSettings = useLanguageSettings();
+
+  const intl = useIntl();
+  const languageList = supportedLanguageList.map(name => ({ name, label: intl.formatMessage(languageLabels[name]) }));
+  languageList.sort((a, b) => (a.label < b.label ? -1 : +1));
 
   return (
     <>
@@ -91,7 +101,7 @@ export function TopBar({ data }: FragmentProps<TopBarFragment>) {
                   `,
                 )}
               >
-                <FontAwesomeIcon icon="tachometer-alt" /> {t('Dashboard')}
+                <FontAwesomeIcon icon="tachometer-alt" /> Dashboard
               </button>
             </Link>
             <button
@@ -105,7 +115,8 @@ export function TopBar({ data }: FragmentProps<TopBarFragment>) {
               )}
               onClick={() => setShowMessagesModal(true)}
             >
-              <FontAwesomeIcon icon="envelope" /> {t('messages')}
+              <FontAwesomeIcon icon="envelope" />{' '}
+              <FormattedMessage id="messages-button-label" defaultMessage="Messages" />
             </button>
             <button
               className={cx(buttonCss, buttonLightCss, buttonSmallCss)}
@@ -113,17 +124,18 @@ export function TopBar({ data }: FragmentProps<TopBarFragment>) {
                 auth.clearAuth();
               }}
             >
-              <FontAwesomeIcon icon="sign-out-alt" /> {t('logOut')}
+              <FontAwesomeIcon icon="sign-out-alt" />{' '}
+              <FormattedMessage id="log-out-button-label" defaultMessage="Log out" />
             </button>
           </>
         )}
         {data.user === null && (
           <button className={cx(buttonCss, buttonLightCss, buttonSmallCss)} onClick={() => setShowLogInModal(true)}>
-            <FontAwesomeIcon icon="sign-in-alt" /> {t('logIn')}
+            <FontAwesomeIcon icon="sign-in-alt" /> <FormattedMessage id="log-in-button-label" defaultMessage="Log in" />
           </button>
         )}
         <select
-          value={i18n.language.substr(0, 2)}
+          value={languageSettings.overrideLanguage ?? ''}
           className={cx(
             'custom-select',
             'custom-select-sm',
@@ -133,10 +145,20 @@ export function TopBar({ data }: FragmentProps<TopBarFragment>) {
               width: auto;
             `,
           )}
-          onChange={e => i18n.changeLanguage(e.target.value)}
+          onChange={e => languageSettings.setOverrideLanguage((e.target.value || null) as SupportedLanguage | null)}
         >
-          <option value="it">Italiano</option>
-          <option value="en">English</option>
+          <option value="">
+            {intl.formatMessage(
+              defineMessage({
+                id: 'language-auto-option',
+                defaultMessage: `Auto: {value}`,
+              }),
+              { value: intl.formatMessage(languageLabels[languageSettings.autoLanguage]) },
+            )}
+          </option>
+          {languageList.map(({ name, label }) => (
+            <option value={name}>{label}</option>
+          ))}
         </select>
       </nav>
     </>

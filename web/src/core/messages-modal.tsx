@@ -2,13 +2,13 @@ import { gql, useMutation, useQuery } from '@apollo/client';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useState } from 'react';
 import { Button, Modal } from 'react-bootstrap';
+import { defineMessage, FormattedMessage, useIntl } from 'react-intl';
 import {
   MessagesQuery,
   MessagesQueryVariables,
   SendMessageMutation,
   SendMessageMutationVariables,
 } from '../generated/graphql-types';
-import { useT } from '../translations/main';
 import { useAuth } from '../util/auth';
 import { Message, messageFragment } from './message';
 
@@ -33,7 +33,6 @@ const sendMessageMutation = gql`
 `;
 
 export function MessagesModal({ onClose }: { onClose: () => void }) {
-  const t = useT();
   const { auth } = useAuth();
   const userId = auth!.currentAuth!.username;
   const [messageText, setMessageText] = useState('');
@@ -64,11 +63,19 @@ export function MessagesModal({ onClose }: { onClose: () => void }) {
     await refetch();
   };
 
+  const intl = useIntl();
+
   return (
     <>
-      <Modal.Header>{t('messages')}</Modal.Header>
+      <Modal.Header>
+        <FormattedMessage id="messages-header" defaultMessage="Messages" />
+      </Modal.Header>
       <Modal.Body>
-        {loading && <h1>Loading</h1>}
+        {loading && (
+          <h1>
+            <FormattedMessage id="messages-loading-message" defaultMessage="Loading..." />
+          </h1>
+        )}
         {data !== undefined &&
           data.messages.map((message, index) => (
             <div key={index}>
@@ -80,17 +87,23 @@ export function MessagesModal({ onClose }: { onClose: () => void }) {
           <textarea
             className="form-control"
             value={messageText}
-            placeholder="write your message"
+            placeholder={intl.formatMessage(
+              defineMessage({
+                id: 'messages-new-message-text-placeholder',
+                defaultMessage: `Write your message...`,
+              }),
+            )}
             onChange={e => setMessageText(e.target.value)}
           />
         </div>
       </Modal.Body>
       <Modal.Footer>
         <Button onClick={onClose} variant="secondary">
-          {t('close')}
+          <FormattedMessage id="messages-close-button-label" defaultMessage="Close" />
         </Button>
         <Button disabled={messageText.length <= 0 || sending} variant="primary" onClick={onSendMessage}>
-          <FontAwesomeIcon icon="paper-plane" /> {t('send')}
+          <FontAwesomeIcon icon="paper-plane" />{' '}
+          <FormattedMessage id="messages-new-message-send-button-label" defaultMessage="Send" />
         </Button>
       </Modal.Footer>
     </>

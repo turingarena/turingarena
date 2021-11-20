@@ -2,9 +2,9 @@ import { gql } from '@apollo/client';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { css, cx } from 'emotion';
 import React, { useState } from 'react';
+import { FormattedMessage } from 'react-intl';
 import { NavLink } from 'react-router-dom';
 import { ContestViewAsideFragment } from '../generated/graphql-types';
-import { useT } from '../translations/main';
 import { badgeCss, getBadgeCssByValence } from '../util/components/badge';
 import { buttonNormalizeCss } from '../util/components/button';
 import { FragmentProps } from '../util/fragment-props';
@@ -24,7 +24,6 @@ const headerClass = css`
 
 export function ContestViewAside({ data }: FragmentProps<ContestViewAsideFragment>) {
   const [visible, setVisible] = useState(true);
-  const t = useT();
 
   if (data.problemSet === null) {
     return null;
@@ -81,7 +80,9 @@ export function ContestViewAside({ data }: FragmentProps<ContestViewAsideFragmen
       >
         {data.problemSet.totalScoreField.score !== null && (
           <div>
-            <h2 className={headerClass}>{t('score')}</h2>
+            <h2 className={headerClass}>
+              <FormattedMessage id="contest-view-aside-score-header" defaultMessage="Score" />
+            </h2>
 
             <div
               className={css`
@@ -102,7 +103,9 @@ export function ContestViewAside({ data }: FragmentProps<ContestViewAsideFragmen
 
         {data.contest.end !== null && <ContestViewClock data={data} />}
 
-        <h2 className={headerClass}>{t('problems')}</h2>
+        <h2 className={headerClass}>
+          <FormattedMessage id="contest-view-aside-problems-header" defaultMessage="Problems" />
+        </h2>
         <div
           className={css`
             padding: 0;
