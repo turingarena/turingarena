@@ -18,11 +18,11 @@ import { SetBasePath, useBasePath } from '../util/paths';
 import {
   ProblemUndertakingSubmissionList,
   problemUndertakingSubmissionListFragment,
-} from './contest-problem-assignment-user-tackling-submission-list';
+} from './problem-undertaking-submission-list';
 import {
   ProblemUndertakingSubmitModal,
   problemUndertakingSubmitModalFragment,
-} from './contest-problem-assignment-user-tackling-submit-modal';
+} from './problem-undertaking-submit-modal';
 import { SubmissionLoader } from './submission-loader';
 
 export const problemUndertakingAsideFragment = gql`

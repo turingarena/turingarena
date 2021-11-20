@@ -5,12 +5,9 @@ import { ContestViewFragment } from '../generated/graphql-types';
 import { hiddenCss } from '../util/components/hidden';
 import { FragmentProps } from '../util/fragment-props';
 import { PathRouter } from '../util/paths';
-import {
-  ProblemViewAside,
-  problemViewAsideFragment,
-} from './contest-problem-assignment-view-aside';
 import { ContestViewAside, contestViewAsideFragment } from './contest-view-aside';
 import { MediaInline, mediaInlineFragment } from './media-inline';
+import { ProblemViewAside, problemViewAsideFragment } from './problem-view-aside';
 import { textFragment } from './text';
 
 export const contestViewFragment = gql`

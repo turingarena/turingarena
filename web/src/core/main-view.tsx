@@ -35,7 +35,9 @@ export function MainView({ data }: { data: MainViewFragment }) {
         <TopBar data={data} />
         {data.contest !== null ? (
           <Switch>
-            <Route path="/dashboard"><Dashboard/></Route>
+            <Route path="/dashboard">
+              <Dashboard />
+            </Route>
             <Route path="/">
               <ContestView data={data.contest} />
             </Route>

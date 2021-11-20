@@ -7,11 +7,11 @@ import { ProblemViewAsideFragment } from '../generated/graphql-types';
 import { useT } from '../translations/main';
 import { badgeCss, getBadgeCssByValence } from '../util/components/badge';
 import { FragmentProps } from '../util/fragment-props';
-import { ProblemUndertakingAside, problemUndertakingAsideFragment } from './contest-problem-assignment-user-tackling-aside';
 import { Field, fieldFragment } from './fields/field';
 import { GradeField, gradeFieldFragment, scoreFieldFragment } from './fields/grade-field';
 import { MediaDownload, mediaDownloadFragment } from './media-download';
 import { mediaInlineFragment } from './media-inline';
+import { ProblemUndertakingAside, problemUndertakingAsideFragment } from './problem-undertaking-aside';
 import { textFragment } from './text';
 
 export const problemViewAsideFragment = gql`

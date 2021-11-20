@@ -33,9 +33,7 @@ export function MemoryUsageField({ data }: FragmentProps<MemoryUsageFieldFragmen
   return (
     <span className="memory-usage">
       {data.memoryUsage !== null && displayMemoryUsage(data.memoryUsage)}
-      {data.memoryUsageWatermark !== null && (
-        <small> / {displayMemoryUsage(data.memoryUsageWatermark)}</small>
-      )}
+      {data.memoryUsageWatermark !== null && <small> / {displayMemoryUsage(data.memoryUsageWatermark)}</small>}
     </span>
   );
 }

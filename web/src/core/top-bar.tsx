@@ -1,6 +1,5 @@
 import { gql } from '@apollo/client';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-
 import { css, cx } from 'emotion';
 import React, { useState } from 'react';
 import { Modal } from 'react-bootstrap';
@@ -82,7 +81,6 @@ export function TopBar({ data }: FragmentProps<TopBarFragment>) {
               {data.user.name}
             </span>
             <Link to="/dashboard">
-              
               <button
                 className={cx(
                   buttonCss,

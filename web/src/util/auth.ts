@@ -85,17 +85,17 @@ export function useAuth() {
   return { auth, setAuth, clearAuth, restoreAuth };
 }
 
-export function bearerHeader(){
+export function bearerHeader() {
   const authJson = localStorage.getItem('auth');
 
-    if (authJson !== null) {
-      try {
-        const { token, username } = JSON.parse(authJson);
-        
-        return{Authorization: `Bearer ${token}`};
-      } catch {
-        return {};
-      }
+  if (authJson !== null) {
+    try {
+      const { token, username } = JSON.parse(authJson);
+
+      return { Authorization: `Bearer ${token}` };
+    } catch {
+      return {};
     }
-    return {};
+  }
+  return {};
 }

@@ -1,4 +1,5 @@
-import { gql, useQuery, useMutation } from '@apollo/client';
+import { gql, useMutation, useQuery } from '@apollo/client';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useState } from 'react';
 import { Button, Modal } from 'react-bootstrap';
 import {
@@ -8,9 +9,8 @@ import {
   SendMessageMutationVariables,
 } from '../generated/graphql-types';
 import { useT } from '../translations/main';
-import { Message, messageFragment } from './message';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useAuth } from '../util/auth';
+import { Message, messageFragment } from './message';
 
 const messagesQuery = gql`
   query Messages($id: ID!) {

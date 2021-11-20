@@ -144,7 +144,7 @@ export function SubmissionsTable() {
           </Form.Group>
         </Form.Row>
       </Form>
-      <div className="ag-theme-alpine" >
+      <div className="ag-theme-alpine">
         <AgGridReact
           rowData={selectedData}
           rowSelection="multiple"

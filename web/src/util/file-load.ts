@@ -5,7 +5,7 @@ async function toBase64(file: File): Promise<string> {
     const reader = new FileReader();
 
     reader.onload = e => {
-      const url = ((e.target as unknown) as { result: string }).result;
+      const url = (e.target as unknown as { result: string }).result;
       resolve(url.substring(url.indexOf(',') + 1));
     };
 
