@@ -1,4 +1,4 @@
-import { Auth } from '../core/auth';
+import { AuthService } from '../core/auth-service';
 import { unreachable } from '../util/unreachable';
 import { InstanceContext } from './instance-context';
 import { Service } from './service';
@@ -33,7 +33,7 @@ export class ServiceContext {
     table = this.instanceContext.table;
 
     // TODO: load secret from environment
-    readonly auth = new Auth(this);
+    readonly auth = new AuthService(this);
 
     service = <T extends Service>(serviceClass: new (ctx: ServiceContext) => T): T =>
         (this.services.get(serviceClass) as T) ?? unreachable(`service not available`);
