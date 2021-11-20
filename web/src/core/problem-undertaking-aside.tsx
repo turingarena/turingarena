@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { css, cx } from 'emotion';
 import React from 'react';
 import { Modal } from 'react-bootstrap';
-import { Link, Route, useHistory } from 'react-router-dom';
+import { Link, Route, useHistory, useRouteMatch } from 'react-router-dom';
 import { ProblemUndertakingAsideFragment } from '../generated/graphql-types';
 import { useT } from '../translations/main';
 import {
@@ -14,7 +14,6 @@ import {
   buttonSuccessCss,
 } from '../util/components/button';
 import { FragmentProps } from '../util/fragment-props';
-import { SetBasePath, useBasePath } from '../util/paths';
 import {
   ProblemUndertakingSubmissionList,
   problemUndertakingSubmissionListFragment,
@@ -44,7 +43,8 @@ export const problemUndertakingAsideFragment = gql`
 `;
 
 export function ProblemUndertakingAside({ data }: FragmentProps<ProblemUndertakingAsideFragment>) {
-  const basePath = useBasePath();
+  const routeMatch = useRouteMatch();
+  const path = routeMatch?.path;
   const history = useHistory();
   const t = useT();
 
@@ -60,15 +60,15 @@ export function ProblemUndertakingAside({ data }: FragmentProps<ProblemUndertaki
     >
       {data.canSubmit && (
         <>
-          <Link className={cx(buttonCss, buttonBlockCss, buttonSuccessCss)} to={`${basePath}/submit`} replace>
+          <Link className={cx(buttonCss, buttonBlockCss, buttonSuccessCss)} to={`${path}/submit`} replace>
             <FontAwesomeIcon icon="paper-plane" /> {t('submitASolution')}
           </Link>
-          <Route path={`${basePath}/submit`}>
+          <Route path={`${path}/submit`}>
             {({ match }) => (
-              <Modal show={match !== null} onHide={() => history.replace(basePath)}>
+              <Modal show={match !== null} onHide={() => history.replace(path)}>
                 <ProblemUndertakingSubmitModal
                   data={data}
-                  onSubmitSuccessful={id => history.replace(`${basePath}/submission/${id}`)}
+                  onSubmitSuccessful={id => history.replace(`${path}/submission/${id}`)}
                 />
               </Modal>
             )}
@@ -79,7 +79,7 @@ export function ProblemUndertakingAside({ data }: FragmentProps<ProblemUndertaki
       {lastSubmission !== null && (
         <>
           <Link
-            to={`${basePath}/submission/${lastSubmission.id}`}
+            to={`${path}/submission/${lastSubmission.id}`}
             className={cx(
               buttonCss,
               buttonBlockCss,
@@ -95,7 +95,7 @@ export function ProblemUndertakingAside({ data }: FragmentProps<ProblemUndertaki
           </Link>
 
           <Link
-            to={`${basePath}/submissions`}
+            to={`${path}/submissions`}
             replace
             className={cx(
               buttonCss,
@@ -108,11 +108,11 @@ export function ProblemUndertakingAside({ data }: FragmentProps<ProblemUndertaki
           >
             <FontAwesomeIcon icon="list" /> {t('allSubmissions')}
           </Link>
-          <Route path={`${basePath}/submissions`}>
+          <Route path={`${path}/submissions`}>
             {({ match }) => (
               <Modal
                 show={match !== null}
-                onHide={() => history.replace(basePath)}
+                onHide={() => history.replace(path)}
                 animation={false}
                 size="xl"
                 scrollable={true}
@@ -126,7 +126,7 @@ export function ProblemUndertakingAside({ data }: FragmentProps<ProblemUndertaki
                   <ProblemUndertakingSubmissionList data={data} />
                 </Modal.Body>
                 <Modal.Footer>
-                  <button onClick={() => history.replace(basePath)} className={cx(buttonCss, buttonPrimaryCss)}>
+                  <button onClick={() => history.replace(path)} className={cx(buttonCss, buttonPrimaryCss)}>
                     Close
                   </button>
                 </Modal.Footer>
@@ -135,27 +135,25 @@ export function ProblemUndertakingAside({ data }: FragmentProps<ProblemUndertaki
           </Route>
         </>
       )}
-      <Route path={`${basePath}/submission/:id`}>
+      <Route path={`${path}/submission/:id`}>
         {({ match }) =>
           match !== null && (
-            <SetBasePath path={`${basePath}/submission/${(match.params as { id: string }).id}`}>
-              <Modal onHide={() => history.replace(basePath)} show={true} animation={false} size="xl" scrollable={true}>
-                <Modal.Header>
-                  <h5>
-                    {/* TODO: submission index, e.g., Submission #6 for: My Problem */}
-                    {t('submissionsFor')}: <strong>{data.view.instance.definition.title.variant}</strong>
-                  </h5>
-                </Modal.Header>
-                <Modal.Body style={{ padding: 0 }}>
-                  <SubmissionLoader id={(match.params as { id: string }).id} />
-                </Modal.Body>
-                <Modal.Footer>
-                  <button onClick={() => history.replace(basePath)} className={cx(buttonCss, buttonPrimaryCss)}>
-                    {t('close')}
-                  </button>
-                </Modal.Footer>
-              </Modal>
-            </SetBasePath>
+            <Modal onHide={() => history.replace(path)} show={true} animation={false} size="xl" scrollable={true}>
+              <Modal.Header>
+                <h5>
+                  {/* TODO: submission index, e.g., Submission #6 for: My Problem */}
+                  {t('submissionsFor')}: <strong>{data.view.instance.definition.title.variant}</strong>
+                </h5>
+              </Modal.Header>
+              <Modal.Body style={{ padding: 0 }}>
+                <SubmissionLoader id={(match.params as { id: string }).id} />
+              </Modal.Body>
+              <Modal.Footer>
+                <button onClick={() => history.replace(path)} className={cx(buttonCss, buttonPrimaryCss)}>
+                  {t('close')}
+                </button>
+              </Modal.Footer>
+            </Modal>
           )
         }
       </Route>

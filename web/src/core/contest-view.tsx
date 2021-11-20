@@ -1,10 +1,10 @@
 import { gql } from '@apollo/client';
 import { css } from 'emotion';
 import React from 'react';
+import { Route } from 'react-router-dom';
 import { ContestViewFragment } from '../generated/graphql-types';
 import { hiddenCss } from '../util/components/hidden';
 import { FragmentProps } from '../util/fragment-props';
-import { PathRouter } from '../util/paths';
 import { ContestViewAside, contestViewAsideFragment } from './contest-view-aside';
 import { MediaInline, mediaInlineFragment } from './media-inline';
 import { ProblemViewAside, problemViewAsideFragment } from './problem-view-aside';
@@ -66,7 +66,7 @@ export function ContestView({ data }: FragmentProps<ContestViewFragment>) {
       <ContestViewAside data={data} />
       {data.problemSet !== null &&
         data.problemSet.problems.map(a => (
-          <PathRouter key={a.instance.definition.id} path={`/${a.instance.definition.name}`}>
+          <Route key={a.instance.definition.id} path={`/${a.instance.definition.name}`}>
             {({ match }) => (
               <>
                 <ProblemViewAside className={match !== null ? undefined : hiddenCss} data={a} />
@@ -75,15 +75,15 @@ export function ContestView({ data }: FragmentProps<ContestViewFragment>) {
                 </div>
               </>
             )}
-          </PathRouter>
+          </Route>
         ))}
-      <PathRouter path="/" exact>
+      <Route path="/" exact>
         {({ match }) => (
           <div className={match !== null ? activeMediaInlineCss : hiddenCss}>
             <MediaInline data={data.contest.statement} />
           </div>
         )}
-      </PathRouter>
+      </Route>
     </div>
   );
 }

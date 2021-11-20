@@ -4,11 +4,10 @@ import { css } from 'emotion';
 import { DateTime } from 'luxon';
 import React from 'react';
 import { Table } from 'react-bootstrap';
-import { Link } from 'react-router-dom';
+import { Link, useRouteMatch } from 'react-router-dom';
 import { ProblemUndertakingSubmissionListFragment } from '../generated/graphql-types';
 import { useT } from '../translations/main';
 import { FragmentProps } from '../util/fragment-props';
-import { useBasePath } from '../util/paths';
 import { columnFragment, getTableClassByValence, recordFragment } from './field-table';
 import { Field } from './fields/field';
 import { Text, textFragment } from './text';
@@ -59,7 +58,7 @@ export const problemUndertakingSubmissionListFragment = gql`
 `;
 
 export function ProblemUndertakingSubmissionList({ data }: FragmentProps<ProblemUndertakingSubmissionListFragment>) {
-  const basePath = useBasePath();
+  const { path } = useRouteMatch();
   const t = useT();
 
   return (
@@ -82,7 +81,7 @@ export function ProblemUndertakingSubmissionList({ data }: FragmentProps<Problem
                 className={css`
                   display: flex;
                 `}
-                to={`${basePath}/submission/${submission.id}`}
+                to={`${path.replace(/submissions$/, '')}submission/${submission.id}`}
               >
                 {DateTime.fromISO(submission.createdAt.local).toRelative() ?? `${submission.createdAt.local}`}
                 {submission.officialEvaluation === null && (
