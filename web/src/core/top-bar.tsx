@@ -10,9 +10,9 @@ import { useAuth } from '../util/auth';
 import { buttonCss, buttonLightCss, buttonSmallCss } from '../util/components/button';
 import { FragmentProps } from '../util/fragment-props';
 import { Theme } from '../util/theme';
+import { textFragment } from './data/text';
 import { LoginModal } from './login-modal';
 import { MessagesModal } from './messages-modal';
-import { textFragment } from './text';
 
 export function TopBar({ data }: FragmentProps<TopBarFragment>) {
   const [showLogInModal, setShowLogInModal] = useState(false);

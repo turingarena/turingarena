@@ -10,8 +10,8 @@ import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { xonokai } from 'react-syntax-highlighter/dist/esm/styles/prism';
 // @ts-ignore
 import RemarkMathPlugin from 'remark-math';
-import { MediaInlineFragment } from '../generated/graphql-types';
-import { FragmentProps } from '../util/fragment-props';
+import { MediaInlineFragment } from '../../generated/graphql-types';
+import { FragmentProps } from '../../util/fragment-props';
 
 export const mediaInlineFragment = gql`
   fragment MediaInline on Media {

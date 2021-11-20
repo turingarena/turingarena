@@ -6,9 +6,9 @@ import { ContestViewFragment } from '../generated/graphql-types';
 import { hiddenCss } from '../util/components/hidden';
 import { FragmentProps } from '../util/fragment-props';
 import { ContestViewAside, contestViewAsideFragment } from './contest-view-aside';
-import { MediaInline, mediaInlineFragment } from './media-inline';
+import { MediaInline, mediaInlineFragment } from './data/media-inline';
+import { textFragment } from './data/text';
 import { ProblemViewAside, problemViewAsideFragment } from './problem-view-aside';
-import { textFragment } from './text';
 
 export const contestViewFragment = gql`
   fragment ContestView on ContestView {

@@ -10,8 +10,8 @@ import { buttonNormalizeCss } from '../util/components/button';
 import { FragmentProps } from '../util/fragment-props';
 import { Theme } from '../util/theme';
 import { ContestViewClock, contestViewClockFragment } from './contest-view-clock';
-import { GradeField, scoreFieldFragment } from './fields/grade-field';
-import { textFragment } from './text';
+import { GradeField, scoreFieldFragment } from './data/grade-field';
+import { textFragment } from './data/text';
 
 // TODO: duplicated?
 const headerClass = css`

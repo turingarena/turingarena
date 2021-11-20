@@ -6,9 +6,9 @@ import { Table } from 'react-bootstrap';
 import { SubmissionFragment } from '../generated/graphql-types';
 import { useT } from '../translations/main';
 import { FragmentProps } from '../util/fragment-props';
+import { Field } from './data/field';
+import { Text, textFragment } from './data/text';
 import { columnFragment, getTableClassByValence, recordFragment } from './field-table';
-import { Field } from './fields/field';
-import { Text, textFragment } from './text';
 
 export const submissionFragment = gql`
   fragment Submission on Submission {

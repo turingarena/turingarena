@@ -1,7 +1,7 @@
 import { gql } from '@apollo/client';
 import { Valence } from '../generated/graphql-types';
-import { fieldFragment } from './fields/field';
-import { textFragment } from './text';
+import { fieldFragment } from './data/field';
+import { textFragment } from './data/text';
 
 export const columnFragment = gql`
   fragment Column on Column {

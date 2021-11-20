@@ -8,9 +8,9 @@ import { Link, useRouteMatch } from 'react-router-dom';
 import { ProblemUndertakingSubmissionListFragment } from '../generated/graphql-types';
 import { useT } from '../translations/main';
 import { FragmentProps } from '../util/fragment-props';
+import { Field } from './data/field';
+import { Text, textFragment } from './data/text';
 import { columnFragment, getTableClassByValence, recordFragment } from './field-table';
-import { Field } from './fields/field';
-import { Text, textFragment } from './text';
 
 export const problemUndertakingSubmissionListFragment = gql`
   fragment ProblemUndertakingSubmissionList on ProblemUndertaking {

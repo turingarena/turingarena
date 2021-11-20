@@ -13,7 +13,7 @@ import { useAsync } from '../util/async-hook';
 import { buttonCss, buttonNormalizeCss, buttonPrimaryCss } from '../util/components/button';
 import { loadFileContent } from '../util/file-load';
 import { FragmentProps } from '../util/fragment-props';
-import { textFragment } from './text';
+import { textFragment } from './data/text';
 
 export const problemUndertakingSubmitModalFragment = gql`
   fragment ProblemUndertakingSubmitModalSubmissionFileType on SubmissionFileType {

@@ -7,12 +7,12 @@ import { ProblemViewAsideFragment } from '../generated/graphql-types';
 import { useT } from '../translations/main';
 import { badgeCss, getBadgeCssByValence } from '../util/components/badge';
 import { FragmentProps } from '../util/fragment-props';
-import { Field, fieldFragment } from './fields/field';
-import { GradeField, gradeFieldFragment, scoreFieldFragment } from './fields/grade-field';
-import { MediaDownload, mediaDownloadFragment } from './media-download';
-import { mediaInlineFragment } from './media-inline';
+import { Field, fieldFragment } from './data/field';
+import { GradeField, gradeFieldFragment, scoreFieldFragment } from './data/grade-field';
+import { MediaDownload, mediaDownloadFragment } from './data/media-download';
+import { mediaInlineFragment } from './data/media-inline';
+import { textFragment } from './data/text';
 import { ProblemUndertakingAside, problemUndertakingAsideFragment } from './problem-undertaking-aside';
-import { textFragment } from './text';
 
 export const problemViewAsideFragment = gql`
   fragment ProblemViewAside on ProblemView {

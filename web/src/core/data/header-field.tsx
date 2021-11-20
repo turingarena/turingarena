@@ -3,7 +3,7 @@ import { css } from 'emotion';
 import React from 'react';
 import { HeaderFieldFragment } from '../../generated/graphql-types';
 import { FragmentProps } from '../../util/fragment-props';
-import { Text, textFragment } from '../text';
+import { Text, textFragment } from './text';
 
 export function HeaderField({ data }: FragmentProps<HeaderFieldFragment>) {
   return (

@@ -2,8 +2,8 @@ import { gql } from '@apollo/client';
 import { IconProp } from '@fortawesome/fontawesome-svg-core';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { AnchorHTMLAttributes } from 'react';
-import { MediaDownloadFragment } from '../generated/graphql-types';
-import { FragmentProps } from '../util/fragment-props';
+import { MediaDownloadFragment } from '../../generated/graphql-types';
+import { FragmentProps } from '../../util/fragment-props';
 
 const mimeTypeIcons: Record<string, IconProp> = {
   'application/pdf': 'file-pdf',
