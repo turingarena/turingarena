@@ -3,7 +3,7 @@ import { LocalApiContext } from '../main/api-context';
 import { ServiceContext } from '../main/service-context';
 import { AuthResult } from './auth';
 import { Contest } from './contest';
-import { User, UserCache } from './user';
+import { User } from './user';
 
 /**
  * Structure of the JsonWebToken
@@ -11,7 +11,6 @@ import { User, UserCache } from './user';
 export interface TokenPayload {
     contestId: string;
     username: string;
-    role: string;
 }
 
 export class AuthService {
@@ -36,11 +35,7 @@ export class AuthService {
         const user = await contest.getUserByToken(token);
         if (user === null) return null;
 
-        // Get the role of the user. If the role is undefined it will use 'user' isntread
-        let role = (await this.apiCtx.cache(UserCache).byId.load(user.id)).role;
-        if (role === undefined) role = 'user';
-
-        const payload: TokenPayload = { contestId: contest.id, username: user.username, role };
+        const payload: TokenPayload = { contestId: contest.id, username: user.username };
 
         return { user, token: sign(payload, this.apiCtx.config.secret) };
     }

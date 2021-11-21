@@ -59,7 +59,6 @@ tee "${CONFIG}" <<EOF
     "host": "${HOST}",
     "port": ${PORT},
     "secret": "$(gen_secret)",
-    "skipAuth": false,
     "cachePath": "${CACHE}",
     "webRoot": "${DEST}/frontend/build"
 }

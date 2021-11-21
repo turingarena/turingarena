@@ -26,7 +26,6 @@ users:
   - id: alerighi
     name: Alessandro Righi
     token: xyejhfdyyujd
-    role: admin # optional
   - id: cairomassimo
     name: Massimo Cairo
     token: jfkldyyjjkjk

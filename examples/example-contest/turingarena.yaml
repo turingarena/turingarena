@@ -3,14 +3,6 @@ title: TuringArena Example Contest
 start: 2021-01-08T20:00:00Z
 end: 2022-01-08T20:00:00Z
 users:
-  - username: alerighi
-    token: alerighi
-    name: Alessandro Righi
-    role: admin
-  - username: cairomassimo
-    token: cairomassimo
-    name: Massimo Cairo
-    role: admin
   - username: user1
     token: user1
     name: Mr. User 1

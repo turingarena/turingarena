@@ -17,19 +17,8 @@ export const userSchema = gql`
         username: ID!
         name: String!
         token: String!
-        role: UserRole!
-    }
-
-    enum UserRole {
-        USER
-        ADMIN
     }
 `;
-
-export enum UserRole {
-    USER,
-    ADMIN,
-}
 
 export class User {
     constructor(readonly contest: Contest, readonly username: string, readonly ctx: ApiContext) {}

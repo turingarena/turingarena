@@ -1,5 +1,5 @@
 import { DocumentNode, execute } from 'graphql';
-import { User, UserCache } from '../core/user';
+import { User } from '../core/user';
 import { ApiCache } from './api-cache';
 import { executableSchema } from './executable-schema';
 import { ServiceContext } from './service-context';
@@ -53,31 +53,19 @@ export class LocalApiContext extends ApiContext {
  * Context for API requests made via network.
  */
 export class RemoteApiContext extends ApiContext {
-    constructor(serviceContext: ServiceContext, readonly user?: User) {
+    constructor(serviceContext: ServiceContext, readonly admin: boolean, readonly user?: User) {
         super(serviceContext);
     }
 
-    private async isAdmin() {
-        if (this.config.skipAuth) return true;
-
-        if (this.user === undefined) return false;
-        const { role } = await this.cache(UserCache).byId.load(this.user.id);
-
-        return role === 'admin';
-    }
-
     async authorizeUser(username: string) {
-        if (this.config.skipAuth) return;
-
         if (this.user?.username === username) return;
-        if (await this.isAdmin()) return;
+        if (this.admin) return;
 
         throw new Error(`Not logged in as '${username}', nor admin`);
     }
 
     async authorizeAdmin() {
-        if (this.config.skipAuth) return;
-        if (await this.isAdmin()) return;
+        if (this.admin) return;
 
         throw new Error(`Not authorized`);
     }

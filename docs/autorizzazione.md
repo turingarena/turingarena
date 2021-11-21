@@ -4,21 +4,8 @@ TuringArena implementa un servizio di autorizzazione che serve le chiamate API G
 
 ## Come abilitare o disattivare l'autorizzazione delle chiamate
 
-All'interno del file [`server\turingarena.config.json`](../server/turingarena.config.json) che viene qui sotto riportato è presente il parametro `skipAuth`. Tale parametro se impostato a `true` permette al server di accettare richieste da chiunque. Sebbene possa essere utile tale opzione durante le fasi di testing, consigliamo di settarlo a `false` nel resto dei casi per impedire potenziali consultazioni o modifiche al database non desiderate.
-
-```json
-{
-    "db": {
-        "storage": "db.sqlite3",
-        "dialect": "sqlite"
-    },
-    "host": "localhost",
-    "port": 3000,
-    "secret": "superSecretCode",
-    "skipAuth": true
-}
-
-```
+Usando l'opzione `--admin` o lanciando `npm run serve-admin` o ``npm run watch:serve-admin` saranno consentite API privilegiate e non sarà controllato alcun token.
+NB: usare sempre un proxy dotato di autenticazione o una rete protetta quando si usa questa modalità in produzione.
 
 ## Come effettuare chiamate all'interfaccia GraphQL quando l'autorizzazione è attiva
 
@@ -83,11 +70,11 @@ Se l'utente ha le autorizzazioni necessarie per effettuare l'operazione le funzi
 
 ### authorizeUser
 La funzione prende come parametro una stringa che nel corretto utilizzo dovrebbe rappresentare il proprietario dell'informazione alla quale si sta tentando di accedere. 
-Inizialmente viene effettuato un controllo per vedere se il parametro skipAuth è impostato a `true` e in tal caso la funzione termina.
-Se invece `skipAuth` è false allora viene controllato se l'utente che ha fatto la richiesta è l'`username` passato come parametro oppure un admin. Se nessuna delle due condizioni viene soddisfatta viene lanciato un errore.
+Inizialmente viene effettuato un controllo per vedere se il parametro admin è impostato a `true` e in tal caso la funzione termina.
+Se invece `admin` è false allora viene controllato se l'utente che ha fatto la richiesta è l'`username` passato come parametro oppure un admin. Se nessuna delle due condizioni viene soddisfatta viene lanciato un errore.
 ``` javascript
 async authorizeUser(username: string) {
-        if (this.environment.config.skipAuth) return;
+        if (this.environment.admin) return;
 
         if (this.user?.username === username) return;
         if (await this.isAdmin()) return;
@@ -101,7 +88,7 @@ Anche in questo caso come nel precedente viene fatto un controllo iniziale per v
 In caso negativo viene controllato se l'utente è loggato nel sistema come amministratore e se così non fosse viene lanciato un errore
 ``` javascript
 async authorizeAdmin() {
-        if (this.environment.config.skipAuth) return;
+        if (this.environment.admin) return;
         if (await this.isAdmin()) return;
 
         throw new Error(`Not authorized`);

@@ -37,8 +37,9 @@ program
 program
     .command('serve')
     .description('start TuringArena server')
+    .option('--admin')
     .action(opts => {
-        serve(loadConfig(opts.parent.config));
+        serve(loadConfig(opts.parent.config), opts.admin);
     });
 
 program

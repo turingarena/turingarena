@@ -23,12 +23,14 @@
         "prepare:graphql-codegen": "ts-node --transpile-only scripts/graphql-codegen.ts",
         "prepare": "npm-run-all --sequential prepare:*",
         "serve": "ts-node --transpile-only scripts/serve.ts",
+        "serve-admin": "ts-node --transpile-only scripts/serve-admin.ts",
         "start": "npm run watch:serve",
         "watch:check:test": "jest --watch",
         "watch:check:tsc": "tsc --watch",
         "watch:check:tslint": "onchange '**/*.ts' -- tslint --project . {{changed}}",
         "watch:prepare:graphql-codegen": "ts-node --transpile-only scripts/graphql-codegen.ts --watch",
-        "watch:serve": "ts-node-dev --clear --transpile-only scripts/serve.ts"
+        "watch:serve": "ts-node-dev --clear --transpile-only scripts/serve.ts",
+        "watch:serve-admin": "ts-node-dev --clear --transpile-only scripts/serve-admin.ts"
     },
     "dependencies": {
         "@edomora97/task-maker": "^1.0.2",

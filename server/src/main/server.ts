@@ -19,7 +19,7 @@ import { ServiceContext } from './service-context';
 // Needed to make Docker exit correctly on CTRL-C
 process.on('SIGINT', () => process.exit(0));
 
-export function serve(config: Config) {
+export function serve(config: Config, admin: boolean) {
     const app = express();
 
     app.use(cors());
@@ -35,7 +35,7 @@ export function serve(config: Config) {
             const nAuthParts = 2;
             const [authType, authPayload] = token.split(' ', nAuthParts);
             const user = authType === 'Bearer' ? await serviceContext.auth.auth(authPayload) : undefined;
-            const apiCtx = new RemoteApiContext(serviceContext, user ?? undefined);
+            const apiCtx = new RemoteApiContext(serviceContext, admin, user ?? undefined);
 
             return apiCtx;
         },
@@ -58,7 +58,7 @@ export function serve(config: Config) {
     app.get('/files/:contentId/:filename', async (req, res, next) => {
         try {
             const { contentId, filename } = req.params;
-            const apiContext = new RemoteApiContext(serviceContext);
+            const apiContext = new RemoteApiContext(serviceContext, false);
             const file = await apiContext
                 .table(FileContent)
                 .findOne({ where: { id: contentId }, attributes: ['content'] });

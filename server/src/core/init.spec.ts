@@ -4,7 +4,7 @@ import { InstanceContext } from '../main/instance-context';
 import { ServiceContext } from '../main/service-context';
 
 it('test user add and delete', async () => {
-    const response = await new RemoteApiContext(new ServiceContext(new InstanceContext(), [])).execute({
+    const response = await new RemoteApiContext(new ServiceContext(new InstanceContext(), []), true).execute({
         document: gql`
             mutation InitSpec {
                 init
