@@ -2,6 +2,7 @@ import { gql } from 'apollo-server-core';
 import { authSchema } from './auth';
 import { contestSchema } from './contest';
 import { contestViewSchema } from './contest-view';
+import { dateTimeSchema } from './data/date-time';
 import { fieldSchema } from './data/field';
 import { fulfillmentSchema } from './data/fulfillment';
 import { gradeSchema } from './data/grade';
@@ -36,7 +37,6 @@ import { querySchema } from './query';
 import { submissionSchema } from './submission';
 import { submissionFileSchema } from './submission-file';
 import { userSchema } from './user';
-import { dateTimeSchema } from './data/date-time';
 
 /** Full GraphQL schema document. Obtained combining schema parts from each components. */
 export const schema = gql`
