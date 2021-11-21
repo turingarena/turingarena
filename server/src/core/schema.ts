@@ -1,4 +1,9 @@
 import { gql } from 'apollo-server-core';
+import { packageArchiveSchema } from './archive/package-archive';
+import { packageBranchSchema } from './archive/package-branch';
+import { packageLocationSchema } from './archive/package-location';
+import { packageRevisionSchema } from './archive/package-revision';
+import { packageTargetSchema } from './archive/package-target';
 import { authSchema } from './auth';
 import { contestSchema } from './contest';
 import { contestViewSchema } from './contest-view';
@@ -61,6 +66,11 @@ export const schema = gql`
     ${objectiveSchema}
     ${objectiveViewSchema}
     ${outcomeSchema}
+    ${packageTargetSchema}
+    ${packageLocationSchema}
+    ${packageRevisionSchema}
+    ${packageArchiveSchema}
+    ${packageBranchSchema}
     ${problemInstanceSchema}
     ${problemMaterialSchema}
     ${problemSchema}

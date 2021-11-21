@@ -1,3 +1,4 @@
+import { PackageLocationData } from './archive/package-location';
 import { ContestData } from './contest';
 import { EvaluationData } from './evaluation';
 import { ArchiveFileData } from './files/archive';
@@ -9,12 +10,13 @@ import { SubmissionFile } from './submission-file';
 
 /** All model classes constructors. */
 export const modelConstructors = {
-    OutcomeData,
     ArchiveFileData,
     ContestData,
     EvaluationData,
     FileContent,
     Message,
+    OutcomeData,
+    PackageLocationData,
     SubmissionData,
     SubmissionFile,
 };

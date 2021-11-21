@@ -2,7 +2,7 @@ import { promises as fs } from 'fs';
 import { defaultConfig } from '../../main/config';
 import { InstanceContext } from '../../main/instance-context';
 import { ServiceContext } from '../../main/service-context';
-import { ArchiveService, exec2 } from './checkout';
+import { exec2, PackageService } from './package-service';
 
 it('copies files and computes a stable hash', async () => {
     await testCheckout(
@@ -35,9 +35,25 @@ it('resolves safe and unsafe symlinks correctly', async () => {
         },
         'archive',
         async (tempDir, hash) => {
+            expect(typeof hash).toBe('string');
+
             await exec2(`ls ${tempDir}/cache/archives/${hash}/dependency/dependency.txt`);
             await exec2(`ls ${tempDir}/cache/archives/${hash}/linked.txt`);
             await exec2(`readlink ${tempDir}/cache/archives/${hash}/link.txt`);
+        },
+    );
+});
+
+it('returns null if directory is not found', async () => {
+    await testCheckout(
+        async tempDir => {
+            await exec2(`echo "test" > ${tempDir}/git-input/test.txt`);
+            await exec2(`git -C ${tempDir}/git-input add test.txt`);
+            await exec2(`git -C ${tempDir}/git-input commit -m "Initial"`);
+        },
+        'non-existent',
+        async (tempDir, hash) => {
+            expect(hash).toBeNull();
         },
     );
 });
@@ -50,7 +66,7 @@ it('fails on unsafe symlinks without referent', async () => {
                 await exec2(`git -C ${tempDir}/git-input add .`);
                 await exec2(`git -C ${tempDir}/git-input commit -m "Initial"`);
             },
-            'archive',
+            '.',
             () => Promise.resolve(),
         ),
     ).rejects.toThrow();
@@ -69,7 +85,7 @@ async function withTempDir(inner: (tempDir: string) => Promise<void>) {
 async function testCheckout(
     prepareCommit: (tempDir: string) => Promise<void>,
     path: string,
-    checkArchive: (tempDir: string, hash: string) => Promise<void>,
+    checkArchive: (tempDir: string, hash: string | null) => Promise<void>,
 ) {
     await withTempDir(async tempDir => {
         await exec2(`mkdir ${tempDir}/git`);
@@ -87,12 +103,10 @@ async function testCheckout(
                 cachePath: `${tempDir}/cache`,
                 gitDir: `${tempDir}/git`,
             }),
-            [ArchiveService],
+            [PackageService],
         );
 
-        const hash = await serviceContext.service(ArchiveService).checkout('test', path);
-        expect(typeof hash).toBe('string');
-
-        await checkArchive(tempDir, hash);
+        const { archiveHash } = await serviceContext.service(PackageService).checkout('test', path);
+        await checkArchive(tempDir, archiveHash ?? null);
     });
 }
