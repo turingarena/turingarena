@@ -6,6 +6,7 @@ import { Options } from 'sequelize';
 
 export interface Config {
     db: Options;
+    gitDir: string;
     port: number;
     host: string;
     taskMaker: TaskMakerConfig;
@@ -63,6 +64,7 @@ export const defaultConfig: Config = {
         storage: ':memory:',
         dialect: 'sqlite',
     },
+    gitDir: `./turingarena-git`,
     port: 3000,
     host: 'localhost',
     taskMaker: {

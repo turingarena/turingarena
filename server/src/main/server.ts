@@ -5,6 +5,7 @@ import { Duration } from 'luxon';
 import * as mime from 'mime-types';
 import * as path from 'path';
 import * as util from 'util';
+import { ArchiveService } from '../core/archive/checkout';
 import { LiveEvaluationService } from '../core/evaluate';
 import { FileContent } from '../core/files/file-content';
 import { mutationRoot } from '../core/mutation';
@@ -25,7 +26,7 @@ export function serve(config: Config) {
     console.log(config);
 
     const instanceContext = new InstanceContext(config);
-    const serviceContext = new ServiceContext(instanceContext, [LiveEvaluationService]);
+    const serviceContext = new ServiceContext(instanceContext, [LiveEvaluationService, ArchiveService]);
 
     const server = new ApolloServer({
         schema: executableSchema(),
