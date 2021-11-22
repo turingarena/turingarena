@@ -21,9 +21,23 @@ export const fileContentSchema = gql`
     }
 `;
 
+export class FileContent implements ApiOutputValue<'FileContent'> {
+    constructor(readonly data: Buffer) {}
+
+    id = ssri.fromData(this.data).hexDigest();
+
+    base64() {
+        return this.data.toString('base64');
+    }
+
+    utf8() {
+        return this.data.toString('utf8');
+    }
+}
+
 /** A generic file in TuringArena. */
 @Table({ updatedAt: false })
-export class FileContent extends BaseModel<FileContent> implements ApiOutputValue<'FileContent'> {
+export class FileContentData extends BaseModel<FileContentData> {
     /** The SHA-1 hash of the file. Is automatically computed on insert. */
     @PrimaryKey
     @AllowNull(false)
@@ -34,25 +48,18 @@ export class FileContent extends BaseModel<FileContent> implements ApiOutputValu
     @AllowNull(false)
     @Column
     content!: Buffer;
-
-    base64() {
-        return this.content.toString('base64');
-    }
-    utf8() {
-        return this.content.toString('utf8');
-    }
 }
 
 export class FileContentCache extends ApiCache {
-    byId = createByIdDataLoader(this.ctx, FileContent);
+    byId = createByIdDataLoader(this.ctx, FileContentData);
 }
 
-export async function createFileFromContent(ctx: ApiContext, content: Buffer) {
-    const id = ssri.fromData(content).hexDigest();
+export async function createFileFromContent(ctx: ApiContext, data: Buffer) {
+    const { id } = new FileContent(data);
 
     return (
-        (await ctx.table(FileContent).findOne({ where: { id } })) ??
-        (await ctx.table(FileContent).create({ content, id }))
+        (await ctx.table(FileContentData).findOne({ where: { id } })) ??
+        (await ctx.table(FileContentData).create({ content: data, id }))
     );
 }
 
@@ -68,7 +75,7 @@ export async function createFileFromPath(ctx: ApiContext, filePath: string) {
  *
  * @param path file path
  */
-export async function extractFile(fileContent: FileContent, filePath: string) {
+export async function extractFile(fileContent: FileContentData, filePath: string) {
     await fs.promises.mkdir(path.dirname(filePath), { recursive: true });
 
     return fs.promises.writeFile(filePath, fileContent.content);

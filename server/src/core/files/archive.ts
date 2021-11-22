@@ -6,7 +6,7 @@ import { v4 as UUIDv4 } from 'uuid';
 import { ApiContext } from '../../main/api-context';
 import { BaseModel } from '../../main/base-model';
 import { ApiOutputValue } from '../../main/graphql-types';
-import { createFileFromPath, extractFile, FileContent, FileContentCache } from './file-content';
+import { createFileFromPath, extractFile, FileContent, FileContentCache, FileContentData } from './file-content';
 
 export const archiveSchema = gql`
     type ArchiveFile {
@@ -32,7 +32,7 @@ export class ArchiveFileData extends BaseModel<ArchiveFileData> {
     uuid!: string;
 
     @AllowNull(false)
-    @ForeignKey(() => FileContent)
+    @ForeignKey(() => FileContentData)
     @Column
     contentId!: string;
 
@@ -41,9 +41,13 @@ export class ArchiveFileData extends BaseModel<ArchiveFileData> {
     @Column
     path!: string;
 
-    @BelongsTo(() => FileContent)
-    content!: FileContent;
-    getContent!: () => Promise<FileContent>;
+    @BelongsTo(() => FileContentData)
+    data!: FileContentData;
+    getData!: () => Promise<FileContentData>;
+
+    content() {
+        return new FileContent(this.data.content);
+    }
 }
 
 /**
@@ -102,7 +106,9 @@ export async function extractArchive(ctx: ApiContext, uuid: string) {
 
     console.debug(`EXTRACT FILE COLLECTION uuid = ${uuid} INTO ${tempDir}`);
 
-    const collection = await ctx.table(ArchiveFileData).findAll({ where: { uuid } });
+    const collection = await ctx
+        .table(ArchiveFileData)
+        .findAll({ where: { uuid }, include: [ctx.table(FileContentData)] });
 
     for (const file of collection) {
         const filePath = path.join(tempDir, file.path);
@@ -122,6 +128,8 @@ export class Archive implements ApiOutputValue<'Archive'> {
     __typename = 'Archive' as const;
 
     files() {
-        return this.ctx.table(ArchiveFileData).findAll({ where: { uuid: this.uuid } });
+        return this.ctx
+            .table(ArchiveFileData)
+            .findAll({ where: { uuid: this.uuid }, include: [this.ctx.table(FileContentData)] });
     }
 }

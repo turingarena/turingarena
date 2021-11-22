@@ -8,6 +8,7 @@ import { createSimpleLoader, UuidBaseModel } from '../main/base-model';
 import { ApiInputValue, ApiOutputValue } from '../main/graphql-types';
 import { unreachable } from '../util/unreachable';
 import { Contest, ContestData } from './contest';
+import { ApiDateTime } from './data/date-time';
 import { FulfillmentField, FulfillmentGradeDomain } from './data/fulfillment';
 import { ScoreField, ScoreGrade, ScoreGradeDomain, ScoreRange } from './data/score';
 import { Text } from './data/text';
@@ -21,7 +22,6 @@ import { ProblemInstance } from './problem-instance';
 import { ProblemUndertaking } from './problem-undertaking';
 import { SubmissionFileCache } from './submission-file';
 import { User } from './user';
-import { ApiDateTime } from './data/date-time';
 
 export const submissionSchema = gql`
     type Submission {
@@ -310,7 +310,7 @@ export class Submission implements ApiOutputValue<'Submission'> {
         const submissionPath = path.join(base, this.id);
 
         for (const submissionFile of submissionFiles) {
-            const content = await submissionFile.getContent({ attributes: ['id', 'content'] });
+            const content = await submissionFile.getData({ attributes: ['id', 'content'] });
             const { fieldName, fileTypeName } = submissionFile;
 
             const extension = fileTypeName;

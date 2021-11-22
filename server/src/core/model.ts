@@ -2,7 +2,7 @@ import { PackageLocationData } from './archive/package-location';
 import { ContestData } from './contest';
 import { EvaluationData } from './evaluation';
 import { ArchiveFileData } from './files/archive';
-import { FileContent } from './files/file-content';
+import { FileContentData } from './files/file-content';
 import { Message } from './message';
 import { OutcomeData } from './outcome';
 import { SubmissionData } from './submission';
@@ -13,7 +13,7 @@ export const modelConstructors = {
     ArchiveFileData,
     ContestData,
     EvaluationData,
-    FileContent,
+    FileContentData,
     Message,
     OutcomeData,
     PackageLocationData,

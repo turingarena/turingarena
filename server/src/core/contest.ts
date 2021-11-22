@@ -14,7 +14,7 @@ import { File } from './data/file';
 import { Media } from './data/media';
 import { Text } from './data/text';
 import { Archive, ArchiveFileData } from './files/archive';
-import { FileContent } from './files/file-content';
+import { FileContentData } from './files/file-content';
 import { ProblemDefinition } from './problem-definition';
 import { ProblemMaterial, ProblemMaterialCache } from './problem-definition-material';
 import { ProblemInstance } from './problem-instance';
@@ -102,6 +102,7 @@ export class Contest implements ApiOutputValue<'Contest'> {
                     [Op.like]: 'files/home%',
                 },
             },
+            include: [this.ctx.table(FileContentData)],
         });
 
         return new Media(statementFiles.map((archiveFile): File => this.getStatementVariantFromFile(archiveFile)));
@@ -122,7 +123,7 @@ export class Contest implements ApiOutputValue<'Contest'> {
         }
 
         const metadataContent = await this.ctx
-            .table(FileContent)
+            .table(FileContentData)
             .findOne({ where: { id: metadataProblemFile.contentId } });
 
         return yaml.parse(metadataContent!.content.toString()) as ContestMetadata;
@@ -192,7 +193,7 @@ export class Contest implements ApiOutputValue<'Contest'> {
             pathParts[pathParts.length - 1],
             null,
             type !== false ? type : 'application/octet-stream',
-            archiveFile.getContent(),
+            archiveFile.content(),
             this.ctx,
         );
     }

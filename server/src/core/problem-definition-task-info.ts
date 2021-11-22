@@ -1,7 +1,7 @@
 import { ApiContext } from '../main/api-context';
 import { ContestCache } from './contest';
 import { ArchiveFileData } from './files/archive';
-import { FileContent } from './files/file-content';
+import { FileContentData } from './files/file-content';
 import { ProblemDefinition } from './problem-definition';
 
 export interface ProblemTaskInfo {
@@ -42,13 +42,14 @@ export async function getProblemTaskInfo(ctx: ApiContext, problem: ProblemDefini
 
     const metadataProblemFile = await ctx.table(ArchiveFileData).findOne({
         where: { uuid: archiveId, path: metadataPath },
+        include: [ctx.table(FileContentData)],
     });
 
     if (metadataProblemFile === null) {
         throw new Error(`Problem ${problem.name} is missing metadata file ${metadataPath}`);
     }
 
-    const metadataContent = await ctx.table(FileContent).findOne({ where: { id: metadataProblemFile.contentId } });
+    const metadataContent = await ctx.table(FileContentData).findOne({ where: { id: metadataProblemFile.contentId } });
 
     return JSON.parse(metadataContent!.content.toString()) as ProblemTaskInfo;
 }

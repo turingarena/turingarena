@@ -3,7 +3,7 @@ import { AllowNull, BelongsTo, Column, ForeignKey, PrimaryKey, Table } from 'seq
 import { FindOptions } from 'sequelize/types';
 import { ApiCache } from '../main/api-cache';
 import { BaseModel, createSimpleLoader } from '../main/base-model';
-import { FileContent } from './files/file-content';
+import { FileContent, FileContentData } from './files/file-content';
 import { SubmissionData } from './submission';
 
 export const submissionFileSchema = gql`
@@ -36,7 +36,7 @@ export class SubmissionFile extends BaseModel<SubmissionFile> {
     @Column
     fileTypeName!: string;
 
-    @ForeignKey(() => FileContent)
+    @ForeignKey(() => FileContentData)
     @AllowNull(false)
     @Column
     contentId!: string;
@@ -45,9 +45,13 @@ export class SubmissionFile extends BaseModel<SubmissionFile> {
     @Column
     fileName!: string;
 
-    @BelongsTo(() => FileContent)
-    content!: FileContent;
-    getContent!: (options?: FindOptions) => Promise<FileContent>;
+    @BelongsTo(() => FileContentData)
+    data!: FileContentData;
+    getData!: (options?: FindOptions) => Promise<FileContentData>;
+
+    content() {
+        return new FileContent(this.data.content);
+    }
 }
 
 export class SubmissionFileCache extends ApiCache {

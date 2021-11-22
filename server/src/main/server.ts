@@ -7,7 +7,7 @@ import * as path from 'path';
 import * as util from 'util';
 import { PackageService } from '../core/archive/package-service';
 import { LiveEvaluationService } from '../core/evaluate';
-import { FileContent } from '../core/files/file-content';
+import { FileContentData } from '../core/files/file-content';
 import { mutationRoot } from '../core/mutation';
 import { queryRoot } from '../core/query';
 import { RemoteApiContext } from './api-context';
@@ -60,7 +60,7 @@ export function serve(config: Config, admin: boolean) {
             const { contentId, filename } = req.params;
             const apiContext = new RemoteApiContext(serviceContext, false);
             const file = await apiContext
-                .table(FileContent)
+                .table(FileContentData)
                 .findOne({ where: { id: contentId }, attributes: ['content'] });
             const contentType = mime.lookup(filename);
 

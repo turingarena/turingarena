@@ -11,7 +11,7 @@ import { Media } from './data/media';
 import { ScoreGradeDomain, ScoreRange } from './data/score';
 import { Text } from './data/text';
 import { ArchiveFileData } from './files/archive';
-import { FileContent } from './files/file-content';
+import { FileContentData } from './files/file-content';
 import { ObjectiveDefinition } from './objective-definition';
 import { ProblemDefinition } from './problem-definition';
 import { submissionFileTypeRules, submissionFileTypes } from './problem-definition-file-types';
@@ -179,14 +179,14 @@ export class ProblemMaterial {
         const { archiveId } = await this.ctx.cache(ContestCache).byId.load(contest.id);
         const file = await this.ctx.table(ArchiveFileData).findOne({
             where: { uuid: archiveId, path: `${problem.name}/${path}` },
-            include: [this.ctx.table(FileContent)],
+            include: [this.ctx.table(FileContentData)],
         });
 
         if (file === null) {
             throw unreachable(`file ${path} not found in problem ${problem.name} (referred from metadata)`);
         }
 
-        return file.content;
+        return file.content();
     }
 }
 

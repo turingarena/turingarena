@@ -24,7 +24,7 @@ export class File implements ApiOutputValue<'File'> {
         readonly name: string,
         readonly language: string | null,
         readonly type: string,
-        readonly content: Promise<FileContent>,
+        readonly content: FileContent | Promise<FileContent>,
         readonly ctx: ApiContext,
     ) {}
 
