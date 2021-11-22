@@ -89,25 +89,35 @@ export class ProblemMaterial {
 
     title = new Text([{ value: this.taskInfo.IOI.title }]);
 
-    statement = new Media(
-        this.taskInfo.IOI.statements.map(
-            ({ path, language, content_type: type }): File =>
-                new File(
-                    path.slice(path.lastIndexOf('/') + 1),
-                    language,
-                    type,
-                    this.loadContent(this.problem, path),
-                    this.ctx,
+    async statement() {
+        return new Media(
+            await Promise.all(
+                this.taskInfo.IOI.statements.map(
+                    async ({ path, language, content_type: type }) =>
+                        new File(
+                            path.slice(path.lastIndexOf('/') + 1),
+                            language,
+                            type,
+                            await this.loadContent(this.problem, path),
+                            this.ctx,
+                        ),
                 ),
-        ),
-    );
+            ),
+        );
+    }
 
-    attachments = this.taskInfo.IOI.attachments.map(
-        ({ name, path, content_type: type }): ProblemAttachment => ({
-            title: new Text([{ value: name }]),
-            media: new Media([new File(name, null, type, this.loadContent(this.problem, path), this.ctx)]),
-        }),
-    );
+    async attachments() {
+        return Promise.all(
+            this.taskInfo.IOI.attachments.map(
+                async ({ name, path, content_type: type }): Promise<ProblemAttachment> => ({
+                    title: new Text([{ value: name }]),
+                    media: new Media([
+                        new File(name, null, type, await this.loadContent(this.problem, path), this.ctx),
+                    ]),
+                }),
+            ),
+        );
+    }
 
     timeLimitSeconds = this.taskInfo.IOI.limits.time;
     memoryLimitBytes = this.taskInfo.IOI.limits.memory * memoryUnitBytes;

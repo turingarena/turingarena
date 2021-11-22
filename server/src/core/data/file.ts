@@ -24,11 +24,11 @@ export class File implements ApiOutputValue<'File'> {
         readonly name: string,
         readonly language: string | null,
         readonly type: string,
-        readonly content: FileContent | Promise<FileContent>,
+        readonly content: FileContent,
         readonly ctx: ApiContext,
     ) {}
 
     async url() {
-        return `/files/${(await this.content).id}/${this.name}`;
+        return `/files/${this.content.id}/${this.name}`;
     }
 }

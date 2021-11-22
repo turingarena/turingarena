@@ -34,10 +34,10 @@ export class ProblemDefinition implements ApiOutputValue<'ProblemDefinition'> {
         return (await this.ctx.cache(ProblemMaterialCache).byId.load(this.id())).title;
     }
     async statement() {
-        return (await this.ctx.cache(ProblemMaterialCache).byId.load(this.id())).statement;
+        return (await this.ctx.cache(ProblemMaterialCache).byId.load(this.id())).statement();
     }
     async attachments() {
-        return (await this.ctx.cache(ProblemMaterialCache).byId.load(this.id())).attachments;
+        return (await this.ctx.cache(ProblemMaterialCache).byId.load(this.id())).attachments();
     }
     async attributes() {
         return (await this.ctx.cache(ProblemMaterialCache).byId.load(this.id())).attributes;

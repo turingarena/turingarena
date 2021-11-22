@@ -105,7 +105,7 @@ export class Contest implements ApiOutputValue<'Contest'> {
             include: [this.ctx.table(FileContentData)],
         });
 
-        return new Media(statementFiles.map((archiveFile): File => this.getStatementVariantFromFile(archiveFile)));
+        return new Media(statementFiles.map(archiveFile => this.getStatementVariantFromFile(archiveFile)));
     }
 
     async getMetadata() {
@@ -185,7 +185,7 @@ export class Contest implements ApiOutputValue<'Contest'> {
         return metadata.users.map(data => new User(this, data.username, this.ctx));
     }
 
-    getStatementVariantFromFile(archiveFile: ArchiveFileData): File {
+    getStatementVariantFromFile(archiveFile: ArchiveFileData) {
         const type = mime.lookup(archiveFile.path);
         const pathParts = archiveFile.path.split('/');
 
