@@ -9,6 +9,7 @@ import { contestSchema } from './contest';
 import { contestViewSchema } from './contest-view';
 import { dateTimeSchema } from './data/date-time';
 import { fieldSchema } from './data/field';
+import { fileSchema } from './data/file';
 import { fulfillmentSchema } from './data/fulfillment';
 import { gradeSchema } from './data/grade';
 import { headerSchema } from './data/header';
@@ -53,6 +54,7 @@ export const schema = gql`
     ${evaluationSchema}
     ${fieldSchema}
     ${fileContentSchema}
+    ${fileSchema}
     ${fulfillmentSchema}
     ${gradeSchema}
     ${headerSchema}

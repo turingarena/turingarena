@@ -28,7 +28,6 @@ export interface ScalarMap {
     Int: number;
     Float: number;
     Boolean: boolean;
-    File: File;
 }
 
 export type GraphQLOutputValueWrapper<T> = T | Promise<T>;

@@ -9,7 +9,9 @@ import { ApiContext } from '../main/api-context';
 import { createSimpleLoader, UuidBaseModel } from '../main/base-model';
 import { ApiOutputValue } from '../main/graphql-types';
 import { ContestMetadata } from './contest-metadata';
-import { Media, MediaFile } from './data/media';
+import { ApiDateTime } from './data/date-time';
+import { File } from './data/file';
+import { Media } from './data/media';
 import { Text } from './data/text';
 import { Archive, ArchiveFileData } from './files/archive';
 import { FileContent } from './files/file-content';
@@ -18,7 +20,6 @@ import { ProblemMaterial, ProblemMaterialCache } from './problem-definition-mate
 import { ProblemInstance } from './problem-instance';
 import { ProblemSetDefinition } from './problem-set-definition';
 import { User } from './user';
-import { ApiDateTime } from './data/date-time';
 
 export const contestSchema = gql`
     type Contest {
@@ -103,7 +104,7 @@ export class Contest implements ApiOutputValue<'Contest'> {
             },
         });
 
-        return new Media(statementFiles.map((archiveFile): MediaFile => this.getStatementVariantFromFile(archiveFile)));
+        return new Media(statementFiles.map((archiveFile): File => this.getStatementVariantFromFile(archiveFile)));
     }
 
     async getMetadata() {
@@ -183,11 +184,11 @@ export class Contest implements ApiOutputValue<'Contest'> {
         return metadata.users.map(data => new User(this, data.username, this.ctx));
     }
 
-    getStatementVariantFromFile(archiveFile: ArchiveFileData): MediaFile {
+    getStatementVariantFromFile(archiveFile: ArchiveFileData): File {
         const type = mime.lookup(archiveFile.path);
         const pathParts = archiveFile.path.split('/');
 
-        return new MediaFile(
+        return new File(
             pathParts[pathParts.length - 1],
             null,
             type !== false ? type : 'application/octet-stream',

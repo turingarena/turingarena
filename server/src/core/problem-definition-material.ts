@@ -5,8 +5,9 @@ import { createSimpleLoader } from '../main/base-model';
 import { ApiOutputValue } from '../main/graphql-types';
 import { unreachable } from '../util/unreachable';
 import { Contest, ContestCache } from './contest';
+import { File } from './data/file';
 import { FulfillmentGradeDomain } from './data/fulfillment';
-import { Media, MediaFile } from './data/media';
+import { Media } from './data/media';
 import { ScoreGradeDomain, ScoreRange } from './data/score';
 import { Text } from './data/text';
 import { ArchiveFileData } from './files/archive';
@@ -90,8 +91,8 @@ export class ProblemMaterial {
 
     statement = new Media(
         this.taskInfo.IOI.statements.map(
-            ({ path, language, content_type: type }): MediaFile =>
-                new MediaFile(
+            ({ path, language, content_type: type }): File =>
+                new File(
                     path.slice(path.lastIndexOf('/') + 1),
                     language,
                     type,
@@ -104,7 +105,7 @@ export class ProblemMaterial {
     attachments = this.taskInfo.IOI.attachments.map(
         ({ name, path, content_type: type }): ProblemAttachment => ({
             title: new Text([{ value: name }]),
-            media: new Media([new MediaFile(name, null, type, this.loadContent(this.problem, path), this.ctx)]),
+            media: new Media([new File(name, null, type, this.loadContent(this.problem, path), this.ctx)]),
         }),
     );
 
