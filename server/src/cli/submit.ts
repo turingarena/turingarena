@@ -1,4 +1,3 @@
-import { ContestCache } from '../core/contest';
 import { Submit } from '../core/submit';
 import { ApiContext } from '../main/api-context';
 
@@ -7,17 +6,16 @@ import { ApiContext } from '../main/api-context';
  *
  * @param root Context
  * @param username Username that submits
- * @param contestName Contest name to submit to
+ * @param contestId Contest to submit to
  * @param problemName Problem name to submit
  * @param solutionPath Path of the submission file
  */
 export async function submitLocalFile(
     ctx: ApiContext,
     username: string,
-    contestName: string,
+    contestId: string,
     problemName: string,
     solutionPath: string,
 ) {
-    const contest = await ctx.cache(ContestCache).byName.load(contestName);
-    await Submit.submit({ username, contestId: contest.id, problemName, files: [] }, ctx, solutionPath);
+    await Submit.submit({ username, contestId, problemName, files: [] }, ctx, solutionPath);
 }

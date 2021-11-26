@@ -5,7 +5,6 @@ export interface UserMetadata {
 }
 
 export interface ContestMetadata {
-    name: string;
     title: string;
     start: string;
     end?: string;

@@ -8,6 +8,7 @@ import { ApiCache } from '../main/api-cache';
 import { ApiContext } from '../main/api-context';
 import { createSimpleLoader, UuidBaseModel } from '../main/base-model';
 import { ApiOutputValue } from '../main/graphql-types';
+import { PackageTarget } from './archive/package-target';
 import { ContestMetadata } from './contest-metadata';
 import { ApiDateTime } from './data/date-time';
 import { File } from './data/file';
@@ -24,7 +25,6 @@ import { User } from './user';
 export const contestSchema = gql`
     type Contest {
         id: ID!
-        name: String!
         title: Text!
 
         "Statement of this contest, presented as its home page"
@@ -64,9 +64,7 @@ export class Contest implements ApiOutputValue<'Contest'> {
     constructor(readonly id: string, readonly ctx: ApiContext) {}
 
     __typename = 'Contest' as const;
-    async name() {
-        return (await this.getMetadata()).name;
-    }
+
     async title() {
         return new Text([{ value: (await this.getMetadata()).title }]);
     }
@@ -93,6 +91,13 @@ export class Contest implements ApiOutputValue<'Contest'> {
 
         return new Archive((await this.ctx.cache(ContestCache).byId.load(this.id)).archiveId, this.ctx);
     }
+
+    async package() {
+        await this.ctx.authorizeAdmin();
+
+        return new PackageTarget(this.ctx, this.id);
+    }
+
     async statement() {
         const { archiveId } = await this.ctx.cache(ContestCache).byId.load(this.id);
         const statementFiles = await this.ctx.table(ArchiveFileData).findAll({
@@ -201,12 +206,4 @@ export class Contest implements ApiOutputValue<'Contest'> {
 
 export class ContestCache extends ApiCache {
     byId = createSimpleLoader((id: string) => this.ctx.table(ContestData).findByPk(id));
-    byName = createSimpleLoader(async (name: string) => {
-        // FIXME: should contests be addressable by name anyway?
-
-        const contests = await this.ctx.table(ContestData).findAll();
-        const metadata = await Promise.all(contests.map(d => d.getContest(this.ctx)).map(async c => c.getMetadata()));
-
-        return contests.find((c, i) => metadata[i].name === name) ?? null;
-    });
 }
