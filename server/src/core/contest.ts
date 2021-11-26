@@ -14,7 +14,7 @@ import { ApiDateTime } from './data/date-time';
 import { File } from './data/file';
 import { Media } from './data/media';
 import { Text } from './data/text';
-import { Archive, ArchiveFileData } from './files/archive';
+import { ArchiveFileData } from './files/archive';
 import { FileContentData } from './files/file-content';
 import { ProblemDefinition } from './problem-definition';
 import { ProblemMaterial, ProblemMaterialCache } from './problem-definition-material';
@@ -35,7 +35,8 @@ export const contestSchema = gql`
 
         status: ContestStatus!
         problemSet: ProblemSetDefinition!
-        archive: Archive!
+
+        package: PackageTarget!
     }
 
     enum ContestStatus {
@@ -68,28 +69,27 @@ export class Contest implements ApiOutputValue<'Contest'> {
     async title() {
         return new Text([{ value: (await this.getMetadata()).title }]);
     }
+
     async start() {
         const start = (await this.getMetadata()).start;
 
         return ApiDateTime.fromISO(start);
     }
+
     async end() {
         const end = (await this.getMetadata()).end;
 
         return end === undefined ? null : ApiDateTime.fromISO(end);
     }
+
     async status() {
         return this.getStatus();
     }
+
     async problemSet() {
         await this.ctx.authorizeAdmin();
 
         return (new ProblemSetDefinition(this) as unknown) as ApiOutputValue<'ProblemSetDefinition'>;
-    }
-    async archive() {
-        await this.ctx.authorizeAdmin();
-
-        return new Archive((await this.ctx.cache(ContestCache).byId.load(this.id)).archiveId, this.ctx);
     }
 
     async package() {
