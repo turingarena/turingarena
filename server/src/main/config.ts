@@ -64,7 +64,7 @@ export const defaultConfig: Config = {
         storage: ':memory:',
         dialect: 'sqlite',
     },
-    gitDir: `./turingarena-git`,
+    gitDir: `./db.git`,
     port: 3000,
     host: 'localhost',
     taskMaker: {

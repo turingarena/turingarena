@@ -10,9 +10,9 @@ __pycache__
 *.log
 *.sqlite3
 *.swp
+*.git/
 build/
 dist/
 generated/
 node_modules/
 temp/
-turingarena-git/
