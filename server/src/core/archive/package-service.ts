@@ -113,11 +113,11 @@ export class PackageService extends Service {
 
             const archivePath = this.archivePath(archiveHash);
             try {
-                // Archive exists, nothing to do
-                await fs.access(archivePath);
-            } catch (error) {
                 // Copy archive atomically
                 await exec2(`mv --no-target-directory ${archiveTempDir} ${archivePath}`);
+            } catch (error) {
+                // Move failed, check that archive exists
+                await fs.access(archivePath);
             }
 
             this.cache.set(this.checkoutCacheKey(commitHash, path), archiveHash);
