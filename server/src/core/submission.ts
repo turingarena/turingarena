@@ -20,7 +20,7 @@ import { ProblemDefinition } from './problem-definition';
 import { ProblemMaterialCache } from './problem-definition-material';
 import { ProblemInstance } from './problem-instance';
 import { ProblemUndertaking } from './problem-undertaking';
-import { SubmissionFileCache } from './submission-file';
+import { SubmissionItemCache } from './submission-item';
 import { User } from './user';
 
 export const submissionSchema = gql`
@@ -30,7 +30,7 @@ export const submissionSchema = gql`
         problem: ProblemInstance!
         user: User!
 
-        files: [SubmissionFile!]!
+        items: [SubmissionItem!]!
         createdAt: DateTime!
         officialEvaluation: Evaluation
         evaluations: [Evaluation!]!
@@ -53,7 +53,7 @@ export const submissionSchema = gql`
 export class SubmissionData extends UuidBaseModel<SubmissionData> {
     @AllowNull(false)
     @Column
-    contestName!: string;
+    contestId!: string;
 
     @AllowNull(false)
     @Column
@@ -264,8 +264,8 @@ export class Submission implements ApiOutputValue<'Submission'> {
         );
     }
 
-    async files() {
-        return this.getSubmissionFiles();
+    async items() {
+        return this.ctx.cache(SubmissionItemCache).bySubmission.load(this.id);
     }
 
     async totalScore() {
@@ -282,14 +282,10 @@ export class Submission implements ApiOutputValue<'Submission'> {
         return this;
     }
 
-    async getSubmissionFiles() {
-        return this.ctx.cache(SubmissionFileCache).bySubmission.load(this.id);
-    }
-
     async getUndertaking() {
-        const { contestName, problemName, username } = await this.ctx.cache(SubmissionCache).byId.load(this.id);
+        const { contestId, problemName, username } = await this.ctx.cache(SubmissionCache).byId.load(this.id);
 
-        const contest = new Contest(contestName, this.ctx);
+        const contest = new Contest(contestId, this.ctx);
 
         return new ProblemUndertaking(
             new ProblemInstance(new ProblemDefinition(contest, problemName)),
@@ -305,17 +301,14 @@ export class Submission implements ApiOutputValue<'Submission'> {
      * @param base base directory
      */
     async extract(base: string) {
-        const submissionFiles = await this.getSubmissionFiles();
+        const items = await this.items();
         const submissionPath = path.join(base, this.id);
 
-        for (const submissionFile of submissionFiles) {
-            const content = await submissionFile.getData({ attributes: ['id', 'content'] });
-            const { fieldName, fileTypeName } = submissionFile;
+        for (const item of items) {
+            const extension = item.fileType.name;
 
-            const extension = fileTypeName;
-
-            const filePath = path.join(submissionPath, `${fieldName}.${fileTypeName}.${extension}`);
-            await extractFile(content, filePath);
+            const filePath = path.join(submissionPath, `${item.field.name}.${item.fileType.name}.${extension}`);
+            await extractFile(item.file.content, filePath);
         }
 
         return submissionPath;

@@ -9,6 +9,7 @@ import { FulfillmentGradeDomain } from './data/fulfillment';
 import { Media } from './data/media';
 import { ScoreGradeDomain, ScoreRange } from './data/score';
 import { Text } from './data/text';
+import { FileContentService } from './files/file-content-service';
 import { ObjectiveDefinition } from './objective-definition';
 import { ProblemDefinition } from './problem-definition';
 import { submissionFileTypeRules, submissionFileTypes } from './problem-definition-file-types';
@@ -95,7 +96,7 @@ export class ProblemMaterial {
                             path.slice(path.lastIndexOf('/') + 1),
                             language,
                             type,
-                            await this.loadContent(this.problem, path),
+                            await this.loadPublicContent(this.problem, path),
                             this.ctx,
                         ),
                 ),
@@ -109,7 +110,7 @@ export class ProblemMaterial {
                 async ({ name, path, content_type: type }): Promise<ProblemAttachment> => ({
                     title: new Text([{ value: name }]),
                     media: new Media([
-                        new File(name, null, type, await this.loadContent(this.problem, path), this.ctx),
+                        new File(name, null, type, await this.loadPublicContent(this.problem, path), this.ctx),
                     ]),
                 }),
             ),
@@ -181,13 +182,15 @@ export class ProblemMaterial {
         { __typename: 'ScoreColumn', title: new Text([{ value: 'Score' }]) },
     ];
 
-    async loadContent(problem: ProblemDefinition, path: string) {
+    async loadPublicContent(problem: ProblemDefinition, path: string) {
         const archive = await problem.archiveUnchecked();
         const content = await archive.fileContent(path);
 
         if (content === null) {
             throw unreachable(`file ${path} not found in problem ${problem.baseName} (referred from metadata)`);
         }
+
+        this.ctx.service(FileContentService).expose(content);
 
         return content;
     }

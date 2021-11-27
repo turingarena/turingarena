@@ -7,7 +7,6 @@ import { InstanceContext } from '../main/instance-context';
 import { serve } from '../main/server';
 import { ServiceContext } from '../main/service-context';
 import { restoreContest } from './restore';
-import { submitLocalFile } from './submit';
 
 const program = new commander.Command();
 
@@ -39,14 +38,6 @@ program
     .option('--admin')
     .action(opts => {
         serve(loadConfig(opts.parent.config), opts.admin);
-    });
-
-program
-    .command('submit <user> <contest> <problem> <solution>')
-    .description('create a submission')
-    .action(async (user, contest, problem, solution, opts) => {
-        const ctx = await ctxFromConfig(opts.parent.config);
-        await submitLocalFile(ctx, user, contest, problem, solution);
     });
 
 program

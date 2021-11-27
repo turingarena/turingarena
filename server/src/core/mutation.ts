@@ -1,7 +1,7 @@
 import { gql } from 'apollo-server-core';
 import { ApiOutputValue } from '../main/graphql-types';
 import { MessageApi } from './message';
-import { Submit } from './submit';
+import { submit } from './submit';
 
 export const mutationSchema = gql`
     type Mutation {
@@ -20,7 +20,7 @@ export const mutationRoot: ApiOutputValue<'Mutation'> = {
     },
     submit: async ({ submission }, ctx) => {
         await ctx.authorizeUser(submission.username);
-        const submissionOutput = await Submit.submit(submission, ctx);
+        const submissionOutput = await submit(submission, ctx);
 
         return (submissionOutput as unknown) as ApiOutputValue<'Submission'>; // FIXME: types
     },

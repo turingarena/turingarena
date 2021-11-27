@@ -11,6 +11,7 @@ import { ApiDateTime } from './data/date-time';
 import { File } from './data/file';
 import { Media } from './data/media';
 import { Text } from './data/text';
+import { FileContentService } from './files/file-content-service';
 import { ProblemDefinition } from './problem-definition';
 import { ProblemMaterial, ProblemMaterialCache } from './problem-definition-material';
 import { ProblemInstance } from './problem-instance';
@@ -102,13 +103,15 @@ export class Contest implements ApiOutputValue<'Contest'> {
                     const type = mime.lookup(path);
                     const pathParts = path.split('/');
                     const baseName = pathParts[pathParts.length - 1];
-                    const content = await archive.fileContent(path);
+                    const content = (await archive.fileContent(path)) ?? unreachable();
+
+                    this.ctx.service(FileContentService).expose(content);
 
                     return new File(
                         baseName,
                         null,
                         type !== false ? type : 'application/octet-stream',
-                        content ?? unreachable(),
+                        content,
                         this.ctx,
                     );
                 }),

@@ -2,7 +2,10 @@ import { gql } from 'apollo-server-core';
 import { ApiOutputValue } from '../main/graphql-types';
 import { Text } from './data/text';
 
-export type SubmissionFileType = ApiOutputValue<'SubmissionFileType'>;
+export class SubmissionFileType implements ApiOutputValue<'SubmissionFileType'> {
+    constructor(readonly name: string, readonly title: Text) {}
+}
+
 export type SubmissionFileTypeRule = ApiOutputValue<'SubmissionFileTypeRule'>;
 
 export const submissionFileTypeSchema = gql`
@@ -33,30 +36,12 @@ export const submissionFileTypeSchema = gql`
 `;
 
 const lang = {
-    python2: {
-        name: 'python2',
-        title: new Text([{ value: 'Python 2 (cpython)' }]),
-    },
-    python3: {
-        name: 'py',
-        title: new Text([{ value: 'Python 3 (cpython)' }]),
-    },
-    c: {
-        name: 'c',
-        title: new Text([{ value: 'C (c11)' }]),
-    },
-    cpp: {
-        name: 'cpp',
-        title: new Text([{ value: 'C++ (c++17)' }]),
-    },
-    rust: {
-        name: 'rust',
-        title: new Text([{ value: 'Rust' }]),
-    },
-    java: {
-        name: 'java',
-        title: new Text([{ value: 'Java 8 (JDK)' }]),
-    },
+    python2: new SubmissionFileType('python2', new Text([{ value: 'Python 2 (cpython)' }])),
+    python3: new SubmissionFileType('py', new Text([{ value: 'Python 3 (cpython)' }])),
+    c: new SubmissionFileType('c', new Text([{ value: 'C (c11)' }])),
+    cpp: new SubmissionFileType('cpp', new Text([{ value: 'C++ (c++17)' }])),
+    rust: new SubmissionFileType('rust', new Text([{ value: 'Rust' }])),
+    java: new SubmissionFileType('java', new Text([{ value: 'Java 8 (JDK)' }])),
 };
 
 export const submissionFileTypes: SubmissionFileType[] = Object.values(lang);

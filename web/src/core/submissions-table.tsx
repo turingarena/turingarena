@@ -26,9 +26,10 @@ const SUBMISSIONS_DATA = gql`
               createdAt {
                 millisFromEpochInteger
               }
-              files {
-                contentId
-                fileName
+              items {
+                file {
+                  name
+                }
               }
               totalScore {
                 score
@@ -93,8 +94,8 @@ export function SubmissionsTable() {
               username: ut.user.username,
               problem_name: at.instance.definition.baseName,
               score: sub.totalScore?.score ?? 0,
-              submission: sub.files[0].fileName,
-              download: sub.files[0],
+              submission: sub.items[0].file.name,
+              download: sub.items[0],
               createdate: new Date(sub.createdAt.millisFromEpochInteger + 32400000).toLocaleString(), //TODO: fix timezone offset
             }),
           );

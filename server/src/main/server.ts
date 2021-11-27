@@ -7,7 +7,7 @@ import * as path from 'path';
 import * as util from 'util';
 import { PackageService } from '../core/archive/package-service';
 import { LiveEvaluationService } from '../core/evaluate';
-import { FileContentData } from '../core/files/file-content';
+import { FileContentService } from '../core/files/file-content-service';
 import { mutationRoot } from '../core/mutation';
 import { queryRoot } from '../core/query';
 import { RemoteApiContext } from './api-context';
@@ -26,7 +26,11 @@ export function serve(config: Config, admin: boolean) {
     console.log(config);
 
     const instanceContext = new InstanceContext(config);
-    const serviceContext = new ServiceContext(instanceContext, [LiveEvaluationService, PackageService]);
+    const serviceContext = new ServiceContext(instanceContext, [
+        LiveEvaluationService,
+        PackageService,
+        FileContentService,
+    ]);
 
     const server = new ApolloServer({
         schema: executableSchema(),
@@ -55,20 +59,12 @@ export function serve(config: Config, admin: boolean) {
     /**
      * Serve static files directly from the database.
      */
-    app.get('/files/:contentId/:filename', async (req, res, next) => {
+    app.get('/files/:hash/:filename', async (req, res, next) => {
         try {
-            const { contentId, filename } = req.params;
-            const apiContext = new RemoteApiContext(serviceContext, false);
-            const file = await apiContext
-                .table(FileContentData)
-                .findOne({ where: { id: contentId }, attributes: ['content'] });
+            const { hash, filename } = req.params;
+
+            const fileContent = serviceContext.service(FileContentService).getContent(hash);
             const contentType = mime.lookup(filename);
-
-            if (file === null) {
-                next();
-
-                return;
-            }
 
             // FIXME: serving untrusted content, investigate security issues
 
@@ -81,17 +77,10 @@ export function serve(config: Config, admin: boolean) {
                     .as('seconds')
                     .toString()}`,
             );
-            res.send(file.content);
+            res.send(fileContent.data);
         } catch (e) {
             next(e);
         }
-    });
-
-    /**
-     * Add a file to the server
-     */
-    app.post('/files/:name', (req, res) => {
-        // TODO
     });
 
     // All other routes go to index.html

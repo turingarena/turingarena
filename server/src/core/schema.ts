@@ -40,7 +40,7 @@ import { problemUndertakingSchema } from './problem-undertaking';
 import { problemViewSchema } from './problem-view';
 import { querySchema } from './query';
 import { submissionSchema } from './submission';
-import { submissionFileSchema } from './submission-file';
+import { submissionFileSchema } from './submission-item';
 import { userSchema } from './user';
 
 /** Full GraphQL schema document. Obtained combining schema parts from each components. */
