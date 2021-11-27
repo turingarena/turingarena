@@ -10,7 +10,7 @@ export const packageBranchSchema = gql`
         location: PackageLocation!
 
         name: String!
-        revision: PackageRevision!
+        revision: PackageRevision
     }
 `;
 
@@ -25,6 +25,8 @@ export class PackageBranch implements ApiOutputValue<'PackageBranch'> {
         const { commitHash, archiveHash } = await this.ctx
             .service(PackageService)
             .checkout(this.name, this.location.path);
+
+        if (commitHash === null) return null;
 
         return new PackageRevision(this, commitHash, archiveHash);
     }

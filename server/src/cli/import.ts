@@ -16,6 +16,7 @@ export async function importContest(ctx: ApiContext, dir = process.cwd()) {
     }
     const contestArchiveId = await createArchive(ctx, dir);
     const contest = await ctx.table(ContestData).create({
+        id: 'default',
         archiveId: contestArchiveId,
     });
 

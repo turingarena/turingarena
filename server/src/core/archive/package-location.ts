@@ -2,7 +2,6 @@ import { gql } from 'apollo-server-core';
 import { Column, Model, PrimaryKey, Table } from 'sequelize-typescript';
 import { ApiOutputValue } from '../../main/graphql-types';
 import { PackageBranch } from './package-branch';
-import { PackageService } from './package-service';
 import { PackageTarget } from './package-target';
 
 export const packageLocationSchema = gql`
@@ -13,6 +12,8 @@ export const packageLocationSchema = gql`
         name: String!
         path: String!
         branches: [PackageBranch!]!
+
+        mainRevision: PackageRevision
     }
 `;
 
@@ -26,6 +27,7 @@ export class PackageLocationData extends Model {
     @Column
     locationName!: string;
 
+    @Column
     path!: string;
 }
 
@@ -37,8 +39,20 @@ export class PackageLocation implements ApiOutputValue<'PackageLocation'> {
     id = `${this.target.id}:${this.name}`;
 
     async branches() {
-        const branchNames = await this.ctx.service(PackageService).getSourceBranches(this.target.id, this.path);
+        const part = this.name === 'default' ? `main` : `location/${this.name}/main`;
 
-        return branchNames.map(branchName => new PackageBranch(this, branchName));
+        return [part, `${this.target.id}/${part}`].map(branchName => new PackageBranch(this, branchName));
+    }
+
+    async mainRevision() {
+        const branches = await this.branches();
+
+        for (const branch of branches) {
+            const revision = await branch.revision();
+            const archive = revision?.archive() ?? null;
+            if (archive !== null) return revision;
+        }
+
+        return null;
     }
 }

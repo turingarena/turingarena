@@ -18,29 +18,6 @@ export async function exec2(line: string) {
 export class PackageService extends Service {
     private readonly cache = new Map<string, string>();
 
-    async getSourceBranches(packageId: string, locationName: string) {
-        await this.ensureGit();
-
-        const locationPart = locationName === 'default' ? '' : `/location/${locationName}`;
-
-        const output = await exec2(
-            `git
-                --git-dir ${this.ctx.config.gitDir}
-                for-each-ref
-                --format="%(refname)"
-                refs/heads${locationPart}/*
-                refs/heads/${packageId}
-                refs/heads/${packageId}${locationPart}
-                refs/heads/${packageId}${locationPart}/*
-                `.replace(/\n/g, ' '),
-        );
-
-        const refs = output.split('\n');
-        refs.pop(); // Empty string after last EOL
-
-        return refs.map(refName => refName.substring('refs/heads/'.length));
-    }
-
     async checkout(branchName: string, path: string) {
         await this.ensureGit();
 
@@ -51,12 +28,25 @@ export class PackageService extends Service {
     }
 
     private async getCachedArchive(branchName: string, path: string) {
-        const commitHashOutput = await exec2(`git --git-dir ${this.ctx.config.gitDir} rev-parse ${branchName}`);
-        const [commitHash] = commitHashOutput.split('\n');
+        const commitHash = await this.getCommitHash(branchName);
+        if (commitHash === null) return { commitHash: null, archiveHash: null };
         const archiveHash = this.cache.get(this.checkoutCacheKey(commitHash, path));
         if (archiveHash === undefined) return null;
 
         return { commitHash, archiveHash };
+    }
+
+    private async getCommitHash(branchName: string) {
+        try {
+            const commitHashOutput = await exec2(
+                `git --git-dir ${this.ctx.config.gitDir} rev-parse refs/heads/${branchName}`,
+            );
+            const [commitHash] = commitHashOutput.split('\n');
+
+            return commitHash;
+        } catch {
+            return null;
+        }
     }
 
     private checkoutCacheKey(commitHash: string, path: string) {
@@ -71,7 +61,14 @@ export class PackageService extends Service {
         const archiveTempDir = await fs.mkdtemp(`${this.ctx.config.cachePath}/archives-temp/`);
 
         try {
-            await exec2(`git clone --local --shared --branch ${branchName} ${this.ctx.config.gitDir} ${cloneTempDir}`);
+            try {
+                await exec2(
+                    `git clone --local --shared --branch ${branchName} ${this.ctx.config.gitDir} ${cloneTempDir}`,
+                );
+            } catch (error) {
+                return { commitHash: null, archiveHash: null, error };
+            }
+
             const commitHashOutput = await exec2(`git --git-dir ${cloneTempDir}/.git rev-parse HEAD`);
             const [commitHash] = commitHashOutput.split('\n');
 
@@ -105,6 +102,7 @@ export class PackageService extends Service {
                     --pax-option=exthdr.name=%d/PaxHeaders/%f,delete=atime,delete=ctime
                     --directory=${archiveTempDir}
                     --create
+                    .
                 | sha256sum`.replace(/\n/g, ' '),
             );
             const [archiveHash] = hashOutput.split(' ', 2);
@@ -112,6 +110,8 @@ export class PackageService extends Service {
             await exec2(`mkdir -p ${this.ctx.config.cachePath}/archives`);
 
             const archivePath = this.archivePath(archiveHash);
+            console.log(archivePath);
+
             try {
                 // Copy archive atomically
                 await exec2(`mv --no-target-directory ${archiveTempDir} ${archivePath}`);
@@ -134,7 +134,12 @@ export class PackageService extends Service {
     }
 
     private async ensureGit() {
-        await exec2(`git --git-dir ${this.ctx.config.gitDir} init --bare`);
+        try {
+            await exec2(`git --git-dir ${this.ctx.config.gitDir} init --bare`);
+        } catch {
+            // Fail if repo does not exist
+            await exec2(`git --git-dir ${this.ctx.config.gitDir} rev-parse`);
+        }
     }
 
     run() {

@@ -7,6 +7,7 @@ export const packageTargetSchema = gql`
     type PackageTarget {
         id: String!
         locations: [PackageLocation!]!
+        mainRevision: PackageRevision
     }
 `;
 
@@ -24,5 +25,16 @@ export class PackageTarget implements ApiOutputValue<'PackageTarget'> {
         }
 
         return locations;
+    }
+
+    async mainRevision() {
+        const locations = await this.locations();
+
+        for (const location of locations) {
+            const revision = await location.mainRevision();
+            if (revision !== null) return revision;
+        }
+
+        return null;
     }
 }

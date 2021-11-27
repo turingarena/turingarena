@@ -4,6 +4,8 @@ import { InstanceContext } from '../../main/instance-context';
 import { ServiceContext } from '../../main/service-context';
 import { exec2, PackageService } from './package-service';
 
+const testHash = 'a98ea518bf1e73d01cb8a3e04c96ffbcb507d13d75493bed823a10264ad100f0';
+
 it('copies files and computes a stable hash', async () => {
     await testCheckout(
         async tempDir => {
@@ -13,10 +15,24 @@ it('copies files and computes a stable hash', async () => {
         },
         '.',
         async (tempDir, hash) => {
-            expect(hash).toBe('e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855');
+            expect(hash).toBe(testHash);
 
             await expect(exec2(`ls ${tempDir}/cache/archives/${hash}/.git`)).rejects.toThrow();
             await exec2(`ls ${tempDir}/cache/archives/${hash}/test.txt`);
+        },
+    );
+});
+
+it('computes a different hash on different content', async () => {
+    await testCheckout(
+        async tempDir => {
+            await exec2(`echo "test2" > ${tempDir}/git-input/test.txt`);
+            await exec2(`git -C ${tempDir}/git-input add test.txt`);
+            await exec2(`git -C ${tempDir}/git-input commit -m "Initial"`);
+        },
+        '.',
+        (tempDir, hash) => {
+            expect(hash).not.toBe(testHash);
         },
     );
 });
@@ -85,7 +101,7 @@ async function withTempDir(inner: (tempDir: string) => Promise<void>) {
 async function testCheckout(
     prepareCommit: (tempDir: string) => Promise<void>,
     path: string,
-    checkArchive: (tempDir: string, hash: string | null) => Promise<void>,
+    checkArchive: (tempDir: string, hash: string | null) => Promise<void> | void,
 ) {
     await withTempDir(async tempDir => {
         await exec2(`mkdir ${tempDir}/git`);

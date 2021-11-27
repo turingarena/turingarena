@@ -21,10 +21,15 @@ import { ProblemMaterial, ProblemMaterialCache } from './problem-definition-mate
 import { ProblemInstance } from './problem-instance';
 import { ProblemSetDefinition } from './problem-set-definition';
 import { User } from './user';
+import { unreachable } from '../util/unreachable';
 
 export const contestSchema = gql`
     type Contest {
         id: ID!
+
+        fullName: String!
+        baseName: String!
+
         title: Text!
 
         "Statement of this contest, presented as its home page"
@@ -66,6 +71,11 @@ export class Contest implements ApiOutputValue<'Contest'> {
 
     __typename = 'Contest' as const;
 
+    baseName = this.id;
+    fullName = `contests/${this.baseName}`;
+
+    packageUnchecked = new PackageTarget(this.ctx, this.fullName);
+
     async title() {
         return new Text([{ value: (await this.getMetadata()).title }]);
     }
@@ -95,7 +105,7 @@ export class Contest implements ApiOutputValue<'Contest'> {
     async package() {
         await this.ctx.authorizeAdmin();
 
-        return new PackageTarget(this.ctx, this.id);
+        return this.packageUnchecked;
     }
 
     async statement() {
@@ -114,24 +124,14 @@ export class Contest implements ApiOutputValue<'Contest'> {
     }
 
     async getMetadata() {
-        const { archiveId } = await this.ctx.cache(ContestCache).byId.load(this.id);
-        const metadataPath = `turingarena.yaml`;
-        const metadataProblemFile = await this.ctx.table(ArchiveFileData).findOne({
-            where: {
-                uuid: archiveId,
-                path: metadataPath,
-            },
-        });
+        const revision = await this.packageUnchecked.mainRevision();
+        const archive = revision?.archive() ?? null;
+        if (archive === null) throw unreachable(`contest has no archive`); // FIXME
 
-        if (metadataProblemFile === null) {
-            throw new Error(`Contest ${this.id} is missing metadata file ${metadataPath}`);
-        }
+        const metadataYaml = await archive.fileContent(`turingarena.yaml`);
+        if (metadataYaml === null) throw unreachable(`contest is missing metadata file`); // FIXME
 
-        const metadataContent = await this.ctx
-            .table(FileContentData)
-            .findOne({ where: { id: metadataProblemFile.contentId } });
-
-        return yaml.parse(metadataContent!.content.toString()) as ContestMetadata;
+        return yaml.parse(metadataYaml.utf8()) as ContestMetadata;
     }
 
     async getStatus(): Promise<ContestStatus> {
