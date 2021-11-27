@@ -185,18 +185,14 @@ export class ProblemMaterial {
     ];
 
     async loadContent(problem: ProblemDefinition, path: string) {
-        const contest = new Contest(problem.contest.id, this.ctx);
-        const { archiveId } = await this.ctx.cache(ContestCache).byId.load(contest.id);
-        const file = await this.ctx.table(ArchiveFileData).findOne({
-            where: { uuid: archiveId, path: `${problem.baseName}/${path}` },
-            include: [this.ctx.table(FileContentData)],
-        });
+        const archive = await problem.archiveUnchecked();
+        const content = await archive.fileContent(path);
 
-        if (file === null) {
+        if (content === null) {
             throw unreachable(`file ${path} not found in problem ${problem.baseName} (referred from metadata)`);
         }
 
-        return file.content();
+        return content;
     }
 }
 
