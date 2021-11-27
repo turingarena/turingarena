@@ -35,11 +35,7 @@ export interface IOITaskInfo {
 }
 
 export async function getProblemTaskInfo(ctx: ApiContext, problem: ProblemDefinition): Promise<ProblemTaskInfo> {
-    const problemPackage = await problem.packageUnchecked();
-    const revision = await problemPackage.mainRevision();
-    const archive = revision?.archive() ?? null;
-
-    if (archive === null) throw unreachable(`problem has no archive`);
+    const archive = await problem.archiveUnchecked();
 
     const taskInfoJson = await archive.fileContent(`.task-info.json`);
     if (taskInfoJson === null) throw unreachable(`problem is missing task-info file`); // FIXME

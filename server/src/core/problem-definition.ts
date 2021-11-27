@@ -1,6 +1,7 @@
 import { gql } from 'apollo-server-core';
 import { ApiContext } from '../main/api-context';
 import { ApiOutputValue } from '../main/graphql-types';
+import { unreachable } from '../util/unreachable';
 import { PackageTarget } from './archive/package-target';
 import { Contest } from './contest';
 import { ScoreGradeDomain } from './data/score';
@@ -28,12 +29,6 @@ export class ProblemDefinition implements ApiOutputValue<'ProblemDefinition'> {
     ctx = this.contest.ctx;
     fullName = `${this.contest.fullName}/problems/${this.baseName}`;
 
-    async packageUnchecked() {
-        const contestLocation = await this.contest.packageUnchecked.mainLocation();
-
-        return new PackageTarget(this.ctx, this.fullName, `${contestLocation.path}/problems/${this.baseName}`);
-    }
-
     static fromId(id: string, ctx: ApiContext): ProblemDefinition {
         const [contestId, problemName] = id.split('/');
 
@@ -48,6 +43,22 @@ export class ProblemDefinition implements ApiOutputValue<'ProblemDefinition'> {
         await this.ctx.authorizeAdmin();
 
         return this.packageUnchecked();
+    }
+
+    async packageUnchecked() {
+        const contestLocation = await this.contest.packageUnchecked.mainLocation();
+
+        return new PackageTarget(this.ctx, this.fullName, `${contestLocation.path}/problems/${this.baseName}`);
+    }
+
+    async archiveUnchecked() {
+        const problemPackage = await this.packageUnchecked();
+        const revision = await problemPackage.mainRevision();
+        const archive = revision?.archive() ?? null;
+
+        if (archive === null) throw unreachable(`problem has no archive`);
+
+        return archive;
     }
 
     async title() {
