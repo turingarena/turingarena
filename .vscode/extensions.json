@@ -2,11 +2,10 @@
   "recommendations": [
     "ms-vscode.vscode-typescript-tslint-plugin",
     "apollographql.vscode-apollo",
-    "Angular.ng-template",
+    "angular.ng-template",
     "esbenp.prettier-vscode",
-    "EditorConfig.EditorConfig",
-    "msjsdiag.debugger-for-chrome",
-    "alexcvzz.vscode-sqlite",
+    "editorconfig.editorconfig",
+    "alexcvzz.vscode-sqlite"
   ],
   "unwantedRecommendations": []
 }
