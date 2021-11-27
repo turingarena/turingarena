@@ -6,7 +6,6 @@ import { loadConfig } from '../main/config';
 import { InstanceContext } from '../main/instance-context';
 import { serve } from '../main/server';
 import { ServiceContext } from '../main/service-context';
-import { importContest } from './import';
 import { restoreContest } from './restore';
 import { submitLocalFile } from './submit';
 
@@ -43,19 +42,19 @@ program
     });
 
 program
-    .command('import [dir]')
-    .description('import a contest')
-    .action(async (dir, opts) => {
-        const ctx = await ctxFromConfig(opts.parent.config);
-        await importContest(ctx, dir);
-    });
-
-program
     .command('submit <user> <contest> <problem> <solution>')
     .description('create a submission')
     .action(async (user, contest, problem, solution, opts) => {
         const ctx = await ctxFromConfig(opts.parent.config);
         await submitLocalFile(ctx, user, contest, problem, solution);
+    });
+
+program
+    .command('init')
+    .description('initialize database')
+    .action(async opts => {
+        const ctx = await ctxFromConfig(opts.parent.config);
+        await ctx.db.sync();
     });
 
 program

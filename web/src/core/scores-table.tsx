@@ -8,7 +8,7 @@ import './dashboard.css';
 
 const SCORES_DATA = gql`
   query GetScoresData {
-    contests {
+    contest(id: "default") {
       problemSet {
         problems {
           definition {
@@ -56,15 +56,15 @@ export function ScoresTable() {
   };
 
   useEffect(() => {
-    if (data?.contests[0] !== undefined) {
+    if (data?.contest !== undefined) {
       const tmpproblemnames: string[] = [];
-      data?.contests[0].problemSet.problems.forEach((a: { problem: { name: any } }) =>
+      data?.contest.problemSet.problems.forEach((a: { problem: { name: any } }) =>
         tmpproblemnames.push(a.problem.name),
       );
       setProblemsNames(tmpproblemnames);
 
       const tmpScores: Scores[] = [];
-      data?.contests[0].problemSet.undertakings.map((ut: ProblemSetUndertaking) => {
+      data?.contest.problemSet.undertakings.map((ut: ProblemSetUndertaking) => {
         const toAdd: Scores = { username: '' };
         toAdd.username = ut.user.username;
         toAdd.totalScore = ut.totalScoreGrade.score.toString();

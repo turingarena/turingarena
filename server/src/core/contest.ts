@@ -1,11 +1,8 @@
 import { gql } from 'apollo-server-core';
 import { DateTime } from 'luxon';
 import * as mime from 'mime-types';
-import { AllowNull, Column, DataType, ForeignKey, Table } from 'sequelize-typescript';
 import * as yaml from 'yaml';
-import { ApiCache } from '../main/api-cache';
 import { ApiContext } from '../main/api-context';
-import { createSimpleLoader, UuidBaseModel } from '../main/base-model';
 import { ApiOutputValue } from '../main/graphql-types';
 import { unreachable } from '../util/unreachable';
 import { PackageTarget } from './archive/package-target';
@@ -14,7 +11,6 @@ import { ApiDateTime } from './data/date-time';
 import { File } from './data/file';
 import { Media } from './data/media';
 import { Text } from './data/text';
-import { ArchiveFileData } from './files/archive';
 import { ProblemDefinition } from './problem-definition';
 import { ProblemMaterial, ProblemMaterialCache } from './problem-definition-material';
 import { ProblemInstance } from './problem-instance';
@@ -49,27 +45,14 @@ export const contestSchema = gql`
     }
 `;
 
-/** A contest in TuringArena */
-@Table
-export class ContestData extends UuidBaseModel<ContestData> {
-    @AllowNull(false)
-    @Column(DataType.UUIDV4)
-    @ForeignKey(() => ArchiveFileData)
-    archiveId!: string;
-
-    getContest(ctx: ApiContext) {
-        return new Contest(this.id, ctx);
-    }
-}
-
 export type ContestStatus = ApiOutputValue<'ContestStatus'>;
 
 export class Contest implements ApiOutputValue<'Contest'> {
-    constructor(readonly id: string, readonly ctx: ApiContext) {}
+    constructor(readonly baseName: string, readonly ctx: ApiContext) {}
 
     __typename = 'Contest' as const;
 
-    baseName = this.id;
+    id = this.baseName;
     fullName = `contests/${this.baseName}`;
 
     packageUnchecked = new PackageTarget(this.ctx, this.fullName, this.fullName);
@@ -176,16 +159,15 @@ export class Contest implements ApiOutputValue<'Contest'> {
     }
 
     async validate() {
-        await this.ctx.cache(ContestCache).byId.load(this.id);
+        // FIXME: is this needed?
+
+        if (this.baseName !== 'default') unreachable(`cannot interact with non-default contest`);
 
         return this;
     }
 
-    static async getDefault(ctx: ApiContext): Promise<Contest | null> {
-        const data = await ctx.table(ContestData).findOne({ where: { id: 'default' } });
-        if (data === null) return null;
-
-        return data.getContest(ctx);
+    static getDefault(ctx: ApiContext) {
+        return new Contest('default', ctx);
     }
 
     async getUserByToken(token: string) {
@@ -203,8 +185,4 @@ export class Contest implements ApiOutputValue<'Contest'> {
 
         return metadata.users.map(data => new User(this, data.username, this.ctx));
     }
-}
-
-export class ContestCache extends ApiCache {
-    byId = createSimpleLoader((id: string) => this.ctx.table(ContestData).findByPk(id));
 }

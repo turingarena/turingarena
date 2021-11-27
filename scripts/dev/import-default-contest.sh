@@ -6,5 +6,9 @@ VALUES \
 
 echo $SQL
 
+set -xe
+
+rm -f server/db.sqlite3
+( cd server/ && npm run cli -- init )
 sqlite3 server/db.sqlite3 "$SQL"
 git push $PWD/server/db.git HEAD:main

@@ -10,7 +10,7 @@ import './dashboard.css';
 
 const SUBMISSIONS_DATA = gql`
   query GetSubmissionsData {
-    contests {
+    contest(id: "default") {
       problemSet {
         undertakings {
           user {
@@ -85,7 +85,7 @@ export function SubmissionsTable() {
 
   useEffect(() => {
     const ptmp: PivotSubmission[] = [];
-    data?.contests[0].problemSet.undertakings.map((ut: ProblemSetUndertaking) =>
+    data?.contest.problemSet.undertakings.map((ut: ProblemSetUndertaking) =>
       ut.problems.map(at => {
         if (at.submissions.length > 0) {
           at.submissions.map(sub =>

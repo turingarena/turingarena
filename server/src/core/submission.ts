@@ -1,13 +1,13 @@
 import { UIMessage } from '@edomora97/task-maker';
 import { gql } from 'apollo-server-core';
 import * as path from 'path';
-import { AllowNull, Column, ForeignKey, Table } from 'sequelize-typescript';
+import { AllowNull, Column, Table } from 'sequelize-typescript';
 import { ApiCache } from '../main/api-cache';
 import { ApiContext } from '../main/api-context';
 import { createSimpleLoader, UuidBaseModel } from '../main/base-model';
 import { ApiInputValue, ApiOutputValue } from '../main/graphql-types';
 import { unreachable } from '../util/unreachable';
-import { Contest, ContestData } from './contest';
+import { Contest } from './contest';
 import { ApiDateTime } from './data/date-time';
 import { FulfillmentField, FulfillmentGradeDomain } from './data/fulfillment';
 import { ScoreField, ScoreGrade, ScoreGradeDomain, ScoreRange } from './data/score';
@@ -51,10 +51,9 @@ export const submissionSchema = gql`
 
 @Table({ updatedAt: false, tableName: 'submissions' })
 export class SubmissionData extends UuidBaseModel<SubmissionData> {
-    @ForeignKey(() => ContestData)
     @AllowNull(false)
     @Column
-    contestId!: string;
+    contestName!: string;
 
     @AllowNull(false)
     @Column
@@ -288,9 +287,9 @@ export class Submission implements ApiOutputValue<'Submission'> {
     }
 
     async getUndertaking() {
-        const { contestId, problemName, username } = await this.ctx.cache(SubmissionCache).byId.load(this.id);
+        const { contestName, problemName, username } = await this.ctx.cache(SubmissionCache).byId.load(this.id);
 
-        const contest = new Contest(contestId, this.ctx);
+        const contest = new Contest(contestName, this.ctx);
 
         return new ProblemUndertaking(
             new ProblemInstance(new ProblemDefinition(contest, problemName)),

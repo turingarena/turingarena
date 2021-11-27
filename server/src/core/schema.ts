@@ -21,7 +21,6 @@ import { textSchema } from './data/text';
 import { timeUsageSchema } from './data/time-usage';
 import { valenceSchema } from './data/valence';
 import { evaluationSchema } from './evaluation';
-import { archiveSchema } from './files/archive';
 import { fileContentSchema } from './files/file-content';
 import { mainViewSchema } from './main-view';
 import { messageSchema } from './message';
@@ -46,7 +45,6 @@ import { userSchema } from './user';
 
 /** Full GraphQL schema document. Obtained combining schema parts from each components. */
 export const schema = gql`
-    ${archiveSchema}
     ${authSchema}
     ${contestSchema}
     ${contestViewSchema}

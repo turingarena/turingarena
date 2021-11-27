@@ -1,8 +1,7 @@
 import { gql } from 'apollo-server-core';
 import { ApiOutputValue } from '../main/graphql-types';
 import { unreachable } from '../util/unreachable';
-import { Contest, ContestData } from './contest';
-import { Archive } from './files/archive';
+import { Contest } from './contest';
 import { MainView } from './main-view';
 import { MessageApi } from './message';
 import { Submission } from './submission';
@@ -14,9 +13,8 @@ export const querySchema = gql`
         Data visible in a front page, i.e., to contestants.
         """
         mainView("Name of the user viewing the front page, if logged in" username: ID): MainView!
-        contests: [Contest!]!
+        contest(id: ID!): Contest!
         fileContent(id: ID!): FileContent!
-        archive(uuid: ID!): Archive!
         submission(id: ID!): Submission!
         message(id: ID!): Message
         messages(id: ID!): [Message!]!
@@ -38,16 +36,6 @@ export const queryRoot: ApiOutputValue<'Query'> = {
             username !== null && username !== undefined ? await new User(contest, username, ctx).validate() : null,
             ctx,
         );
-    },
-    contests: async ({}, ctx) => {
-        await ctx.authorizeAdmin();
-
-        return (await ctx.table(ContestData).findAll()).map(d => d.getContest(ctx));
-    },
-    archive: async ({ uuid }, ctx) => {
-        await ctx.authorizeAdmin();
-
-        return new Archive(uuid, ctx);
     },
     submission: async ({ id }, ctx) => {
         const submission = await new Submission(id, ctx).validate();
@@ -71,5 +59,10 @@ export const queryRoot: ApiOutputValue<'Query'> = {
         await ctx.authorizeUser(id);
 
         return ctx.cache(MessageApi).find(id);
+    },
+    contest: async ({ id }, ctx) => {
+        await ctx.authorizeAdmin();
+
+        return new Contest(id, ctx);
     },
 };
