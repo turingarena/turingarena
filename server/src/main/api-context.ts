@@ -23,10 +23,11 @@ export abstract class ApiContext {
     readonly caches = new Map<unknown, unknown>();
 
     config = this.serviceContext.config;
-    auth = this.serviceContext.auth;
-    db = this.serviceContext.db;
     service = this.serviceContext.service;
+    db = this.serviceContext.db;
     table = this.serviceContext.table;
+
+    auth = this.serviceContext.auth;
 
     cache<T extends ApiCache>(cacheClass: new (ctx: ApiContext) => T): T {
         if (!this.caches.has(cacheClass)) {

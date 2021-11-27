@@ -293,7 +293,7 @@ export class Submission implements ApiOutputValue<'Submission'> {
         const contest = new Contest(contestId, this.ctx);
 
         return new ProblemUndertaking(
-            new ProblemInstance(new ProblemDefinition(contest, problemName, this.ctx)),
+            new ProblemInstance(new ProblemDefinition(contest, problemName)),
             new User(contest, username, this.ctx),
             this.ctx,
         );
@@ -373,7 +373,7 @@ export class SubmissionCache extends ApiCache {
 
     byUndertaking = createSimpleLoader(async (id: string) => {
         const cpaut = ProblemUndertaking.fromId(id, this.ctx);
-        const problemName = cpaut.instance.definition.name;
+        const problemName = cpaut.instance.definition.baseName;
         const contestId = cpaut.instance.contest().id;
         const username = cpaut.user.username;
 

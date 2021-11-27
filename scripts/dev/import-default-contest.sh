@@ -7,4 +7,4 @@ VALUES \
 echo $SQL
 
 sqlite3 server/db.sqlite3 "$SQL"
-git push $PWD/server/db.git develop:main
+git push $PWD/server/db.git HEAD:main

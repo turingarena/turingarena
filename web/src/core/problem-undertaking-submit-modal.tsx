@@ -53,7 +53,7 @@ export const problemUndertakingSubmitModalFragment = gql`
           id
         }
         definition {
-          name
+          baseName
           title {
             ...Text
           }
@@ -100,7 +100,7 @@ export function ProblemUndertakingSubmitModal({
       variables: {
         submission: {
           contestId: data.view.instance.contest.id,
-          problemName: data.view.instance.definition.name,
+          problemName: data.view.instance.definition.baseName,
           username: data.user.username,
           files: await Promise.all(
             data.view.instance.definition.submissionFields.map(async field => {

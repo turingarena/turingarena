@@ -32,9 +32,9 @@ export class ServiceContext {
     db = this.instanceContext.db;
     table = this.instanceContext.table;
 
-    // TODO: load secret from environment
-    readonly auth = new AuthService(this);
-
     service = <T extends Service>(serviceClass: new (ctx: ServiceContext) => T): T =>
         (this.services.get(serviceClass) as T) ?? unreachable(`service not available`);
+
+    // TODO: load secret from environment
+    readonly auth = new AuthService(this);
 }

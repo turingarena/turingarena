@@ -28,6 +28,9 @@ export class AuthService {
      *  null otherwise
      */
     async logIn(token: string): Promise<AuthResult | null> {
+        console.log(this.ctx.service);
+        console.log(this.apiCtx.service);
+
         // FIXME: assuming only one contest here
         const contest = await Contest.getDefault(this.apiCtx);
         if (contest === null) return null;

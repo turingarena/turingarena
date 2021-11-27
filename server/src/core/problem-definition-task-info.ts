@@ -1,7 +1,5 @@
 import { ApiContext } from '../main/api-context';
-import { ContestCache } from './contest';
-import { ArchiveFileData } from './files/archive';
-import { FileContentData } from './files/file-content';
+import { unreachable } from '../util/unreachable';
 import { ProblemDefinition } from './problem-definition';
 
 export interface ProblemTaskInfo {
@@ -37,19 +35,14 @@ export interface IOITaskInfo {
 }
 
 export async function getProblemTaskInfo(ctx: ApiContext, problem: ProblemDefinition): Promise<ProblemTaskInfo> {
-    const { archiveId } = await ctx.cache(ContestCache).byId.load(problem.contest.id);
-    const metadataPath = `${problem.name}/.task-info.json`;
+    const problemPackage = await problem.packageUnchecked();
+    const revision = await problemPackage.mainRevision();
+    const archive = revision?.archive() ?? null;
 
-    const metadataProblemFile = await ctx.table(ArchiveFileData).findOne({
-        where: { uuid: archiveId, path: metadataPath },
-        include: [ctx.table(FileContentData)],
-    });
+    if (archive === null) throw unreachable(`problem has no archive`);
 
-    if (metadataProblemFile === null) {
-        throw new Error(`Problem ${problem.name} is missing metadata file ${metadataPath}`);
-    }
+    const taskInfoJson = await archive.fileContent(`.task-info.json`);
+    if (taskInfoJson === null) throw unreachable(`problem is missing task-info file`); // FIXME
 
-    const metadataContent = await ctx.table(FileContentData).findOne({ where: { id: metadataProblemFile.contentId } });
-
-    return JSON.parse(metadataContent!.content.toString()) as ProblemTaskInfo;
+    return JSON.parse(taskInfoJson.utf8()) as ProblemTaskInfo;
 }

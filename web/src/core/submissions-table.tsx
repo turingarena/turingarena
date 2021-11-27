@@ -19,7 +19,7 @@ const SUBMISSIONS_DATA = gql`
           problems {
             instance {
               definition {
-                name
+                baseName
               }
             }
             submissions {
@@ -91,7 +91,7 @@ export function SubmissionsTable() {
           at.submissions.map(sub =>
             ptmp.push({
               username: ut.user.username,
-              problem_name: at.instance.definition.name,
+              problem_name: at.instance.definition.baseName,
               score: sub.totalScore?.score ?? 0,
               submission: sub.files[0].fileName,
               download: sub.files[0],

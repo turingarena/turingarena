@@ -12,7 +12,7 @@ const SCORES_DATA = gql`
       problemSet {
         problems {
           definition {
-            name
+            baseName
           }
         }
         undertakings {

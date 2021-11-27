@@ -18,7 +18,7 @@ export class PackageArchive implements ApiOutputValue<'PackageArchive'> {
     dir = pathUtils.join(this.ctx.config.cachePath, 'archives', this.hash);
 
     async execInDir(command: string) {
-        return exec2(`cd ${this.dir} && { ${command} }`);
+        return exec2(`cd ${this.dir} && { ${command} ; }`);
     }
 
     async fileContent(path: string) {

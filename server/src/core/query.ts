@@ -1,7 +1,6 @@
 import { gql } from 'apollo-server-core';
 import { ApiOutputValue } from '../main/graphql-types';
 import { unreachable } from '../util/unreachable';
-import { PackageTarget } from './archive/package-target';
 import { Contest, ContestData } from './contest';
 import { Archive } from './files/archive';
 import { MainView } from './main-view';
@@ -21,7 +20,6 @@ export const querySchema = gql`
         submission(id: ID!): Submission!
         message(id: ID!): Message
         messages(id: ID!): [Message!]!
-        packageTarget(id: ID!): PackageTarget!
     }
 `;
 
@@ -73,10 +71,5 @@ export const queryRoot: ApiOutputValue<'Query'> = {
         await ctx.authorizeUser(id);
 
         return ctx.cache(MessageApi).find(id);
-    },
-    packageTarget: async ({ id }, ctx) => {
-        await ctx.authorizeAdmin();
-
-        return new PackageTarget(ctx, id);
     },
 };

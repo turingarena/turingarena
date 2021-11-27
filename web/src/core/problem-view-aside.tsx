@@ -20,7 +20,7 @@ export const problemViewAsideFragment = gql`
       id
       definition {
         id
-        name
+        baseName
         title {
           ...Text
         }

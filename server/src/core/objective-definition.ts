@@ -39,7 +39,7 @@ export class ObjectiveDefinition implements ApiOutputValue<'ObjectiveDefinition'
             : new FulfillmentGradeDomain();
 
     id() {
-        return `${this.material.problem.contest.id}/${this.material.problem.name}/${this.index}`;
+        return `${this.material.problem.contest.id}/${this.material.problem.baseName}/${this.index}`;
     }
     problem() {
         return this.material.problem;

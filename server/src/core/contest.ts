@@ -1,13 +1,13 @@
 import { gql } from 'apollo-server-core';
 import { DateTime } from 'luxon';
 import * as mime from 'mime-types';
-import { Op } from 'sequelize';
 import { AllowNull, Column, DataType, ForeignKey, Table } from 'sequelize-typescript';
 import * as yaml from 'yaml';
 import { ApiCache } from '../main/api-cache';
 import { ApiContext } from '../main/api-context';
 import { createSimpleLoader, UuidBaseModel } from '../main/base-model';
 import { ApiOutputValue } from '../main/graphql-types';
+import { unreachable } from '../util/unreachable';
 import { PackageTarget } from './archive/package-target';
 import { ContestMetadata } from './contest-metadata';
 import { ApiDateTime } from './data/date-time';
@@ -15,13 +15,11 @@ import { File } from './data/file';
 import { Media } from './data/media';
 import { Text } from './data/text';
 import { ArchiveFileData } from './files/archive';
-import { FileContentData } from './files/file-content';
 import { ProblemDefinition } from './problem-definition';
 import { ProblemMaterial, ProblemMaterialCache } from './problem-definition-material';
 import { ProblemInstance } from './problem-instance';
 import { ProblemSetDefinition } from './problem-set-definition';
 import { User } from './user';
-import { unreachable } from '../util/unreachable';
 
 export const contestSchema = gql`
     type Contest {
@@ -74,7 +72,7 @@ export class Contest implements ApiOutputValue<'Contest'> {
     baseName = this.id;
     fullName = `contests/${this.baseName}`;
 
-    packageUnchecked = new PackageTarget(this.ctx, this.fullName);
+    packageUnchecked = new PackageTarget(this.ctx, this.fullName, this.fullName);
 
     async title() {
         return new Text([{ value: (await this.getMetadata()).title }]);
@@ -109,29 +107,46 @@ export class Contest implements ApiOutputValue<'Contest'> {
     }
 
     async statement() {
-        const { archiveId } = await this.ctx.cache(ContestCache).byId.load(this.id);
-        const statementFiles = await this.ctx.table(ArchiveFileData).findAll({
-            where: {
-                uuid: archiveId,
-                path: {
-                    [Op.like]: 'files/home%',
-                },
-            },
-            include: [this.ctx.table(FileContentData)],
-        });
+        const archive = await this.getArchive();
 
-        return new Media(statementFiles.map(archiveFile => this.getStatementVariantFromFile(archiveFile)));
+        const lsOutput = await archive.execInDir(`ls files/home.*`);
+        const filePaths = lsOutput.split('\n');
+        filePaths.pop(); // FIXME: re-use this logic
+
+        return new Media(
+            await Promise.all(
+                filePaths.map(async path => {
+                    const type = mime.lookup(path);
+                    const pathParts = path.split('/');
+                    const baseName = pathParts[pathParts.length - 1];
+                    const content = await archive.fileContent(path);
+
+                    return new File(
+                        baseName,
+                        null,
+                        type !== false ? type : 'application/octet-stream',
+                        content ?? unreachable(),
+                        this.ctx,
+                    );
+                }),
+            ),
+        );
     }
 
     async getMetadata() {
-        const revision = await this.packageUnchecked.mainRevision();
-        const archive = revision?.archive() ?? null;
-        if (archive === null) throw unreachable(`contest has no archive`); // FIXME
-
+        const archive = await this.getArchive();
         const metadataYaml = await archive.fileContent(`turingarena.yaml`);
         if (metadataYaml === null) throw unreachable(`contest is missing metadata file`); // FIXME
 
         return yaml.parse(metadataYaml.utf8()) as ContestMetadata;
+    }
+
+    async getArchive() {
+        const revision = await this.packageUnchecked.mainRevision();
+        const archive = revision?.archive() ?? null;
+        if (archive === null) throw unreachable(`contest has no archive`); // FIXME
+
+        return archive;
     }
 
     async getStatus(): Promise<ContestStatus> {
@@ -149,7 +164,7 @@ export class Contest implements ApiOutputValue<'Contest'> {
     async getProblems() {
         const metadata = await this.getMetadata();
 
-        return metadata.problems.map(name => new ProblemInstance(new ProblemDefinition(this, name, this.ctx)));
+        return metadata.problems.map(name => new ProblemInstance(new ProblemDefinition(this, name)));
     }
 
     async getProblemSetMaterial(): Promise<ProblemMaterial[]> {
@@ -167,8 +182,7 @@ export class Contest implements ApiOutputValue<'Contest'> {
     }
 
     static async getDefault(ctx: ApiContext): Promise<Contest | null> {
-        // FIXME: assumes there is only one contest
-        const data = await ctx.table(ContestData).findOne();
+        const data = await ctx.table(ContestData).findOne({ where: { id: 'default' } });
         if (data === null) return null;
 
         return data.getContest(ctx);
@@ -188,19 +202,6 @@ export class Contest implements ApiOutputValue<'Contest'> {
         const metadata = await this.getMetadata();
 
         return metadata.users.map(data => new User(this, data.username, this.ctx));
-    }
-
-    getStatementVariantFromFile(archiveFile: ArchiveFileData) {
-        const type = mime.lookup(archiveFile.path);
-        const pathParts = archiveFile.path.split('/');
-
-        return new File(
-            pathParts[pathParts.length - 1],
-            null,
-            type !== false ? type : 'application/octet-stream',
-            archiveFile.content(),
-            this.ctx,
-        );
     }
 }
 

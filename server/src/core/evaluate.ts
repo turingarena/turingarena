@@ -53,7 +53,7 @@ export async function evaluateSubmission(ctx: ApiContext, submission: Submission
 
     const material = await ctx.cache(ProblemMaterialCache).byId.load(instance.definition.id());
 
-    const problemDir = path.join(contestDir, instance.definition.name);
+    const problemDir = path.join(contestDir, instance.definition.baseName);
 
     const submissionPath = await submission.extract(path.join(ctx.config.cachePath, 'submission'));
 

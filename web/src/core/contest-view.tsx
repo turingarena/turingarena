@@ -28,7 +28,7 @@ export const contestViewFragment = gql`
           id
           definition {
             id
-            name
+            baseName
             statement {
               ...MediaInline
             }
@@ -66,7 +66,7 @@ export function ContestView({ data }: FragmentProps<ContestViewFragment>) {
       <ContestViewAside data={data} />
       {data.problemSet !== null &&
         data.problemSet.problems.map(a => (
-          <Route key={a.instance.definition.id} path={`/${a.instance.definition.name}`}>
+          <Route key={a.instance.definition.id} path={`/${a.instance.definition.baseName}`}>
             {({ match }) => (
               <>
                 <ProblemViewAside className={match !== null ? undefined : hiddenCss} data={a} />

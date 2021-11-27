@@ -60,7 +60,7 @@ export class ObjectiveUndertaking {
             {
                 bind: {
                     contestId: this.instance.problem.definition.contest.id,
-                    problemName: this.instance.problem.definition.name,
+                    problemName: this.instance.problem.definition.baseName,
                     username: this.user.username,
                     objectiveIndex: this.instance.definition.index,
                 },

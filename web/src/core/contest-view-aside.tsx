@@ -150,7 +150,7 @@ export function ContestViewAside({ data }: FragmentProps<ContestViewAsideFragmen
               `}
               key={index}
               title={view.instance.definition.title.variant}
-              to={`/${view.instance.definition.name}`}
+              to={`/${view.instance.definition.baseName}`}
             >
               <span
                 className={css`
@@ -200,7 +200,7 @@ export const contestViewAsideFragment = gql`
           id
           definition {
             id
-            name
+            baseName
             title {
               ...Text
             }

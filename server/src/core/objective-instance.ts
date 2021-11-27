@@ -20,6 +20,6 @@ export class ObjectiveInstance {
     constructor(readonly problem: ProblemInstance, readonly definition: ObjectiveDefinition) {}
     __typename = 'ObjectiveInstance' as const;
     id() {
-        return `${this.problem.definition.contest.id}/${this.problem.definition.name}/${this.definition.index}`;
+        return `${this.problem.definition.contest.id}/${this.problem.definition.baseName}/${this.definition.index}`;
     }
 }
