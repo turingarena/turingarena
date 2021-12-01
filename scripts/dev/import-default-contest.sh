@@ -11,4 +11,10 @@ set -xe
 rm -f server/db.sqlite3
 ( cd server/ && npm run cli -- init )
 sqlite3 server/db.sqlite3 "$SQL"
-git push $PWD/server/db.git HEAD:main
+
+git push $PWD/server/db.git \
+    HEAD:contests/default/main \
+    HEAD:contests/default/problems/easy1/main \
+    HEAD:contests/default/problems/game123/main \
+    #
+

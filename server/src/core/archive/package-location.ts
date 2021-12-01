@@ -11,8 +11,8 @@ export const packageLocationSchema = gql`
 
         name: String!
         path: String!
-        branches: [PackageBranch!]!
 
+        mainBranch: PackageBranch!
         mainRevision: PackageRevision
     }
 `;
@@ -38,21 +38,14 @@ export class PackageLocation implements ApiOutputValue<'PackageLocation'> {
 
     id = `${this.target.id}:${this.name}`;
 
-    async branches() {
-        const part = this.name === 'default' ? `main` : `location/${this.name}/main`;
-
-        return [part, `${this.target.id}/${part}`].map(branchName => new PackageBranch(this, branchName));
+    mainBranch() {
+        return new PackageBranch(
+            this,
+            `${this.target.id}/${this.name === 'default' ? `` : `location/${this.name}/`}main`,
+        );
     }
 
     async mainRevision() {
-        const branches = await this.branches();
-
-        for (const branch of branches) {
-            const revision = await branch.revision();
-            const archive = revision?.archive() ?? null;
-            if (archive !== null) return revision;
-        }
-
-        return null;
+        return this.mainBranch().revision();
     }
 }
