@@ -39,7 +39,7 @@ export function AdminView({ data }: { data: AdminViewFragment }) {
           overflow: hidden;
         `}
       >
-        <AdminAside />
+        <AdminAside data={data} />
         <Switch>
           <Route path="/admin" exact>
             Admin

@@ -1,10 +1,12 @@
 import { css, cx } from 'emotion';
 import React from 'react';
 import { NavLink } from 'react-router-dom';
+import { AdminViewFragment } from '../../generated/graphql-types';
 import { badgeCss, getBadgeCssByValence } from '../../util/components/badge';
+import { FragmentProps } from '../../util/fragment-props';
 import { Theme } from '../../util/theme';
 
-export function AdminAside() {
+export function AdminAside({ data }: FragmentProps<AdminViewFragment>) {
   return (
     <aside
       className={css`
@@ -17,12 +19,12 @@ export function AdminAside() {
         border-right: 1px solid rgba(0, 0, 0, 0.1);
       `}
     >
-      <AdminNavLink name="Users" to="/admin/users" />
+      <AdminNavLink name="Users" to="/admin/users" badge={data.contest.userTable.rows.length} />
     </aside>
   );
 }
 
-function AdminNavLink({ name, to }: { name: string; to: string }) {
+function AdminNavLink({ name, to, badge }: { name: string; to: string; badge: number }) {
   return (
     <NavLink
       className={css`
@@ -87,7 +89,7 @@ function AdminNavLink({ name, to }: { name: string; to: string }) {
           getBadgeCssByValence('NOMINAL'),
         )}
       >
-        0
+        {badge}
       </span>
     </NavLink>
   );
