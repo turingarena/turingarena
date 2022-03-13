@@ -4,6 +4,7 @@
         "target": "ES6",
         "module": "CommonJS",
         "moduleResolution": "node",
+        "lib": ["ES2019"],
 
         "experimentalDecorators": true,
         "emitDecoratorMetadata": true,
