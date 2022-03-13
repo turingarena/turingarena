@@ -2,6 +2,7 @@ import { gql } from 'apollo-server-core';
 import { DateTime } from 'luxon';
 import { ApiOutputValue } from '../../main/graphql-types';
 import { unreachable } from '../../util/unreachable';
+import { Text } from './text';
 
 export const dateTimeSchema = gql`
     "An instant, i.e., a point in time."
@@ -20,6 +21,15 @@ export const dateTimeSchema = gql`
         millisFromEpochInteger: Int!
 
         utcOffsetMinutes: Int!
+    }
+
+    type DateTimeField {
+        dateTime: DateTime
+    }
+
+    "Column containing a date-time."
+    type DateTimeColumn implements TitledColumn {
+        title: Text!
     }
 `;
 
@@ -40,4 +50,16 @@ export class ApiDateTime implements ApiOutputValue<'DateTime'> {
     static fromJSDate(jsDate: Date) {
         return new ApiDateTime(DateTime.fromJSDate(jsDate));
     }
+}
+
+export class DateTimeField implements ApiOutputValue<'DateTimeField'> {
+    __typename = 'DateTimeField' as const;
+
+    constructor(readonly dateTime: ApiDateTime | null) {}
+}
+
+export class DateTimeColumn implements ApiOutputValue<'DateTimeColumn'> {
+    __typename = 'DateTimeColumn' as const;
+
+    constructor(readonly title: Text) {}
 }

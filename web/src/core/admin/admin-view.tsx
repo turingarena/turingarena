@@ -14,6 +14,9 @@ export const adminViewFragment = gql`
       userTable {
         ...Table
       }
+      submissionTable {
+        ...Table
+      }
     }
   }
 
@@ -45,7 +48,10 @@ export function AdminView({ data }: { data: AdminViewFragment }) {
             Admin
           </Route>
           <Route path="/admin/users">
-            <Table data={data.contest.userTable} />
+            <Table key="users" data={data.contest.userTable} />
+          </Route>
+          <Route path="/admin/submissions">
+            <Table key="submissions" data={data.contest.submissionTable} />
           </Route>
           <Redirect to="/admin" />
         </Switch>

@@ -17,9 +17,7 @@ export class ProblemInstance implements ApiOutputValue<'ProblemInstance'> {
 
     __typename = 'ProblemInstance' as const;
 
-    id() {
-        return `${this.definition.contest.id}/${this.definition.baseName}`;
-    }
+    id = `${this.definition.contest.id}/${this.definition.baseName}`;
 
     contest() {
         return this.definition.contest;

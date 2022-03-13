@@ -20,6 +20,7 @@ export function AdminAside({ data }: FragmentProps<AdminViewFragment>) {
       `}
     >
       <AdminNavLink name="Users" to="/admin/users" badge={data.contest.userTable.rows.length} />
+      <AdminNavLink name="Submissions" to="/admin/submissions" badge={data.contest.submissionTable.rows.length} />
     </aside>
   );
 }

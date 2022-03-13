@@ -1,10 +1,11 @@
 import { gql } from '@apollo/client';
-import { ColDef, ValueFormatterParams, ValueGetterParams } from 'ag-grid-community';
+import { ValueFormatterParams, ValueGetterParams } from 'ag-grid-community';
 import { AgGridColumn, AgGridReact } from 'ag-grid-react';
 import { css, cx } from 'emotion';
 import React from 'react';
 import {
   ColumnFragment,
+  DateTimeFieldFragment,
   FieldFragment,
   HeaderFieldFragment,
   ScoreFieldFragment,
@@ -55,10 +56,12 @@ export function Table({ data }: FragmentProps<TableFragment>) {
   );
 }
 
-function getFilterMode(column: ColumnFragment): 'set' | 'number' | 'text' | 'date' {
+function getFilterMode(column: ColumnFragment): 'set' | 'number' | 'text' | 'date' | null {
   switch (column.__typename) {
     case 'ScoreColumn':
       return 'number';
+    case 'DateTimeColumn':
+      return null;
     default:
       return 'text';
   }
@@ -70,6 +73,9 @@ function getCellValue(column: ColumnFragment, field: FieldFragment) {
       return (field as HeaderFieldFragment).index ?? (field as HeaderFieldFragment).title.variant;
     case 'ScoreColumn':
       return (field as ScoreFieldFragment).score;
+    case 'DateTimeColumn':
+      const { dateTime } = field as DateTimeFieldFragment;
+      return dateTime === null ? null : new Date(dateTime.local);
     default:
       return null;
   }

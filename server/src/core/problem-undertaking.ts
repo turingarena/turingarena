@@ -44,7 +44,7 @@ export class ProblemUndertaking implements ApiOutputValue<'ProblemUndertaking'> 
     __typename = 'ProblemUndertaking' as const;
 
     id(): string {
-        return `${this.instance.id()}/${this.user.id}`;
+        return `${this.instance.id}/${this.user.id}`;
     }
 
     static async fromId(id: string, ctx: ApiContext) {

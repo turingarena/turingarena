@@ -3,6 +3,7 @@ import React from 'react';
 import { FieldFragment } from '../../generated/graphql-types';
 import { unexpected } from '../../util/check';
 import { FragmentProps } from '../../util/fragment-props';
+import { DateTimeField, dateTimeFieldFragment } from './date-time-field';
 import { FulfillmentField, fulfillmentFieldFragment, ScoreField, scoreFieldFragment } from './grade-field';
 import { HeaderField, headerFieldFragment } from './header-field';
 import { MemoryUsageField, memoryUsageFieldFragment } from './memory-usage-field';
@@ -23,6 +24,8 @@ export function Field({ data }: FragmentProps<FieldFragment>) {
       return <MessageField data={data} />;
     case 'HeaderField':
       return <HeaderField data={data} />;
+    case 'DateTimeField':
+      return <DateTimeField data={data} />;
     default:
       return unexpected(data);
   }
@@ -48,6 +51,9 @@ export const fieldFragment = gql`
     ... on MemoryUsageField {
       ...MemoryUsageField
     }
+    ... on DateTimeField {
+      ...DateTimeField
+    }
   }
 
   ${headerFieldFragment}
@@ -56,4 +62,5 @@ export const fieldFragment = gql`
   ${memoryUsageFieldFragment}
   ${messageFieldFragment}
   ${timeUsageFieldFragment}
+  ${dateTimeFieldFragment}
 `;

@@ -355,11 +355,16 @@ export class SubmissionCache extends ApiCache {
     pendingByContestAndUser = createSimpleLoader(
         async ({ contestId, username }: { contestId: string; username: string }) => {
             // TODO: denormalize DB to make this code simpler and faster
-            const submissions = await this.ctx.table(SubmissionData).findAll({ where: { username } });
+            const submissions = await this.ctx.table(SubmissionData).findAll({ where: { contestId, username } });
 
             return submissions
                 .filter((s, i) => this.ctx.service(LiveEvaluationService).getBySubmission(s.id))
                 .map(s => Submission.fromId(s.id, this.ctx));
         },
     );
+
+    byContest = createSimpleLoader(async (contestId: string) => {
+        const submissions = await this.ctx.table(SubmissionData).findAll({ where: { contestId } });
+        return submissions.map(s => Submission.fromId(s.id, this.ctx));
+    });
 }

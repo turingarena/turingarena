@@ -7,7 +7,7 @@ import { ApiOutputValue } from '../main/graphql-types';
 import { unreachable } from '../util/unreachable';
 import { PackageTarget } from './archive/package-target';
 import { ContestMetadata } from './contest-metadata';
-import { ApiDateTime } from './data/date-time';
+import { ApiDateTime, DateTimeColumn, DateTimeField } from './data/date-time';
 import { ApiTable, Column, Field, Record } from './data/field';
 import { File } from './data/file';
 import { HeaderColumn, HeaderField } from './data/header';
@@ -21,6 +21,7 @@ import { ProblemInstance } from './problem-instance';
 import { ProblemSetDefinition } from './problem-set-definition';
 import { ProblemSetUndertaking } from './problem-set-undertaking';
 import { ProblemUndertaking } from './problem-undertaking';
+import { Submission, SubmissionCache } from './submission';
 import { User } from './user';
 
 export const contestSchema = gql`
@@ -44,6 +45,7 @@ export const contestSchema = gql`
         package: PackageTarget!
 
         userTable: Table!
+        submissionTable: Table!
     }
 
     enum ContestStatus {
@@ -213,7 +215,7 @@ export class Contest implements ApiOutputValue<'Contest'> {
 
         type MyColumn = [Column, (user: User) => Field | Promise<Field>];
 
-        const userTableColumns: Array<MyColumn> = [
+        const columns: Array<MyColumn> = [
             [
                 new HeaderColumn(new Text([{ value: 'ID' }])),
                 user => new HeaderField(new Text([{ value: user.metadata.name }]), null),
@@ -243,16 +245,62 @@ export class Contest implements ApiOutputValue<'Contest'> {
         ];
 
         return new ApiTable(
-            userTableColumns.map(([column]) => column),
+            columns.map(([column]) => column),
             await Promise.all(
                 contestMetadata.users.map(
                     async user =>
                         new Record(
-                            await Promise.all(
-                                userTableColumns.map(([, mapper]) => mapper(new User(this, user, this.ctx))),
-                            ),
+                            await Promise.all(columns.map(([, mapper]) => mapper(new User(this, user, this.ctx)))),
                             null,
                         ),
+                ),
+            ),
+        );
+    }
+
+    async submissionTable() {
+        await this.ctx.authorizeAdmin();
+
+        type MyColumn = [Column, (submission: Submission) => Field | Promise<Field>];
+
+        const columns: Array<MyColumn> = [
+            [
+                new HeaderColumn(new Text([{ value: 'ID' }])),
+                submission => new HeaderField(new Text([{ value: submission.id }]), null),
+            ],
+            [
+                new HeaderColumn(new Text([{ value: 'Problem' }])),
+                async submission =>
+                    new HeaderField(new Text([{ value: (await submission.problem()).definition.baseName }]), null),
+            ],
+            [
+                new HeaderColumn(new Text([{ value: 'User' }])),
+                async submission =>
+                    new HeaderField(new Text([{ value: (await submission.user()).metadata.name }]), null),
+            ],
+            [
+                new DateTimeColumn(new Text([{ value: 'Time' }])),
+                async submission => new DateTimeField(await submission.createdAt()),
+            ],
+            [
+                new ScoreColumn(new Text([{ value: 'Score' }])),
+                async submission => {
+                    const problem = await submission.problem();
+                    const totalScoreDomain = await problem.definition.totalScoreDomain();
+                    const totalScore = await submission.getTotalScore();
+                    return new ScoreField(totalScoreDomain.scoreRange, totalScore?.score ?? null);
+                },
+            ],
+        ];
+
+        const submissions = await this.ctx.cache(SubmissionCache).byContest.load(this.id);
+
+        return new ApiTable(
+            columns.map(([column]) => column),
+            await Promise.all(
+                submissions.map(
+                    async submission =>
+                        new Record(await Promise.all(columns.map(([, mapper]) => mapper(submission))), null),
                 ),
             ),
         );
