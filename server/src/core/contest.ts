@@ -6,9 +6,11 @@ import { ApiContext } from '../main/api-context';
 import { ApiOutputValue } from '../main/graphql-types';
 import { unreachable } from '../util/unreachable';
 import { PackageTarget } from './archive/package-target';
-import { ContestMetadata } from './contest-metadata';
+import { ContestMetadata, UserMetadata } from './contest-metadata';
 import { ApiDateTime } from './data/date-time';
+import { ApiTable, Column, Field, Record } from './data/field';
 import { File } from './data/file';
+import { HeaderColumn, HeaderField } from './data/header';
 import { Media } from './data/media';
 import { Text } from './data/text';
 import { FileContentService } from './files/file-content-service';
@@ -37,6 +39,8 @@ export const contestSchema = gql`
         problemSet: ProblemSetDefinition!
 
         package: PackageTarget!
+
+        userTable: Table!
     }
 
     enum ContestStatus {
@@ -188,4 +192,27 @@ export class Contest implements ApiOutputValue<'Contest'> {
 
         return metadata.users.map(data => new User(this, data.username, this.ctx));
     }
+
+    async userTable() {
+        await this.ctx.authorizeAdmin();
+        const contestMetadata = await this.getMetadata();
+        return new ApiTable(
+            userTableColumns.map(([column]) => column),
+            contestMetadata.users.map(
+                user =>
+                    new Record(
+                        userTableColumns.map(([, mapper]) => mapper(user)),
+                        null,
+                    ),
+            ),
+        );
+    }
 }
+
+const userTableColumns: Array<[Column, (user: UserMetadata) => Field]> = [
+    [new HeaderColumn(new Text([{ value: 'ID' }])), user => new HeaderField(new Text([{ value: user.name }]), null)],
+    [
+        new HeaderColumn(new Text([{ value: 'token' }])),
+        user => new HeaderField(new Text([{ value: user.token }]), null),
+    ],
+];

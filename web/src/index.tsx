@@ -8,6 +8,8 @@ import 'bootstrap/dist/css/bootstrap.css';
 import 'katex/dist/katex.min.css';
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { BrowserRouter, Route, Switch } from 'react-router-dom';
+import { AdminLoader } from './core/admin/admin-loader';
 import { MainLoader } from './core/main-loader';
 import result from './generated/possible-types';
 import './index.css';
@@ -43,11 +45,23 @@ const client = new ApolloClient({
 function App() {
   return (
     <React.StrictMode>
-      <ApolloProvider client={client}>
-        <AppIntlProvider>
-          <MainLoader />
-        </AppIntlProvider>
-      </ApolloProvider>
+      <AppIntlProvider>
+        <BrowserRouter>
+          <Switch>
+            <Route path="/admin">
+              {/* TODO: use different client (e.g., target port) for admin? */}
+              <ApolloProvider client={client}>
+                <AdminLoader />
+              </ApolloProvider>
+            </Route>
+            <Route path="/">
+              <ApolloProvider client={client}>
+                <MainLoader />
+              </ApolloProvider>
+            </Route>
+          </Switch>
+        </BrowserRouter>
+      </AppIntlProvider>
     </React.StrictMode>
   );
 }
