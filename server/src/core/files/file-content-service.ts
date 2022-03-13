@@ -10,7 +10,7 @@ export class FileContentService extends Service {
         return this.cache.get(id) ?? unreachable(`file content not found`);
     }
 
-    expose(fileContent: FileContent) {
+    publish(fileContent: FileContent) {
         // TODO: allow exposing a file only to some users
         this.cache.set(fileContent.id, fileContent);
     }

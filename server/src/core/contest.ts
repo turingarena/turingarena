@@ -105,7 +105,7 @@ export class Contest implements ApiOutputValue<'Contest'> {
                     const baseName = pathParts[pathParts.length - 1];
                     const content = (await archive.fileContent(path)) ?? unreachable();
 
-                    this.ctx.service(FileContentService).expose(content);
+                    this.ctx.service(FileContentService).publish(content);
 
                     return new File(
                         baseName,

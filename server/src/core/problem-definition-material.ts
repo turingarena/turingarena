@@ -183,7 +183,7 @@ export class ProblemMaterial {
             throw unreachable(`file ${path} not found in problem ${problem.baseName} (referred from metadata)`);
         }
 
-        this.ctx.service(FileContentService).expose(content);
+        this.ctx.service(FileContentService).publish(content);
 
         return content;
     }
