@@ -2,9 +2,10 @@ import { gql } from 'apollo-server-core';
 import { ApiCache } from '../main/api-cache';
 import { ApiContext } from '../main/api-context';
 import { createSimpleLoader } from '../main/base-model';
+import { ApiOutputValue } from '../main/graphql-types';
 import { unreachable } from '../util/unreachable';
 import { Contest } from './contest';
-import { ApiOutputValue } from '../main/graphql-types';
+import { UserMetadata } from './contest-metadata';
 
 export const userSchema = gql`
     type User {
@@ -22,8 +23,10 @@ export const userSchema = gql`
 `;
 
 export class User implements ApiOutputValue<'User'> {
-    constructor(readonly contest: Contest, readonly username: string, readonly ctx: ApiContext) {}
+    constructor(readonly contest: Contest, readonly metadata: UserMetadata, readonly ctx: ApiContext) {}
     __typename = 'User' as const;
+
+    username = this.metadata.username;
 
     id = `${this.contest.id}/${this.username}`;
 
@@ -31,22 +34,16 @@ export class User implements ApiOutputValue<'User'> {
         return (await this.ctx.cache(UserCache).byId.load(this.id)).name;
     }
 
-    async validate() {
-        await this.ctx.cache(UserCache).byId.load(this.id);
-
-        return this;
-    }
-
-    static fromId(id: string, ctx: ApiContext): User {
+    static async fromId(id: string, ctx: ApiContext) {
         const [contestId, username] = id.split('/');
-
-        return new User(new Contest(contestId, ctx), username, ctx);
+        const contest = new Contest(contestId, ctx);
+        return contest.getUserByName(username);
     }
 }
 
 export class UserCache extends ApiCache {
     byId = createSimpleLoader(async (id: string) => {
-        const user = User.fromId(id, this.ctx);
+        const user = await User.fromId(id, this.ctx);
         const contestMetadata = await user.contest.getMetadata();
 
         return (

@@ -22,6 +22,7 @@ export const headerFieldFragment = gql`
     title {
       ...Text
     }
+    index
   }
 
   ${textFragment}

@@ -1,5 +1,6 @@
 import { gql } from 'apollo-server-core';
 import { ApiContext } from '../main/api-context';
+import { ApiOutputValue } from '../main/graphql-types';
 import { ScoreGrade } from './data/score';
 import { ObjectiveInstance } from './objective-instance';
 import { ObjectiveUndertaking } from './objective-undertaking';
@@ -8,7 +9,6 @@ import { ProblemInstance } from './problem-instance';
 import { ProblemView } from './problem-view';
 import { SubmissionCache } from './submission';
 import { User } from './user';
-import { ApiOutputValue } from '../main/graphql-types';
 
 export const problemUndertakingSchema = gql`
     """
@@ -47,12 +47,12 @@ export class ProblemUndertaking implements ApiOutputValue<'ProblemUndertaking'> 
         return `${this.instance.id()}/${this.user.id}`;
     }
 
-    static fromId(id: string, ctx: ApiContext): ProblemUndertaking {
+    static async fromId(id: string, ctx: ApiContext) {
         const ids = id.split('/');
         const problemId = ids.splice(0, 2).join('/');
         const userId = ids.join('/');
 
-        return new ProblemUndertaking(ProblemInstance.fromId(problemId, ctx), User.fromId(userId, ctx), ctx);
+        return new ProblemUndertaking(ProblemInstance.fromId(problemId, ctx), await User.fromId(userId, ctx), ctx);
     }
 
     async canSubmit() {

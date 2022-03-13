@@ -26,7 +26,6 @@ import { ProblemMaterialCache } from './problem-definition-material';
 import { ProblemInstance } from './problem-instance';
 import { ProblemUndertaking } from './problem-undertaking';
 import { SubmissionItemCache } from './submission-item';
-import { User } from './user';
 
 export const submissionSchema = gql`
     type Submission {
@@ -266,7 +265,7 @@ export class Submission implements ApiOutputValue<'Submission'> {
 
         return new ProblemUndertaking(
             new ProblemInstance(new ProblemDefinition(contest, problemName)),
-            new User(contest, username, this.ctx),
+            await contest.getUserByName(username),
             this.ctx,
         );
     }
@@ -341,7 +340,7 @@ export class SubmissionCache extends ApiCache {
     byId = createSimpleLoader((id: string) => this.ctx.table(SubmissionData).findByPk(id));
 
     byUndertaking = createSimpleLoader(async (id: string) => {
-        const cpaut = ProblemUndertaking.fromId(id, this.ctx);
+        const cpaut = await ProblemUndertaking.fromId(id, this.ctx);
         const problemName = cpaut.instance.definition.baseName;
         const contestId = cpaut.instance.contest().id;
         const username = cpaut.user.username;

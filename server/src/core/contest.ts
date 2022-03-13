@@ -6,18 +6,20 @@ import { ApiContext } from '../main/api-context';
 import { ApiOutputValue } from '../main/graphql-types';
 import { unreachable } from '../util/unreachable';
 import { PackageTarget } from './archive/package-target';
-import { ContestMetadata, UserMetadata } from './contest-metadata';
+import { ContestMetadata } from './contest-metadata';
 import { ApiDateTime } from './data/date-time';
 import { ApiTable, Column, Field, Record } from './data/field';
 import { File } from './data/file';
 import { HeaderColumn, HeaderField } from './data/header';
 import { Media } from './data/media';
+import { ScoreColumn, ScoreField } from './data/score';
 import { Text } from './data/text';
 import { FileContentService } from './files/file-content-service';
 import { ProblemDefinition } from './problem-definition';
 import { ProblemMaterial, ProblemMaterialCache } from './problem-definition-material';
 import { ProblemInstance } from './problem-instance';
 import { ProblemSetDefinition } from './problem-set-definition';
+import { ProblemSetUndertaking } from './problem-set-undertaking';
 import { User } from './user';
 
 export const contestSchema = gql`
@@ -177,20 +179,28 @@ export class Contest implements ApiOutputValue<'Contest'> {
         return new Contest('default', ctx);
     }
 
+    async getUserByName(name: string) {
+        const contestMetadata = await this.getMetadata();
+        const userMetadata = contestMetadata.users.find(data => data.username === name) ?? null;
+
+        if (userMetadata === null) unreachable(`user not found`);
+
+        return new User(this, userMetadata, this.ctx);
+    }
+
     async getUserByToken(token: string) {
         const contestMetadata = await this.getMetadata();
         const userMetadata = contestMetadata.users.find(data => data.token === token) ?? null;
 
         if (userMetadata === null) return null;
-        const { username } = userMetadata;
 
-        return new User(this, username, this.ctx);
+        return new User(this, userMetadata, this.ctx);
     }
 
     async getParticipatingUsers() {
         const metadata = await this.getMetadata();
 
-        return metadata.users.map(data => new User(this, data.username, this.ctx));
+        return metadata.users.map(data => new User(this, data, this.ctx));
     }
 
     async userTable() {
@@ -198,21 +208,37 @@ export class Contest implements ApiOutputValue<'Contest'> {
         const contestMetadata = await this.getMetadata();
         return new ApiTable(
             userTableColumns.map(([column]) => column),
-            contestMetadata.users.map(
-                user =>
-                    new Record(
-                        userTableColumns.map(([, mapper]) => mapper(user)),
-                        null,
-                    ),
+            await Promise.all(
+                contestMetadata.users.map(
+                    async user =>
+                        new Record(
+                            await Promise.all(
+                                userTableColumns.map(([, mapper]) => mapper(new User(this, user, this.ctx))),
+                            ),
+                            null,
+                        ),
+                ),
             ),
         );
     }
 }
 
-const userTableColumns: Array<[Column, (user: UserMetadata) => Field]> = [
-    [new HeaderColumn(new Text([{ value: 'ID' }])), user => new HeaderField(new Text([{ value: user.name }]), null)],
+const userTableColumns: Array<[Column, (user: User) => Field | Promise<Field>]> = [
+    [
+        new HeaderColumn(new Text([{ value: 'ID' }])),
+        user => new HeaderField(new Text([{ value: user.metadata.name }]), null),
+    ],
     [
         new HeaderColumn(new Text([{ value: 'token' }])),
-        user => new HeaderField(new Text([{ value: user.token }]), null),
+        user => new HeaderField(new Text([{ value: user.metadata.token }]), null),
+    ],
+    [
+        new ScoreColumn(new Text([{ value: 'Total score' }])),
+        async user => {
+            const problemSet = await user.contest.problemSet();
+            const undertaking = new ProblemSetUndertaking(problemSet, user, user.ctx);
+            const { scoreRange, score } = await undertaking.totalScoreGrade();
+            return new ScoreField(scoreRange, score);
+        },
     ],
 ];

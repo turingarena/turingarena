@@ -5,7 +5,6 @@ import { Contest } from './contest';
 import { MainView } from './main-view';
 import { MessageApi } from './message';
 import { Submission } from './submission';
-import { User } from './user';
 
 export const querySchema = gql`
     type Query {
@@ -33,7 +32,7 @@ export const queryRoot: ApiOutputValue<'Query'> = {
 
         return new MainView(
             contest,
-            username !== null && username !== undefined ? await new User(contest, username, ctx).validate() : null,
+            username !== null && username !== undefined ? await contest.getUserByName(username) : null,
             ctx,
         );
     },

@@ -3,7 +3,6 @@ import { LocalApiContext } from '../main/api-context';
 import { ServiceContext } from '../main/service-context';
 import { AuthResult } from './auth';
 import { Contest } from './contest';
-import { User } from './user';
 
 /**
  * Structure of the JsonWebToken
@@ -49,7 +48,7 @@ export class AuthService {
         if (contest === null || contest.id !== payload.contestId) {
             throw new Error(`token not valid for current contest`);
         }
-        const user = await new User(contest, payload.username, this.apiCtx).validate();
+        const user = await contest.getUserByName(payload.username);
 
         return user;
     }

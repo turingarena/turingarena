@@ -3,11 +3,10 @@ import { Contest } from './contest';
 import { evaluateSubmission } from './evaluate';
 import { Submission, SubmissionData, SubmissionInput } from './submission';
 import { SubmissionItemData } from './submission-item';
-import { User } from './user';
 
 export async function submit({ contestId, problemName, username, files }: SubmissionInput, ctx: ApiContext) {
     const contest = await new Contest(contestId, ctx).validate();
-    await new User(contest, username, ctx).validate();
+    await contest.getUserByName(username);
 
     const submissionData = await ctx.table(SubmissionData).create({ contestId: contest.id, problemName, username });
     const submission = Submission.fromId(submissionData.id, ctx);

@@ -1,12 +1,17 @@
 import { gql } from '@apollo/client';
-import { ValueFormatterParams, ValueGetterParams } from 'ag-grid-community';
+import { ColDef, ValueFormatterParams, ValueGetterParams } from 'ag-grid-community';
 import { AgGridColumn, AgGridReact } from 'ag-grid-react';
 import { css, cx } from 'emotion';
 import React from 'react';
-import { ColumnFragment, FieldFragment, HeaderField, TableFragment } from '../../generated/graphql-types';
+import {
+  ColumnFragment,
+  FieldFragment,
+  HeaderFieldFragment,
+  ScoreFieldFragment,
+  TableFragment,
+} from '../../generated/graphql-types';
 import { FragmentProps } from '../../util/fragment-props';
 import { Field } from '../data/field';
-import { Text } from '../data/text';
 import { columnFragment, recordFragment } from '../field-table';
 
 export const tableFragment = gql`
@@ -37,7 +42,7 @@ export function Table({ data }: FragmentProps<TableFragment>) {
         {data.columns.map((column, i) => (
           <AgGridColumn
             field={String(i)}
-            filter="text"
+            filter={getFilterMode(column)}
             resizable
             sortable
             headerName={column.title.variant}
@@ -50,10 +55,21 @@ export function Table({ data }: FragmentProps<TableFragment>) {
   );
 }
 
+function getFilterMode(column: ColumnFragment): 'set' | 'number' | 'text' | 'date' {
+  switch (column.__typename) {
+    case 'ScoreColumn':
+      return 'number';
+    default:
+      return 'text';
+  }
+}
+
 function getCellValue(column: ColumnFragment, field: FieldFragment) {
   switch (column.__typename) {
     case 'HeaderColumn':
-      return (field as HeaderField).index ?? (field as HeaderField).title.variant;
+      return (field as HeaderFieldFragment).index ?? (field as HeaderFieldFragment).title.variant;
+    case 'ScoreColumn':
+      return (field as ScoreFieldFragment).score;
     default:
       return null;
   }
