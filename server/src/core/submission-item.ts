@@ -9,6 +9,7 @@ import { unreachable } from '../util/unreachable';
 import { File } from './data/file';
 import { FileContent } from './files/file-content';
 import { submissionFileTypes } from './problem-definition-file-types';
+import { SubmissionField } from './problem-definition-material';
 import { Submission, SubmissionData } from './submission';
 
 export const submissionFileSchema = gql`
@@ -54,7 +55,7 @@ export class SubmissionItemData extends BaseModel<SubmissionItemData> {
 export class SubmissionItem implements ApiOutputValue<'SubmissionItem'> {
     constructor(
         readonly ctx: ApiContext,
-        readonly field: ApiOutputValue<'SubmissionField'>,
+        readonly field: SubmissionField,
         readonly submission: Submission,
         readonly data: SubmissionItemData,
     ) {}

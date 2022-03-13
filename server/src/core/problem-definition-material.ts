@@ -4,11 +4,16 @@ import { ApiContext } from '../main/api-context';
 import { createSimpleLoader } from '../main/base-model';
 import { ApiOutputValue } from '../main/graphql-types';
 import { unreachable } from '../util/unreachable';
+import { Field } from './data/field';
 import { File } from './data/file';
-import { FulfillmentGradeDomain } from './data/fulfillment';
+import { FulfillmentColumn, FulfillmentGradeDomain } from './data/fulfillment';
+import { HeaderColumn } from './data/header';
 import { Media } from './data/media';
-import { ScoreGradeDomain, ScoreRange } from './data/score';
+import { MemoryUsage, MemoryUsageColumn, MemoryUsageField } from './data/memory-usage';
+import { MessageColumn } from './data/message';
+import { ScoreColumn, ScoreGradeDomain, ScoreRange } from './data/score';
 import { Text } from './data/text';
+import { TimeUsage, TimeUsageColumn, TimeUsageField } from './data/time-usage';
 import { FileContentService } from './files/file-content-service';
 import { ObjectiveDefinition } from './objective-definition';
 import { ProblemDefinition } from './problem-definition';
@@ -67,17 +72,21 @@ export const problemMaterialSchema = gql`
     }
 `;
 
-type Field = ApiOutputValue<'Field'>;
-
 export interface ProblemAttachment {
     title: Text;
     media: Media;
 }
 
-export interface ProblemAttribute {
-    title: Text;
-    field: Field; // FIXME: should not use generated types here
-    icon: string;
+export class ProblemAttribute implements ApiOutputValue<'ProblemAttribute'> {
+    constructor(readonly title: Text, readonly field: Field, readonly icon: string) {}
+
+    __typename = 'ProblemAttribute' as const;
+}
+
+export class SubmissionField implements ApiOutputValue<'SubmissionField'> {
+    constructor(readonly name: string, readonly title: Text) {}
+
+    __typename = 'SubmissionField' as const;
 }
 
 const memoryUnitBytes = 1024 * 1024;
@@ -120,36 +129,24 @@ export class ProblemMaterial {
     timeLimitSeconds = this.taskInfo.IOI.limits.time;
     memoryLimitBytes = this.taskInfo.IOI.limits.memory * memoryUnitBytes;
 
-    attributes: ProblemAttribute[] = [
-        {
-            title: new Text([{ value: 'Time limit' }]),
-            field: {
-                __typename: 'TimeUsageField',
-                timeUsageMaxRelevant: null,
-                timeUsage: { __typename: 'TimeUsage', seconds: this.timeLimitSeconds },
-                timeUsageWatermark: null,
-                valence: null,
-            },
-            icon: 'stopwatch',
-        },
-        {
-            title: new Text([{ value: 'Memory limit' }]),
-            field: {
-                __typename: 'MemoryUsageField',
-                memoryUsageMaxRelevant: null,
-                memoryUsage: { __typename: 'MemoryUsage', bytes: this.memoryLimitBytes },
-                memoryUsageWatermark: null,
-                valence: null,
-            },
-            icon: 'microchip',
-        },
+    attributes = [
+        new ProblemAttribute(
+            new Text([{ value: 'Time limit' }]),
+            new TimeUsageField(new TimeUsage(this.timeLimitSeconds), null, null, null),
+            'stopwatch',
+        ),
+        new ProblemAttribute(
+            new Text([{ value: 'Memory limit' }]),
+            new MemoryUsageField(new MemoryUsage(this.memoryLimitBytes), null, null, null),
+            'microchip',
+        ),
     ];
 
     objectives = this.taskInfo.IOI.scoring.subtasks.map(
         (subtask, index): ObjectiveDefinition => new ObjectiveDefinition(this, index),
     );
 
-    submissionFields = [{ name: 'solution', title: new Text([{ value: 'Solution' }]) }];
+    submissionFields = [new SubmissionField('solution', new Text([{ value: 'Solution' }]))];
     submissionFileTypes = submissionFileTypes;
     submissionFileTypeRules = submissionFileTypeRules;
 
@@ -160,26 +157,22 @@ export class ProblemMaterial {
             .map(d => d.scoreRange),
     );
 
-    submissionListColumns: Array<ApiOutputValue<'Column'>> = [
+    submissionListColumns = [
         ...this.objectives.map(({ title, gradeDomain }) => {
-            if (gradeDomain instanceof ScoreGradeDomain) {
-                return { __typename: 'ScoreColumn' as const, title };
-            }
-            if (gradeDomain instanceof FulfillmentGradeDomain) {
-                return { __typename: 'FulfillmentColumn' as const, title };
-            }
+            if (gradeDomain instanceof ScoreGradeDomain) return new ScoreColumn(title);
+            if (gradeDomain instanceof FulfillmentGradeDomain) return new FulfillmentColumn(title);
             throw new Error(`unexpected grade domain ${gradeDomain}`);
         }),
-        { __typename: 'ScoreColumn' as const, title: new Text([{ value: 'Total score' }]) },
+        new ScoreColumn(new Text([{ value: 'Total score' }])),
     ];
 
-    evaluationFeedbackColumns: Array<ApiOutputValue<'Column'>> = [
-        { __typename: 'HeaderColumn', title: new Text([{ value: 'Subtask' }]) },
-        { __typename: 'HeaderColumn', title: new Text([{ value: 'Case' }]) },
-        { __typename: 'TimeUsageColumn', title: new Text([{ value: 'Time usage' }]) },
-        { __typename: 'MemoryUsageColumn', title: new Text([{ value: 'Memory usage' }]) },
-        { __typename: 'MessageColumn', title: new Text([{ value: 'Message' }]) },
-        { __typename: 'ScoreColumn', title: new Text([{ value: 'Score' }]) },
+    evaluationFeedbackColumns = [
+        new HeaderColumn(new Text([{ value: 'Subtask' }])),
+        new HeaderColumn(new Text([{ value: 'Case' }])),
+        new TimeUsageColumn(new Text([{ value: 'Time usage' }])),
+        new MemoryUsageColumn(new Text([{ value: 'Memory usage' }])),
+        new MessageColumn(new Text([{ value: 'Message' }])),
+        new ScoreColumn(new Text([{ value: 'Score' }])),
     ];
 
     async loadPublicContent(problem: ProblemDefinition, path: string) {

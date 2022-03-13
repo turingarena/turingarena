@@ -1,5 +1,6 @@
 import { gql } from 'apollo-server-core';
 import { ApiOutputValue } from '../../main/graphql-types';
+import { Text } from './text';
 import { Valence } from './valence';
 
 export const scoreSchema = gql`
@@ -87,4 +88,10 @@ export class ScoreField implements ApiOutputValue<'ScoreField'> {
             ? 'PARTIAL'
             : 'FAILURE';
     }
+}
+
+export class ScoreColumn implements ApiOutputValue<'ScoreColumn'> {
+    __typename = 'ScoreColumn' as const;
+
+    constructor(readonly title: Text) {}
 }

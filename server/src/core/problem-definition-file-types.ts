@@ -2,12 +2,6 @@ import { gql } from 'apollo-server-core';
 import { ApiOutputValue } from '../main/graphql-types';
 import { Text } from './data/text';
 
-export class SubmissionFileType implements ApiOutputValue<'SubmissionFileType'> {
-    constructor(readonly name: string, readonly title: Text) {}
-}
-
-export type SubmissionFileTypeRule = ApiOutputValue<'SubmissionFileTypeRule'>;
-
 export const submissionFileTypeSchema = gql`
     type SubmissionFileType {
         name: String!
@@ -34,6 +28,12 @@ export const submissionFileTypeSchema = gql`
         otherTypes: [SubmissionFileType!]!
     }
 `;
+
+export class SubmissionFileType implements ApiOutputValue<'SubmissionFileType'> {
+    constructor(readonly name: string, readonly title: Text) {}
+}
+
+export type SubmissionFileTypeRule = ApiOutputValue<'SubmissionFileTypeRule'>;
 
 const lang = {
     python2: new SubmissionFileType('python2', new Text([{ value: 'Python 2 (cpython)' }])),

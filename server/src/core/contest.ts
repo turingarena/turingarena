@@ -81,7 +81,7 @@ export class Contest implements ApiOutputValue<'Contest'> {
     async problemSet() {
         await this.ctx.authorizeAdmin();
 
-        return (new ProblemSetDefinition(this) as unknown) as ApiOutputValue<'ProblemSetDefinition'>;
+        return new ProblemSetDefinition(this);
     }
 
     async package() {

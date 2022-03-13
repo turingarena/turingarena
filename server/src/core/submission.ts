@@ -9,9 +9,14 @@ import { ApiInputValue, ApiOutputValue } from '../main/graphql-types';
 import { unreachable } from '../util/unreachable';
 import { Contest } from './contest';
 import { ApiDateTime } from './data/date-time';
+import { ApiTable, Record } from './data/field';
 import { FulfillmentField, FulfillmentGradeDomain } from './data/fulfillment';
+import { HeaderField } from './data/header';
+import { MemoryUsage, MemoryUsageField } from './data/memory-usage';
+import { MessageField } from './data/message';
 import { ScoreField, ScoreGrade, ScoreGradeDomain, ScoreRange } from './data/score';
 import { Text } from './data/text';
+import { TimeUsage, TimeUsageField } from './data/time-usage';
 import { LiveEvaluationService } from './evaluate';
 import { Evaluation, EvaluationCache } from './evaluation';
 import { extractFile } from './files/file-content';
@@ -83,40 +88,36 @@ export class Submission implements ApiOutputValue<'Submission'> {
         return new Evaluation(data.id, this.ctx);
     }
 
-    async summaryRow(): Promise<ApiOutputValue<'Record'>> {
+    async summaryRow() {
         const scoreRange = (await this.getMaterial()).scoreRange;
         const score = (await this.getTotalScore())?.score;
         const outcomes = await this.getObjectiveOutcomes();
         const material = await this.getMaterial();
 
-        return {
-            __typename: 'Record',
-            valence:
-                score !== undefined ? (score >= scoreRange.max ? 'SUCCESS' : score > 0 ? 'PARTIAL' : 'FAILURE') : null,
-            fields: [
-                ...material.objectives.map(objective => {
-                    const { gradeDomain } = objective;
-                    if (gradeDomain instanceof ScoreGradeDomain) {
-                        return new ScoreField(
-                            gradeDomain.scoreRange,
-                            outcomes !== null ? outcomes.get(objective)?.getScoreGrade(gradeDomain).score ?? 0 : null,
-                        );
-                    }
-                    if (gradeDomain instanceof FulfillmentGradeDomain) {
-                        return new FulfillmentField(
-                            outcomes !== null
-                                ? outcomes.get(objective)?.getFulfillmentGrade().fulfilled ?? false
-                                : null,
-                        );
-                    }
-                    throw unreachable();
-                }),
-                new ScoreField(scoreRange, score !== undefined ? score : null),
-            ],
-        };
+        const objectiveFields = material.objectives.map(objective => {
+            const { gradeDomain } = objective;
+            if (gradeDomain instanceof ScoreGradeDomain) {
+                return new ScoreField(
+                    gradeDomain.scoreRange,
+                    outcomes !== null ? outcomes.get(objective)?.getScoreGrade(gradeDomain).score ?? 0 : null,
+                );
+            }
+            if (gradeDomain instanceof FulfillmentGradeDomain) {
+                return new FulfillmentField(
+                    outcomes !== null ? outcomes.get(objective)?.getFulfillmentGrade().fulfilled ?? false : null,
+                );
+            }
+            throw unreachable();
+        });
+
+        const totalScoreField = new ScoreField(scoreRange, score !== undefined ? score : null);
+        const valence =
+            score !== undefined ? (score >= scoreRange.max ? 'SUCCESS' : score > 0 ? 'PARTIAL' : 'FAILURE') : null;
+
+        return new Record([...objectiveFields, totalScoreField], valence);
     }
 
-    async feedbackTable(): Promise<ApiOutputValue<'Table'>> {
+    async feedbackTable() {
         const {
             objectives,
             taskInfo,
@@ -180,68 +181,44 @@ export class Submission implements ApiOutputValue<'Submission'> {
             }
         }
 
-        return {
-            __typename: 'Table',
-            columns: evaluationFeedbackColumns,
-            rows: testCasesData.map(
-                (
-                    { objectiveIndex, score, message, timeUsage, memoryUsage },
-                    testCaseIndex,
-                ): ApiOutputValue<'Record'> => ({
-                    valence: score !== null ? (score >= 1 ? 'SUCCESS' : score > 0 ? 'PARTIAL' : 'FAILURE') : null,
-                    fields: [
-                        {
-                            __typename: 'HeaderField',
-                            index: objectiveIndex,
-                            title: new Text([{ value: `Subtask ${objectiveIndex}` }]),
-                        },
-                        {
-                            __typename: 'HeaderField',
-                            index: testCaseIndex,
-                            title: new Text([{ value: `Case ${testCaseIndex}` }]),
-                        },
-                        {
-                            __typename: 'TimeUsageField',
-                            timeUsage: timeUsage !== null ? { seconds: timeUsage } : null,
-                            timeUsageMaxRelevant: { seconds: timeLimitSeconds * limitsMarginMultiplier },
-                            timeUsageWatermark: { seconds: timeLimitSeconds },
-                            valence:
-                                timeUsage === null
-                                    ? null
-                                    : timeUsage <= warningWatermarkMultiplier * timeLimitSeconds
-                                    ? 'NOMINAL'
-                                    : timeUsage <= timeLimitSeconds
-                                    ? 'WARNING'
-                                    : 'FAILURE',
-                        },
-                        {
-                            __typename: 'MemoryUsageField',
-                            memoryUsage: memoryUsage !== null ? { bytes: memoryUsage * memoryUnitBytes } : null,
-                            memoryUsageMaxRelevant: {
-                                bytes: memoryLimitBytes * limitsMarginMultiplier,
-                            },
-                            memoryUsageWatermark: {
-                                bytes: memoryLimitBytes,
-                            },
-                            valence:
-                                memoryUsage === null
-                                    ? null
-                                    : memoryUsage * memoryUnitBytes <= warningWatermarkMultiplier * memoryLimitBytes
-                                    ? 'NOMINAL'
-                                    : memoryUsage * memoryUnitBytes <= memoryLimitBytes
-                                    ? 'WARNING'
-                                    : 'FAILURE',
-                        },
-                        {
-                            __typename: 'MessageField',
-                            message: new Text([{ value: `${message ?? ``}` }]),
-                            valence: null,
-                        },
-                        new ScoreField(new ScoreRange(1, 2, true), score),
-                    ],
-                }),
-            ),
-        };
+        const rows = testCasesData.map(({ objectiveIndex, score, message, timeUsage, memoryUsage }, testCaseIndex) => {
+            const fields = [
+                new HeaderField(new Text([{ value: `Subtask ${objectiveIndex}` }]), objectiveIndex),
+                new HeaderField(new Text([{ value: `Case ${testCaseIndex}` }]), testCaseIndex),
+                new TimeUsageField(
+                    timeUsage !== null ? new TimeUsage(timeUsage) : null,
+                    new TimeUsage(timeLimitSeconds * limitsMarginMultiplier),
+                    new TimeUsage(timeLimitSeconds),
+                    timeUsage === null
+                        ? null
+                        : timeUsage <= warningWatermarkMultiplier * timeLimitSeconds
+                        ? 'NOMINAL'
+                        : timeUsage <= timeLimitSeconds
+                        ? 'WARNING'
+                        : 'FAILURE',
+                ),
+                new MemoryUsageField(
+                    memoryUsage !== null ? new MemoryUsage(memoryUsage * memoryUnitBytes) : null,
+                    new MemoryUsage(memoryLimitBytes * limitsMarginMultiplier),
+                    new MemoryUsage(memoryLimitBytes),
+                    memoryUsage === null
+                        ? null
+                        : memoryUsage * memoryUnitBytes <= warningWatermarkMultiplier * memoryLimitBytes
+                        ? 'NOMINAL'
+                        : memoryUsage * memoryUnitBytes <= memoryLimitBytes
+                        ? 'WARNING'
+                        : 'FAILURE',
+                ),
+                new MessageField(new Text([{ value: `${message ?? ``}` }]), null),
+                new ScoreField(new ScoreRange(1, 2, true), score),
+            ];
+
+            const valence = score !== null ? (score >= 1 ? 'SUCCESS' : score > 0 ? 'PARTIAL' : 'FAILURE') : null;
+
+            return new Record(fields, valence);
+        });
+
+        return new ApiTable(evaluationFeedbackColumns, rows);
     }
 
     private async getLiveEvaluationEvents() {

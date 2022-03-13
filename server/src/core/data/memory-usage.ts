@@ -1,4 +1,7 @@
 import { gql } from 'apollo-server-core';
+import { ApiOutputValue } from '../../main/graphql-types';
+import { Text } from './text';
+import { Valence } from './valence';
 
 export const memoryUsageSchema = gql`
     "Quantity of memory used for some computation."
@@ -27,3 +30,26 @@ export const memoryUsageSchema = gql`
         title: Text!
     }
 `;
+
+export class MemoryUsage implements ApiOutputValue<'MemoryUsage'> {
+    __typename = 'MemoryUsage' as const;
+
+    constructor(readonly bytes: number) {}
+}
+
+export class MemoryUsageField implements ApiOutputValue<'MemoryUsageField'> {
+    __typename = 'MemoryUsageField' as const;
+
+    constructor(
+        readonly memoryUsage: MemoryUsage | null,
+        readonly memoryUsageMaxRelevant: MemoryUsage | null,
+        readonly memoryUsageWatermark: MemoryUsage | null,
+        readonly valence: Valence | null,
+    ) {}
+}
+
+export class MemoryUsageColumn implements ApiOutputValue<'MemoryUsageColumn'> {
+    __typename = 'MemoryUsageColumn' as const;
+
+    constructor(readonly title: Text) {}
+}

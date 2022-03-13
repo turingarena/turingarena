@@ -20,9 +20,7 @@ export const mutationRoot: ApiOutputValue<'Mutation'> = {
     },
     submit: async ({ submission }, ctx) => {
         await ctx.authorizeUser(submission.username);
-        const submissionOutput = await submit(submission, ctx);
-
-        return (submissionOutput as unknown) as ApiOutputValue<'Submission'>; // FIXME: types
+        return submit(submission, ctx);
     },
     logIn: ({ token }, ctx) => ctx.auth.logIn(token),
     sendMessage: async ({ message }, ctx) => {
