@@ -1,6 +1,7 @@
 import { gql } from 'apollo-server-core';
 import { ObjectiveDefinition } from './objective-definition';
 import { ProblemInstance } from './problem-instance';
+import { ApiOutputValue } from '../main/graphql-types';
 
 export const objectiveInstanceSchema = gql`
     """
@@ -16,7 +17,7 @@ export const objectiveInstanceSchema = gql`
     }
 `;
 
-export class ObjectiveInstance {
+export class ObjectiveInstance implements ApiOutputValue<'ObjectiveInstance'> {
     constructor(readonly problem: ProblemInstance, readonly definition: ObjectiveDefinition) {}
     __typename = 'ObjectiveInstance' as const;
     id() {

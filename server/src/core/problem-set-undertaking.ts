@@ -5,6 +5,7 @@ import { ProblemSetDefinition } from './problem-set-definition';
 import { ProblemSetView } from './problem-set-view';
 import { ProblemUndertaking } from './problem-undertaking';
 import { User } from './user';
+import { ApiOutputValue } from '../main/graphql-types';
 
 export const problemSetUndertakingSchema = gql`
     """
@@ -25,7 +26,7 @@ export const problemSetUndertakingSchema = gql`
     }
 `;
 
-export class ProblemSetUndertaking {
+export class ProblemSetUndertaking implements ApiOutputValue<'ProblemSetUndertaking'> {
     constructor(readonly definition: ProblemSetDefinition, readonly user: User, readonly ctx: ApiContext) {}
 
     __typename = 'ProblemSetUndertaking' as const;

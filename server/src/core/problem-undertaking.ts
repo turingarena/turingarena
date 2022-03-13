@@ -8,6 +8,7 @@ import { ProblemInstance } from './problem-instance';
 import { ProblemView } from './problem-view';
 import { SubmissionCache } from './submission';
 import { User } from './user';
+import { ApiOutputValue } from '../main/graphql-types';
 
 export const problemUndertakingSchema = gql`
     """
@@ -37,7 +38,7 @@ export const problemUndertakingSchema = gql`
     }
 `;
 
-export class ProblemUndertaking {
+export class ProblemUndertaking implements ApiOutputValue<'ProblemUndertaking'> {
     constructor(readonly instance: ProblemInstance, readonly user: User, readonly ctx: ApiContext) {}
 
     __typename = 'ProblemUndertaking' as const;

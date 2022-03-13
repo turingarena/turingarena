@@ -9,6 +9,7 @@ import { ProblemSetDefinition } from './problem-set-definition';
 import { ProblemSetView } from './problem-set-view';
 import { ProblemUndertaking } from './problem-undertaking';
 import { User } from './user';
+import { ApiOutputValue } from '../main/graphql-types';
 
 export const problemViewSchema = gql`
     """
@@ -38,7 +39,7 @@ export const problemViewSchema = gql`
     }
 `;
 
-export class ProblemView {
+export class ProblemView implements ApiOutputValue<'ProblemView'> {
     constructor(readonly instance: ProblemInstance, readonly user: User | null, readonly ctx: ApiContext) {}
 
     __typename = 'ProblemView' as const;

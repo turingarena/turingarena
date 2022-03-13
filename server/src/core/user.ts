@@ -4,6 +4,7 @@ import { ApiContext } from '../main/api-context';
 import { createSimpleLoader } from '../main/base-model';
 import { unreachable } from '../util/unreachable';
 import { Contest } from './contest';
+import { ApiOutputValue } from '../main/graphql-types';
 
 export const userSchema = gql`
     type User {
@@ -20,7 +21,7 @@ export const userSchema = gql`
     }
 `;
 
-export class User {
+export class User implements ApiOutputValue<'User'> {
     constructor(readonly contest: Contest, readonly username: string, readonly ctx: ApiContext) {}
     __typename = 'User' as const;
 
