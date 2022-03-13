@@ -20,6 +20,7 @@ import { ProblemMaterial, ProblemMaterialCache } from './problem-definition-mate
 import { ProblemInstance } from './problem-instance';
 import { ProblemSetDefinition } from './problem-set-definition';
 import { ProblemSetUndertaking } from './problem-set-undertaking';
+import { ProblemUndertaking } from './problem-undertaking';
 import { User } from './user';
 
 export const contestSchema = gql`
@@ -205,7 +206,42 @@ export class Contest implements ApiOutputValue<'Contest'> {
 
     async userTable() {
         await this.ctx.authorizeAdmin();
+
         const contestMetadata = await this.getMetadata();
+        const problemSet = await this.problemSet();
+        const problems = await problemSet.problems();
+
+        type MyColumn = [Column, (user: User) => Field | Promise<Field>];
+
+        const userTableColumns: Array<MyColumn> = [
+            [
+                new HeaderColumn(new Text([{ value: 'ID' }])),
+                user => new HeaderField(new Text([{ value: user.metadata.name }]), null),
+            ],
+            [
+                new HeaderColumn(new Text([{ value: 'token' }])),
+                user => new HeaderField(new Text([{ value: user.metadata.token }]), null),
+            ],
+            ...problems.map(
+                (problem): MyColumn => [
+                    new ScoreColumn(new Text([{ value: `Score ${problem.definition.baseName}` }])),
+                    async user => {
+                        const undertaking = new ProblemUndertaking(problem, user, user.ctx);
+                        const { scoreRange, score } = await undertaking.totalScoreGrade();
+                        return new ScoreField(scoreRange, score);
+                    },
+                ],
+            ),
+            [
+                new ScoreColumn(new Text([{ value: 'Total score' }])),
+                async user => {
+                    const undertaking = new ProblemSetUndertaking(problemSet, user, user.ctx);
+                    const { scoreRange, score } = await undertaking.totalScoreGrade();
+                    return new ScoreField(scoreRange, score);
+                },
+            ],
+        ];
+
         return new ApiTable(
             userTableColumns.map(([column]) => column),
             await Promise.all(
@@ -222,23 +258,3 @@ export class Contest implements ApiOutputValue<'Contest'> {
         );
     }
 }
-
-const userTableColumns: Array<[Column, (user: User) => Field | Promise<Field>]> = [
-    [
-        new HeaderColumn(new Text([{ value: 'ID' }])),
-        user => new HeaderField(new Text([{ value: user.metadata.name }]), null),
-    ],
-    [
-        new HeaderColumn(new Text([{ value: 'token' }])),
-        user => new HeaderField(new Text([{ value: user.metadata.token }]), null),
-    ],
-    [
-        new ScoreColumn(new Text([{ value: 'Total score' }])),
-        async user => {
-            const problemSet = await user.contest.problemSet();
-            const undertaking = new ProblemSetUndertaking(problemSet, user, user.ctx);
-            const { scoreRange, score } = await undertaking.totalScoreGrade();
-            return new ScoreField(scoreRange, score);
-        },
-    ],
-];
