@@ -281,9 +281,7 @@ export class Submission implements ApiOutputValue<'Submission'> {
         const submissionPath = path.join(base, this.id);
 
         for (const item of items) {
-            const extension = item.fileType.name;
-
-            const filePath = path.join(submissionPath, `${item.field.name}.${item.fileType.name}.${extension}`);
+            const filePath = path.join(submissionPath, item.file.name);
             await extractFile(item.file.content, filePath);
         }
 
