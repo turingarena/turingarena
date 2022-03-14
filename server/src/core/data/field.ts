@@ -8,6 +8,7 @@ import { TimeUsageField, TimeUsageColumn } from './time-usage';
 import { MemoryUsageField, MemoryUsageColumn } from './memory-usage';
 import { HeaderField, HeaderColumn } from './header';
 import { DateTimeColumn, DateTimeField } from './date-time';
+import { FileColumn, FileField } from './file';
 
 export const fieldSchema = gql`
     "Container for values to show users as feedback, e.g., in table cells."
@@ -19,6 +20,7 @@ export const fieldSchema = gql`
         | MemoryUsageField
         | HeaderField
         | DateTimeField
+        | FileField
 
     "A column with a title."
     interface TitledColumn {
@@ -34,6 +36,7 @@ export const fieldSchema = gql`
         | MemoryUsageColumn
         | HeaderColumn
         | DateTimeColumn
+        | FileColumn
 
     "Collection of fields, in 1-to-1 correspondence with a collection of columns."
     type Record {
@@ -54,7 +57,9 @@ export type Field =
     | TimeUsageField
     | MemoryUsageField
     | HeaderField
-    | DateTimeField;
+    | DateTimeField
+    | FileField;
+
 export type Column =
     | ScoreColumn
     | FulfillmentColumn
@@ -62,7 +67,8 @@ export type Column =
     | TimeUsageColumn
     | MemoryUsageColumn
     | HeaderColumn
-    | DateTimeColumn;
+    | DateTimeColumn
+    | FileColumn;
 
 export class Record implements ApiOutputValue<'Record'> {
     __typename = 'Record' as const;

@@ -2,6 +2,7 @@ import { gql } from 'apollo-server-core';
 import { ApiContext } from '../../main/api-context';
 import { ApiOutputValue } from '../../main/graphql-types';
 import { FileContent } from '../files/file-content';
+import { Text } from './text';
 
 export const fileSchema = gql`
     "File containing multimedia content"
@@ -17,6 +18,15 @@ export const fileSchema = gql`
         # TODO: add a 'baseUrl' parameter, and make this URL absolute?
         url: String!
     }
+
+    type FileField {
+        file: File
+    }
+
+    "Column containing a date-time."
+    type FileColumn implements TitledColumn {
+        title: Text!
+    }
 `;
 
 export class File implements ApiOutputValue<'File'> {
@@ -31,4 +41,16 @@ export class File implements ApiOutputValue<'File'> {
     async url() {
         return `/files/${this.content.id}/${this.name}`;
     }
+}
+
+export class FileField implements ApiOutputValue<'FileField'> {
+    __typename = 'FileField' as const;
+
+    constructor(readonly file: File | null) {}
+}
+
+export class FileColumn implements ApiOutputValue<'FileColumn'> {
+    __typename = 'FileColumn' as const;
+
+    constructor(readonly title: Text) {}
 }

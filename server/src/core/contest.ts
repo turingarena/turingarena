@@ -9,7 +9,7 @@ import { PackageTarget } from './archive/package-target';
 import { ContestMetadata } from './contest-metadata';
 import { ApiDateTime, DateTimeColumn, DateTimeField } from './data/date-time';
 import { ApiTable, Column, Field, Record } from './data/field';
-import { File } from './data/file';
+import { File, FileColumn, FileField } from './data/file';
 import { HeaderColumn, HeaderField } from './data/header';
 import { Media } from './data/media';
 import { ScoreColumn, ScoreField } from './data/score';
@@ -261,6 +261,15 @@ export class Contest implements ApiOutputValue<'Contest'> {
     async submissionTable() {
         await this.ctx.authorizeAdmin();
 
+        const problemSet = await this.problemSet();
+        const problems = await problemSet.problems();
+
+        const submissionFields = (
+            await Promise.all(problems.map(problem => problem.definition.submissionFields()))
+        ).flatMap(fields => fields);
+
+        const submissionFieldNames = Array.from(new Set(submissionFields.map(field => field.name)));
+
         type MyColumn = [Column, (submission: Submission) => Field | Promise<Field>];
 
         const columns: Array<MyColumn> = [
@@ -282,6 +291,18 @@ export class Contest implements ApiOutputValue<'Contest'> {
                 new DateTimeColumn(new Text([{ value: 'Time' }])),
                 async submission => new DateTimeField(await submission.createdAt()),
             ],
+            ...submissionFieldNames.map(
+                (name): MyColumn => [
+                    new FileColumn(new Text([{ value: name }])),
+                    async submission => {
+                        const items = await submission.items();
+                        const item = items.find(item => item.field.name === name);
+                        const file = item?.file ?? null;
+                        if (file) this.ctx.service(FileContentService).publish(file.content);
+                        return new FileField(file);
+                    },
+                ],
+            ),
             [
                 new ScoreColumn(new Text([{ value: 'Score' }])),
                 async submission => {

@@ -4,6 +4,7 @@ import { FieldFragment } from '../../generated/graphql-types';
 import { unexpected } from '../../util/check';
 import { FragmentProps } from '../../util/fragment-props';
 import { DateTimeField, dateTimeFieldFragment } from './date-time-field';
+import { FileField, fileFieldFragment } from './file-field';
 import { FulfillmentField, fulfillmentFieldFragment, ScoreField, scoreFieldFragment } from './grade-field';
 import { HeaderField, headerFieldFragment } from './header-field';
 import { MemoryUsageField, memoryUsageFieldFragment } from './memory-usage-field';
@@ -26,6 +27,8 @@ export function Field({ data }: FragmentProps<FieldFragment>) {
       return <HeaderField data={data} />;
     case 'DateTimeField':
       return <DateTimeField data={data} />;
+    case 'FileField':
+      return <FileField data={data} />;
     default:
       return unexpected(data);
   }
@@ -54,6 +57,9 @@ export const fieldFragment = gql`
     ... on DateTimeField {
       ...DateTimeField
     }
+    ... on FileField {
+      ...FileField
+    }
   }
 
   ${headerFieldFragment}
@@ -63,4 +69,5 @@ export const fieldFragment = gql`
   ${messageFieldFragment}
   ${timeUsageFieldFragment}
   ${dateTimeFieldFragment}
+  ${fileFieldFragment}
 `;
