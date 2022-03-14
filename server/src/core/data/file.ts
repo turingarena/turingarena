@@ -46,7 +46,7 @@ export class File implements ApiOutputValue<'File'> {
 export class FileField implements ApiOutputValue<'FileField'> {
     __typename = 'FileField' as const;
 
-    constructor(readonly file: File | null) {}
+    constructor(readonly file: File | null, readonly title: Text) {}
 }
 
 export class FileColumn implements ApiOutputValue<'FileColumn'> {

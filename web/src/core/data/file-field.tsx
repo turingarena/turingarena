@@ -2,16 +2,16 @@ import { gql } from '@apollo/client';
 import React from 'react';
 import { FileFieldFragment } from '../../generated/graphql-types';
 import { FragmentProps } from '../../util/fragment-props';
-import { FileDownload } from './media-download';
+import { FileDownload, fileDownloadFragment } from './media-download';
 
 export const fileFieldFragment = gql`
   fragment FileField on FileField {
     file {
-      name
-      type
-      url
+      ...FileDownload
     }
   }
+
+  ${fileDownloadFragment}
 `;
 
 export function FileField({ data }: FragmentProps<FileFieldFragment>) {

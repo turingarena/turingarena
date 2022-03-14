@@ -3,12 +3,14 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as ssri from 'ssri';
 import { ApiOutputValue } from '../../main/graphql-types';
+import { MemoryUsage } from '../data/memory-usage';
 
 export const fileContentSchema = gql`
     type FileContent {
         id: ID!
         base64: String!
         utf8: String!
+        size: MemoryUsage!
     }
 
     input FileContentInput {
@@ -28,6 +30,10 @@ export class FileContent implements ApiOutputValue<'FileContent'> {
 
     utf8() {
         return this.data.toString('utf8');
+    }
+
+    size() {
+        return new MemoryUsage(this.data.byteLength);
     }
 }
 

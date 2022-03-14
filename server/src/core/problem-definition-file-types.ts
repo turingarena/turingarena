@@ -30,18 +30,24 @@ export const submissionFileTypeSchema = gql`
 `;
 
 export class SubmissionFileType implements ApiOutputValue<'SubmissionFileType'> {
-    constructor(readonly name: string, readonly title: Text) {}
+    constructor(readonly name: string, readonly extension: string, readonly title: Text) {}
 }
 
-export type SubmissionFileTypeRule = ApiOutputValue<'SubmissionFileTypeRule'>;
+export interface SubmissionFileTypeRule extends ApiOutputValue<'SubmissionFileTypeRule'> {
+    extensions: string[];
+    defaultType: SubmissionFileType;
+    recommendedTypes: SubmissionFileType[];
+    otherTypes: SubmissionFileType[];
+    fields: null; // TODO
+}
 
 const lang = {
-    python2: new SubmissionFileType('python2', new Text([{ value: 'Python 2 (cpython)' }])),
-    python3: new SubmissionFileType('py', new Text([{ value: 'Python 3 (cpython)' }])),
-    c: new SubmissionFileType('c', new Text([{ value: 'C (c11)' }])),
-    cpp: new SubmissionFileType('cpp', new Text([{ value: 'C++ (c++17)' }])),
-    rust: new SubmissionFileType('rust', new Text([{ value: 'Rust' }])),
-    java: new SubmissionFileType('java', new Text([{ value: 'Java 8 (JDK)' }])),
+    python2: new SubmissionFileType('python2', '.py', new Text([{ value: 'Python 2 (cpython)' }])),
+    python3: new SubmissionFileType('py', '.py', new Text([{ value: 'Python 3 (cpython)' }])),
+    c: new SubmissionFileType('c', '.c', new Text([{ value: 'C (c11)' }])),
+    cpp: new SubmissionFileType('cpp', '.cpp', new Text([{ value: 'C++ (c++17)' }])),
+    rust: new SubmissionFileType('rust', '.rust', new Text([{ value: 'Rust' }])),
+    java: new SubmissionFileType('java', '.java', new Text([{ value: 'Java 8 (JDK)' }])),
 };
 
 export const submissionFileTypes: SubmissionFileType[] = Object.values(lang);
