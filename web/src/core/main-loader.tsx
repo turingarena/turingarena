@@ -40,11 +40,7 @@ export function MainLoader() {
   }, [data]);
 
   if (data === undefined && loading) return <>Loading...</>;
-  if (error !== undefined) {
-    clearAuth();
-
-    return <>Error! {error.message}</>;
-  }
+  if (error !== undefined) return <>Error! {error.message}</>;
   if (data?.mainView === undefined) return <>No main view!</>;
 
   return <MainView data={data?.mainView} />;
