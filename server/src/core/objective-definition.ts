@@ -38,9 +38,8 @@ export class ObjectiveDefinition implements ApiOutputValue<'ObjectiveDefinition'
             ? new ScoreGradeDomain(new ScoreRange(this.subtaskInfo.max_score, 0, true))
             : new FulfillmentGradeDomain();
 
-    id() {
-        return `${this.material.problem.contest.id}/${this.material.problem.baseName}/${this.index}`;
-    }
+    id = `${this.material.problem.contest.id}/${this.material.problem.baseName}/${this.index}`;
+
     problem() {
         return this.material.problem;
     }

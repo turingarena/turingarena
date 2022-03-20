@@ -10,9 +10,10 @@ import { ContestMetadata } from './contest-metadata';
 import { ApiDateTime, DateTimeColumn, DateTimeField } from './data/date-time';
 import { ApiTable, Column, Field, Record } from './data/field';
 import { File, FileColumn, FileField } from './data/file';
+import { FulfillmentColumn, FulfillmentField } from './data/fulfillment';
 import { HeaderColumn, HeaderField } from './data/header';
 import { Media } from './data/media';
-import { ScoreColumn, ScoreField } from './data/score';
+import { ScoreColumn, ScoreField, ScoreGradeDomain } from './data/score';
 import { Text } from './data/text';
 import { Evaluation, EvaluationCache } from './evaluation';
 import { FileContentService } from './files/file-content-service';
@@ -332,6 +333,12 @@ export class Contest implements ApiOutputValue<'Contest'> {
     async evaluationTable() {
         await this.ctx.authorizeAdmin();
 
+        const problemSet = await this.problemSet();
+        const problems = await problemSet.problems();
+        const objectives = (await Promise.all(problems.map(problem => problem.definition.objectives()))).flatMap(
+            x => x,
+        );
+
         type MyColumn = [Column, (evaluation: Evaluation) => Field | Promise<Field>];
 
         const columns: Array<MyColumn> = [
@@ -363,6 +370,32 @@ export class Contest implements ApiOutputValue<'Contest'> {
                     return new ScoreField(scoreRange, score);
                 },
             ],
+            ...objectives.map(
+                (objective): MyColumn => {
+                    const gradeDomain = objective.gradeDomain;
+                    return gradeDomain instanceof ScoreGradeDomain
+                        ? [
+                              new ScoreColumn(objective.title),
+                              async evaluation => {
+                                  const outcomes = [...(await evaluation.getObjectiveOutcomes()).entries()];
+                                  const objectiveOutcome = outcomes.find(([{ id }]) => id === objective.id);
+                                  const outcome = objectiveOutcome?.[1] ?? null;
+                                  console.log(outcome, objective);
+                                  return new ScoreField(gradeDomain.scoreRange, objectiveOutcome?.[1]?.grade ?? null);
+                              },
+                          ]
+                        : [
+                              new FulfillmentColumn(objective.title),
+                              async evaluation => {
+                                  const outcomes = [...(await evaluation.getObjectiveOutcomes()).entries()];
+                                  const objectiveOutcome = outcomes.find(([{ id }]) => id === objective.id);
+                                  const outcome = objectiveOutcome?.[1] ?? null;
+                                  const fulfilled = outcome === null ? null : outcome.grade > 0;
+                                  return new FulfillmentField(fulfilled);
+                              },
+                          ];
+                },
+            ),
         ];
 
         const evaluations = (await this.ctx.cache(EvaluationCache).all.load('')).map(
