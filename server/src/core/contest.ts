@@ -24,6 +24,7 @@ import { ScoreColumn, ScoreField, ScoreGradeDomain } from './data/score';
 import { Text } from './data/text';
 import { Evaluation, EvaluationCache } from './evaluation';
 import { FileContentService } from './files/file-content-service';
+import { ObjectiveDefinition } from './objective-definition';
 import { ProblemDefinition } from './problem-definition';
 import { ProblemMaterial, ProblemMaterialCache } from './problem-definition-material';
 import { ProblemInstance } from './problem-instance';
@@ -355,7 +356,7 @@ export class Contest implements ApiOutputValue<'Contest'> {
                 i => new DateTimeColumn(new Text([{ value: 'Time' }]), i),
                 async evaluation => new DateTimeField(ApiDateTime.fromJSDate((await evaluation.getData()).createdAt)),
             ),
-            new GroupColumnDefinition(new Text([{ value: 'Objectives' }]), [
+            new GroupColumnDefinition(new Text([{ value: 'Outcome' }]), [
                 {
                     show: 'ALWAYS',
                     column: new AtomicColumnDefinition(
@@ -377,32 +378,53 @@ export class Contest implements ApiOutputValue<'Contest'> {
     private async evaluationObjectiveTableDefinition() {
         const problemSet = await this.problemSet();
         const problems = await problemSet.problems();
-        const objectives = (await Promise.all(problems.map(problem => problem.definition.objectives()))).flatMap(
-            x => x,
+
+        const problemObjectives = await Promise.all(
+            problems.map(async problem => ({ problem, objectives: await problem.definition.objectives() })),
         );
 
-        return objectives.map(
-            (objective): ColumnDefinition<Evaluation> => {
-                const gradeDomain = objective.gradeDomain;
-                return gradeDomain instanceof ScoreGradeDomain
-                    ? new AtomicColumnDefinition(
-                          i => new ScoreColumn(objective.title, i),
-                          async evaluation => {
-                              const outcome = await evaluation.getOutcome(objective);
-                              if (!outcome) return null;
-                              return new ScoreField(gradeDomain.scoreRange, outcome?.grade ?? null);
-                          },
-                      )
-                    : new AtomicColumnDefinition(
-                          i => new FulfillmentColumn(objective.title, i),
-                          async evaluation => {
-                              const outcome = await evaluation.getOutcome(objective);
-                              if (!outcome) return null;
-                              const fulfilled = outcome === null ? null : outcome.grade > 0;
-                              return new FulfillmentField(fulfilled);
-                          },
-                      );
-            },
+        return problemObjectives.map(
+            ({ problem, objectives }) =>
+                new GroupColumnDefinition(new Text([{ value: problem.definition.baseName }]), [
+                    {
+                        show: 'ALWAYS',
+                        column: new AtomicColumnDefinition<Evaluation>(
+                            i => new ScoreColumn(new Text([{ value: 'Total score' }]), i),
+                            async evaluation => {
+                                const submissionProblem = await (await evaluation.submission()).problem();
+                                if (submissionProblem.id !== problem.id) return null;
+                                const { score, scoreRange } = await evaluation.getTotalScore();
+                                return new ScoreField(scoreRange, score);
+                            },
+                        ),
+                    },
+                    ...objectives.map(objective => ({
+                        show: 'WHEN_OPEN' as const,
+                        column: getObjectiveColumnDefinition(objective),
+                    })),
+                ]),
         );
     }
+}
+
+function getObjectiveColumnDefinition(objective: ObjectiveDefinition) {
+    const gradeDomain = objective.gradeDomain;
+    return gradeDomain instanceof ScoreGradeDomain
+        ? new AtomicColumnDefinition<Evaluation>(
+              i => new ScoreColumn(objective.title, i),
+              async evaluation => {
+                  const outcome = await evaluation.getOutcome(objective);
+                  if (!outcome) return null;
+                  return new ScoreField(gradeDomain.scoreRange, outcome?.grade ?? null);
+              },
+          )
+        : new AtomicColumnDefinition<Evaluation>(
+              i => new FulfillmentColumn(objective.title, i),
+              async evaluation => {
+                  const outcome = await evaluation.getOutcome(objective);
+                  if (!outcome) return null;
+                  const fulfilled = outcome === null ? null : outcome.grade > 0;
+                  return new FulfillmentField(fulfilled);
+              },
+          );
 }

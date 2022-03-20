@@ -64,6 +64,7 @@ function mapColumn(column: ColumnFragment, columnGroupShow: ColumnGroupItemShow 
   return column.__typename === 'GroupColumn' ? (
     <AgGridColumn
       id={column.title.variant /* FIXME */}
+      groupId={column.title.variant /* FIXME */}
       headerName={column.title.variant}
       columnGroupShow={columnGroupShow2}
       resizable
