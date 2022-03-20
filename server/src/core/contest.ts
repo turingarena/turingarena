@@ -14,6 +14,7 @@ import { HeaderColumn, HeaderField } from './data/header';
 import { Media } from './data/media';
 import { ScoreColumn, ScoreField } from './data/score';
 import { Text } from './data/text';
+import { Evaluation, EvaluationCache } from './evaluation';
 import { FileContentService } from './files/file-content-service';
 import { ProblemDefinition } from './problem-definition';
 import { ProblemMaterial, ProblemMaterialCache } from './problem-definition-material';
@@ -46,6 +47,7 @@ export const contestSchema = gql`
 
         userTable: Table!
         submissionTable: Table!
+        evaluationTable: Table!
     }
 
     enum ContestStatus {
@@ -322,6 +324,50 @@ export class Contest implements ApiOutputValue<'Contest'> {
                 submissions.map(
                     async submission =>
                         new Record(await Promise.all(columns.map(([, mapper]) => mapper(submission))), null),
+                ),
+            ),
+        );
+    }
+
+    async evaluationTable() {
+        await this.ctx.authorizeAdmin();
+
+        type MyColumn = [Column, (evaluation: Evaluation) => Field | Promise<Field>];
+
+        const columns: Array<MyColumn> = [
+            [
+                new HeaderColumn(new Text([{ value: 'ID' }])),
+                evaluation => new HeaderField(new Text([{ value: evaluation.id }]), null),
+            ],
+            [
+                new HeaderColumn(new Text([{ value: 'Submission' }])),
+                async evaluation => new HeaderField(new Text([{ value: (await evaluation.submission()).id }]), null),
+            ],
+            [
+                new HeaderColumn(new Text([{ value: 'Problem Name' }])),
+                async evaluation =>
+                    new HeaderField(new Text([{ value: (await evaluation.submission()).problem.name }]), null),
+            ],
+            [
+                new HeaderColumn(new Text([{ value: 'Problem Archive Hash' }])),
+                async evaluation => new HeaderField(new Text([{ value: await evaluation.problemArchiveHash() }]), null),
+            ],
+            [
+                new DateTimeColumn(new Text([{ value: 'Time' }])),
+                async evaluation => new DateTimeField(ApiDateTime.fromJSDate((await evaluation.getData()).createdAt)),
+            ],
+        ];
+
+        const evaluations = (await this.ctx.cache(EvaluationCache).all.load('')).map(
+            data => new Evaluation(data.id, this.ctx),
+        );
+
+        return new ApiTable(
+            columns.map(([column]) => column),
+            await Promise.all(
+                evaluations.map(
+                    async evaluation =>
+                        new Record(await Promise.all(columns.map(([, mapper]) => mapper(evaluation))), null),
                 ),
             ),
         );

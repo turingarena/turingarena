@@ -26,6 +26,10 @@ export class EvaluationData extends UuidBaseModel<EvaluationData> {
     @AllowNull(false)
     @Column
     eventsJson!: string;
+
+    @AllowNull(false)
+    @Column
+    problemArchiveHash!: string;
 }
 
 export class Evaluation implements ApiOutputValue<'Evaluation'> {
@@ -39,6 +43,10 @@ export class Evaluation implements ApiOutputValue<'Evaluation'> {
 
     async submission() {
         return new Submission((await this.getData()).submissionId, this.ctx);
+    }
+
+    async problemArchiveHash() {
+        return (await this.getData()).problemArchiveHash;
     }
 }
 
@@ -60,4 +68,5 @@ export class EvaluationCache extends ApiCache {
             ),
         ),
     );
+    all = createSimpleLoader((unused: '') => this.ctx.table(EvaluationData).findAll());
 }

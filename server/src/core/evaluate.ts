@@ -84,7 +84,11 @@ export async function evaluateSubmission(ctx: ApiContext, submission: Submission
         await ctx.db.transaction(async t => {
             const evaluation = await ctx
                 .table(EvaluationData)
-                .create({ submissionId: submission.id, eventsJson: JSON.stringify(events) });
+                .create({
+                    submissionId: submission.id,
+                    eventsJson: JSON.stringify(events),
+                    problemArchiveHash: archive.hash,
+                });
 
             for (const objective of material.objectives) {
                 for (const event of events) {
