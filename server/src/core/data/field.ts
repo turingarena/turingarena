@@ -81,3 +81,22 @@ export class ApiTable implements ApiOutputValue<'Table'> {
 
     constructor(readonly columns: Column[], readonly rows: Record[]) {}
 }
+
+export type ColumnGenerator<T> = [Column, (item: T) => Field | null | Promise<Field | null>];
+
+export type TableGenerator<T> = Array<ColumnGenerator<T>>;
+
+export function mapTable<TFrom, TTo>(
+    generator: TableGenerator<TTo>,
+    mapper: (item: TFrom) => TTo | null | Promise<TTo | null>,
+): TableGenerator<TFrom> {
+    return generator.map(
+        ([column, cellMapper]): ColumnGenerator<TFrom> => [
+            column,
+            async item => {
+                const mappedItem: TTo | null = await mapper(item);
+                return mappedItem === null ? null : cellMapper(mappedItem);
+            },
+        ],
+    );
+}

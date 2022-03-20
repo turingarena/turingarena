@@ -8,7 +8,7 @@ import { unreachable } from '../util/unreachable';
 import { PackageTarget } from './archive/package-target';
 import { ContestMetadata } from './contest-metadata';
 import { ApiDateTime, DateTimeColumn, DateTimeField } from './data/date-time';
-import { ApiTable, Column, Field, Record } from './data/field';
+import { ApiTable, Column, ColumnGenerator, Field, mapTable, Record, TableGenerator } from './data/field';
 import { File, FileColumn, FileField } from './data/file';
 import { FulfillmentColumn, FulfillmentField } from './data/fulfillment';
 import { HeaderColumn, HeaderField } from './data/header';
@@ -264,6 +264,22 @@ export class Contest implements ApiOutputValue<'Contest'> {
     async submissionTable() {
         await this.ctx.authorizeAdmin();
 
+        const columns: TableGenerator<Submission> = await this.submissionTableGenerator();
+
+        const submissions = await this.ctx.cache(SubmissionCache).byContest.load(this.id);
+
+        return new ApiTable(
+            columns.map(([column]) => column),
+            await Promise.all(
+                submissions.map(
+                    async submission =>
+                        new Record(await Promise.all(columns.map(([, mapper]) => mapper(submission))), null),
+                ),
+            ),
+        );
+    }
+
+    private async submissionTableGenerator(): Promise<TableGenerator<Submission>> {
         const problemSet = await this.problemSet();
         const problems = await problemSet.problems();
 
@@ -273,9 +289,7 @@ export class Contest implements ApiOutputValue<'Contest'> {
 
         const submissionFieldNames = Array.from(new Set(submissionFields.map(field => field.name)));
 
-        type MyColumn = [Column, (submission: Submission) => Field | Promise<Field>];
-
-        const columns: Array<MyColumn> = [
+        return [
             [
                 new HeaderColumn(new Text([{ value: 'ID' }])),
                 submission => new HeaderField(new Text([{ value: submission.id }]), null),
@@ -295,7 +309,7 @@ export class Contest implements ApiOutputValue<'Contest'> {
                 async submission => new DateTimeField(await submission.createdAt()),
             ],
             ...submissionFieldNames.map(
-                (name): MyColumn => [
+                (name): ColumnGenerator<Submission> => [
                     new FileColumn(new Text([{ value: name }])),
                     async submission => {
                         const items = await submission.items();
@@ -306,98 +320,16 @@ export class Contest implements ApiOutputValue<'Contest'> {
                     },
                 ],
             ),
-            [
-                new ScoreColumn(new Text([{ value: 'Score' }])),
-                async submission => {
-                    const problem = await submission.problem();
-                    const totalScoreDomain = await problem.definition.totalScoreDomain();
-                    const totalScore = await submission.getTotalScore();
-                    return new ScoreField(totalScoreDomain.scoreRange, totalScore?.score ?? null);
-                },
-            ],
-        ];
-
-        const submissions = await this.ctx.cache(SubmissionCache).byContest.load(this.id);
-
-        return new ApiTable(
-            columns.map(([column]) => column),
-            await Promise.all(
-                submissions.map(
-                    async submission =>
-                        new Record(await Promise.all(columns.map(([, mapper]) => mapper(submission))), null),
-                ),
+            ...mapTable<Submission, Evaluation>(await this.evaluationInfoTableGenerator(), async submission =>
+                submission.officialEvaluation(),
             ),
-        );
+        ];
     }
 
     async evaluationTable() {
         await this.ctx.authorizeAdmin();
 
-        const problemSet = await this.problemSet();
-        const problems = await problemSet.problems();
-        const objectives = (await Promise.all(problems.map(problem => problem.definition.objectives()))).flatMap(
-            x => x,
-        );
-
-        type MyColumn = [Column, (evaluation: Evaluation) => Field | null | Promise<Field | null>];
-
-        const columns: Array<MyColumn> = [
-            [
-                new HeaderColumn(new Text([{ value: 'ID' }])),
-                evaluation => new HeaderField(new Text([{ value: evaluation.id }]), null),
-            ],
-            [
-                new HeaderColumn(new Text([{ value: 'Submission' }])),
-                async evaluation => new HeaderField(new Text([{ value: (await evaluation.submission()).id }]), null),
-            ],
-            [
-                new HeaderColumn(new Text([{ value: 'Problem Name' }])),
-                async evaluation =>
-                    new HeaderField(new Text([{ value: (await evaluation.submission()).problem.name }]), null),
-            ],
-            [
-                new HeaderColumn(new Text([{ value: 'Problem Archive Hash' }])),
-                async evaluation => new HeaderField(new Text([{ value: await evaluation.problemArchiveHash() }]), null),
-            ],
-            [
-                new DateTimeColumn(new Text([{ value: 'Time' }])),
-                async evaluation => new DateTimeField(ApiDateTime.fromJSDate((await evaluation.getData()).createdAt)),
-            ],
-            [
-                new ScoreColumn(new Text([{ value: 'Score' }])),
-                async evaluation => {
-                    const { score, scoreRange } = await evaluation.getTotalScore();
-                    return new ScoreField(scoreRange, score);
-                },
-            ],
-            ...objectives.map(
-                (objective): MyColumn => {
-                    const gradeDomain = objective.gradeDomain;
-                    return gradeDomain instanceof ScoreGradeDomain
-                        ? [
-                              new ScoreColumn(objective.title),
-                              async evaluation => {
-                                  const outcomes = [...(await evaluation.getObjectiveOutcomes()).entries()];
-                                  const objectiveOutcome = outcomes.find(([{ id }]) => id === objective.id);
-                                  if (!objectiveOutcome) return null;
-                                  const [, outcome] = objectiveOutcome;
-                                  return new ScoreField(gradeDomain.scoreRange, outcome?.grade ?? null);
-                              },
-                          ]
-                        : [
-                              new FulfillmentColumn(objective.title),
-                              async evaluation => {
-                                  const outcomes = [...(await evaluation.getObjectiveOutcomes()).entries()];
-                                  const objectiveOutcome = outcomes.find(([{ id }]) => id === objective.id);
-                                  if (!objectiveOutcome) return null;
-                                  const [, outcome] = objectiveOutcome;
-                                  const fulfilled = outcome === null ? null : outcome.grade > 0;
-                                  return new FulfillmentField(fulfilled);
-                              },
-                          ];
-                },
-            ),
-        ];
+        const columns = await this.evaluationTableGenerator();
 
         const evaluations = (await this.ctx.cache(EvaluationCache).all.load('')).map(
             data => new Evaluation(data.id, this.ctx),
@@ -412,5 +344,85 @@ export class Contest implements ApiOutputValue<'Contest'> {
                 ),
             ),
         );
+    }
+
+    private async evaluationTableGenerator(): Promise<TableGenerator<Evaluation>> {
+        return [
+            [
+                new HeaderColumn(new Text([{ value: 'ID' }])),
+                evaluation => new HeaderField(new Text([{ value: evaluation.id }]), null),
+            ],
+            [
+                new HeaderColumn(new Text([{ value: 'Submission' }])),
+                async evaluation => new HeaderField(new Text([{ value: (await evaluation.submission()).id }]), null),
+            ],
+            [
+                new HeaderColumn(new Text([{ value: 'Problem Name' }])),
+                async evaluation =>
+                    new HeaderField(
+                        new Text([{ value: (await (await evaluation.submission()).problem()).definition.baseName }]),
+                        null,
+                    ),
+            ],
+            ...(await this.evaluationInfoTableGenerator()),
+        ];
+    }
+
+    private async evaluationInfoTableGenerator(): Promise<TableGenerator<Evaluation>> {
+        return [
+            [
+                new HeaderColumn(new Text([{ value: 'Problem Archive Hash' }])),
+                async evaluation => new HeaderField(new Text([{ value: await evaluation.problemArchiveHash() }]), null),
+            ],
+            [
+                new DateTimeColumn(new Text([{ value: 'Time' }])),
+                async evaluation => new DateTimeField(ApiDateTime.fromJSDate((await evaluation.getData()).createdAt)),
+            ],
+            ...(await this.evaluationObjectiveTableGenerator()),
+            [
+                new ScoreColumn(new Text([{ value: 'Total score' }])),
+                async evaluation => {
+                    const { score, scoreRange } = await evaluation.getTotalScore();
+                    return new ScoreField(scoreRange, score);
+                },
+            ],
+        ];
+    }
+
+    private async evaluationObjectiveTableGenerator() {
+        const problemSet = await this.problemSet();
+        const problems = await problemSet.problems();
+        const objectives = (await Promise.all(problems.map(problem => problem.definition.objectives()))).flatMap(
+            x => x,
+        );
+
+        const x = objectives.map(
+            (objective): ColumnGenerator<Evaluation> => {
+                const gradeDomain = objective.gradeDomain;
+                return gradeDomain instanceof ScoreGradeDomain
+                    ? [
+                          new ScoreColumn(objective.title),
+                          async evaluation => {
+                              const outcomes = [...(await evaluation.getObjectiveOutcomes()).entries()];
+                              const objectiveOutcome = outcomes.find(([{ id }]) => id === objective.id);
+                              if (!objectiveOutcome) return null;
+                              const [, outcome] = objectiveOutcome;
+                              return new ScoreField(gradeDomain.scoreRange, outcome?.grade ?? null);
+                          },
+                      ]
+                    : [
+                          new FulfillmentColumn(objective.title),
+                          async evaluation => {
+                              const outcomes = [...(await evaluation.getObjectiveOutcomes()).entries()];
+                              const objectiveOutcome = outcomes.find(([{ id }]) => id === objective.id);
+                              if (!objectiveOutcome) return null;
+                              const [, outcome] = objectiveOutcome;
+                              const fulfilled = outcome === null ? null : outcome.grade > 0;
+                              return new FulfillmentField(fulfilled);
+                          },
+                      ];
+            },
+        );
+        return x;
     }
 }
