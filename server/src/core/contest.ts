@@ -8,7 +8,14 @@ import { unreachable } from '../util/unreachable';
 import { PackageTarget } from './archive/package-target';
 import { ContestMetadata } from './contest-metadata';
 import { ApiDateTime, DateTimeColumn, DateTimeField } from './data/date-time';
-import { ApiTable, ColumnDefinition, mapTable, TableDefinition } from './data/field';
+import {
+    ApiTable,
+    AtomicColumnDefinition,
+    ColumnDefinition,
+    GroupColumnDefinition,
+    mapTable,
+    TableDefinition,
+} from './data/field';
 import { File, FileColumn, FileField } from './data/file';
 import { FulfillmentColumn, FulfillmentField } from './data/fulfillment';
 import { HeaderColumn, HeaderField } from './data/header';
@@ -217,33 +224,33 @@ export class Contest implements ApiOutputValue<'Contest'> {
         const problems = await problemSet.problems();
 
         const columns: TableDefinition<User> = [
-            {
-                columnMapper: i => new HeaderColumn(new Text([{ value: 'ID' }]), i),
-                dataMapper: user => new HeaderField(new Text([{ value: user.metadata.name }]), null),
-            },
-            {
-                columnMapper: i => new HeaderColumn(new Text([{ value: 'token' }]), i),
-                dataMapper: user => new HeaderField(new Text([{ value: user.metadata.token }]), null),
-            },
-            ...problems.map(
-                (problem): ColumnDefinition<User> => ({
-                    columnMapper: i =>
-                        new ScoreColumn(new Text([{ value: `Score ${problem.definition.baseName}` }]), i),
-                    dataMapper: async user => {
-                        const undertaking = new ProblemUndertaking(problem, user, user.ctx);
-                        const { scoreRange, score } = await undertaking.totalScoreGrade();
-                        return new ScoreField(scoreRange, score);
-                    },
-                }),
+            new AtomicColumnDefinition(
+                i => new HeaderColumn(new Text([{ value: 'ID' }]), i),
+                user => new HeaderField(new Text([{ value: user.metadata.name }]), null),
             ),
-            {
-                columnMapper: i => new ScoreColumn(new Text([{ value: 'Total score' }]), i),
-                dataMapper: async user => {
+            new AtomicColumnDefinition(
+                i => new HeaderColumn(new Text([{ value: 'token' }]), i),
+                user => new HeaderField(new Text([{ value: user.metadata.token }]), null),
+            ),
+            ...problems.map(
+                (problem): ColumnDefinition<User> =>
+                    new AtomicColumnDefinition(
+                        i => new ScoreColumn(new Text([{ value: `Score ${problem.definition.baseName}` }]), i),
+                        async user => {
+                            const undertaking = new ProblemUndertaking(problem, user, user.ctx);
+                            const { scoreRange, score } = await undertaking.totalScoreGrade();
+                            return new ScoreField(scoreRange, score);
+                        },
+                    ),
+            ),
+            new AtomicColumnDefinition(
+                i => new ScoreColumn(new Text([{ value: 'Total score' }]), i),
+                async user => {
                     const undertaking = new ProblemSetUndertaking(problemSet, user, user.ctx);
                     const { scoreRange, score } = await undertaking.totalScoreGrade();
                     return new ScoreField(scoreRange, score);
                 },
-            },
+            ),
         ];
 
         const users = contestMetadata.users.map(metadata => new User(this, metadata, this.ctx));
@@ -270,35 +277,36 @@ export class Contest implements ApiOutputValue<'Contest'> {
         const submissionFieldNames = Array.from(new Set(submissionFields.map(field => field.name)));
 
         return [
-            {
-                columnMapper: i => new HeaderColumn(new Text([{ value: 'ID' }]), i),
-                dataMapper: submission => new HeaderField(new Text([{ value: submission.id }]), null),
-            },
-            {
-                columnMapper: i => new HeaderColumn(new Text([{ value: 'Problem' }]), i),
-                dataMapper: async submission =>
+            new AtomicColumnDefinition(
+                i => new HeaderColumn(new Text([{ value: 'ID' }]), i),
+                submission => new HeaderField(new Text([{ value: submission.id }]), null),
+            ),
+            new AtomicColumnDefinition(
+                i => new HeaderColumn(new Text([{ value: 'Problem' }]), i),
+                async submission =>
                     new HeaderField(new Text([{ value: (await submission.problem()).definition.baseName }]), null),
-            },
-            {
-                columnMapper: i => new HeaderColumn(new Text([{ value: 'User' }]), i),
-                dataMapper: async submission =>
+            ),
+            new AtomicColumnDefinition(
+                i => new HeaderColumn(new Text([{ value: 'User' }]), i),
+                async submission =>
                     new HeaderField(new Text([{ value: (await submission.user()).metadata.name }]), null),
-            },
-            {
-                columnMapper: i => new DateTimeColumn(new Text([{ value: 'Time' }]), i),
-                dataMapper: async submission => new DateTimeField(await submission.createdAt()),
-            },
+            ),
+            new AtomicColumnDefinition(
+                i => new DateTimeColumn(new Text([{ value: 'Time' }]), i),
+                async submission => new DateTimeField(await submission.createdAt()),
+            ),
             ...submissionFieldNames.map(
-                (name): ColumnDefinition<Submission> => ({
-                    columnMapper: i => new FileColumn(new Text([{ value: name }]), i),
-                    dataMapper: async submission => {
-                        const items = await submission.items();
-                        const item = items.find(item => item.field.name === name);
-                        const file = item?.file ?? null;
-                        if (file) this.ctx.service(FileContentService).publish(file.content);
-                        return new FileField(file);
-                    },
-                }),
+                (name): ColumnDefinition<Submission> =>
+                    new AtomicColumnDefinition(
+                        i => new FileColumn(new Text([{ value: name }]), i),
+                        async submission => {
+                            const items = await submission.items();
+                            const item = items.find(item => item.field.name === name);
+                            const file = item?.file ?? null;
+                            if (file) this.ctx.service(FileContentService).publish(file.content);
+                            return new FileField(file);
+                        },
+                    ),
             ),
             ...mapTable<Submission, Evaluation>(await this.evaluationInfoTableDefinition(), async submission =>
                 submission.officialEvaluation(),
@@ -317,47 +325,52 @@ export class Contest implements ApiOutputValue<'Contest'> {
 
     private async evaluationTableDefinition(): Promise<TableDefinition<Evaluation>> {
         return [
-            {
-                columnMapper: i => new HeaderColumn(new Text([{ value: 'ID' }]), i),
-                dataMapper: evaluation => new HeaderField(new Text([{ value: evaluation.id }]), null),
-            },
-            {
-                columnMapper: i => new HeaderColumn(new Text([{ value: 'Submission' }]), i),
-                dataMapper: async evaluation =>
-                    new HeaderField(new Text([{ value: (await evaluation.submission()).id }]), null),
-            },
-            {
-                columnMapper: i => new HeaderColumn(new Text([{ value: 'Problem Name' }]), i),
-                dataMapper: async evaluation =>
+            new AtomicColumnDefinition(
+                i => new HeaderColumn(new Text([{ value: 'ID' }]), i),
+                evaluation => new HeaderField(new Text([{ value: evaluation.id }]), null),
+            ),
+            new AtomicColumnDefinition(
+                i => new HeaderColumn(new Text([{ value: 'Submission' }]), i),
+                async evaluation => new HeaderField(new Text([{ value: (await evaluation.submission()).id }]), null),
+            ),
+            new AtomicColumnDefinition(
+                i => new HeaderColumn(new Text([{ value: 'Problem Name' }]), i),
+                async evaluation =>
                     new HeaderField(
                         new Text([{ value: (await (await evaluation.submission()).problem()).definition.baseName }]),
                         null,
                     ),
-            },
+            ),
             ...(await this.evaluationInfoTableDefinition()),
         ];
     }
 
     private async evaluationInfoTableDefinition(): Promise<TableDefinition<Evaluation>> {
         return [
-            {
-                columnMapper: i => new HeaderColumn(new Text([{ value: 'Problem Archive Hash' }]), i),
-                dataMapper: async evaluation =>
-                    new HeaderField(new Text([{ value: await evaluation.problemArchiveHash() }]), null),
-            },
-            {
-                columnMapper: i => new DateTimeColumn(new Text([{ value: 'Time' }]), i),
-                dataMapper: async evaluation =>
-                    new DateTimeField(ApiDateTime.fromJSDate((await evaluation.getData()).createdAt)),
-            },
-            ...(await this.evaluationObjectiveTableDefinition()),
-            {
-                columnMapper: i => new ScoreColumn(new Text([{ value: 'Total score' }]), i),
-                dataMapper: async evaluation => {
-                    const { score, scoreRange } = await evaluation.getTotalScore();
-                    return new ScoreField(scoreRange, score);
+            new AtomicColumnDefinition(
+                i => new HeaderColumn(new Text([{ value: 'Problem Archive Hash' }]), i),
+                async evaluation => new HeaderField(new Text([{ value: await evaluation.problemArchiveHash() }]), null),
+            ),
+            new AtomicColumnDefinition(
+                i => new DateTimeColumn(new Text([{ value: 'Time' }]), i),
+                async evaluation => new DateTimeField(ApiDateTime.fromJSDate((await evaluation.getData()).createdAt)),
+            ),
+            new GroupColumnDefinition(new Text([{ value: 'Objectives' }]), [
+                {
+                    show: 'ALWAYS',
+                    column: new AtomicColumnDefinition(
+                        i => new ScoreColumn(new Text([{ value: 'Total score' }]), i),
+                        async evaluation => {
+                            const { score, scoreRange } = await evaluation.getTotalScore();
+                            return new ScoreField(scoreRange, score);
+                        },
+                    ),
                 },
-            },
+                ...(await this.evaluationObjectiveTableDefinition()).map(column => ({
+                    show: 'WHEN_OPEN' as const,
+                    column,
+                })),
+            ]),
         ];
     }
 
@@ -372,23 +385,23 @@ export class Contest implements ApiOutputValue<'Contest'> {
             (objective): ColumnDefinition<Evaluation> => {
                 const gradeDomain = objective.gradeDomain;
                 return gradeDomain instanceof ScoreGradeDomain
-                    ? {
-                          columnMapper: i => new ScoreColumn(objective.title, i),
-                          dataMapper: async evaluation => {
+                    ? new AtomicColumnDefinition(
+                          i => new ScoreColumn(objective.title, i),
+                          async evaluation => {
                               const outcome = await evaluation.getOutcome(objective);
                               if (!outcome) return null;
                               return new ScoreField(gradeDomain.scoreRange, outcome?.grade ?? null);
                           },
-                      }
-                    : {
-                          columnMapper: i => new FulfillmentColumn(objective.title, i),
-                          dataMapper: async evaluation => {
+                      )
+                    : new AtomicColumnDefinition(
+                          i => new FulfillmentColumn(objective.title, i),
+                          async evaluation => {
                               const outcome = await evaluation.getOutcome(objective);
                               if (!outcome) return null;
                               const fulfilled = outcome === null ? null : outcome.grade > 0;
                               return new FulfillmentField(fulfilled);
                           },
-                      };
+                      );
             },
         );
     }

@@ -4,12 +4,51 @@ import { fieldFragment } from './data/field';
 import { textFragment } from './data/text';
 
 export const columnFragment = gql`
-  fragment Column on Column {
+  fragment AtomicColumn on Column {
     ... on TitledColumn {
       title {
         ...Text
       }
       fieldIndex
+    }
+  }
+
+  fragment GroupColumnBase on GroupColumn {
+    title {
+      ...Text
+    }
+  }
+
+  # Limited recursion depth
+
+  fragment Column on Column {
+    ...AtomicColumn
+    ... on GroupColumn {
+      ...GroupColumnBase
+      children {
+        show
+        column {
+          ...AtomicColumn
+          ... on GroupColumn {
+            ...GroupColumnBase
+            children {
+              show
+              column {
+                ...AtomicColumn
+                ... on GroupColumn {
+                  ...GroupColumnBase
+                  children {
+                    show
+                    column {
+                      ...AtomicColumn
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   }
 

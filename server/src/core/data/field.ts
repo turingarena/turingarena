@@ -7,6 +7,7 @@ import { HeaderColumn, HeaderField } from './header';
 import { MemoryUsageColumn, MemoryUsageField } from './memory-usage';
 import { MessageColumn, MessageField } from './message';
 import { ScoreColumn, ScoreField } from './score';
+import { Text } from './text';
 import { TimeUsageColumn, TimeUsageField } from './time-usage';
 import { Valence } from './valence';
 
@@ -28,6 +29,23 @@ export const fieldSchema = gql`
         title: Text!
     }
 
+    "A column grouping more columns"
+    type GroupColumn {
+        title: Text!
+        children: [ColumnGroupItem!]!
+    }
+
+    type ColumnGroupItem {
+        show: ColumnGroupItemShow!
+        column: Column!
+    }
+
+    enum ColumnGroupItemShow {
+        ALWAYS
+        WHEN_OPEN
+        WHEN_CLOSED
+    }
+
     "Definition of a table column."
     union Column =
           ScoreColumn
@@ -38,6 +56,7 @@ export const fieldSchema = gql`
         | HeaderColumn
         | DateTimeColumn
         | FileColumn
+        | GroupColumn
 
     "Collection of fields, in 1-to-1 correspondence with a collection of columns."
     type Record {
@@ -61,7 +80,7 @@ export type Field =
     | DateTimeField
     | FileField;
 
-export type Column =
+export type AtomicColumn =
     | ScoreColumn
     | FulfillmentColumn
     | MessageColumn
@@ -70,6 +89,14 @@ export type Column =
     | HeaderColumn
     | DateTimeColumn
     | FileColumn;
+
+export type Column = AtomicColumn | GroupColumn;
+
+export class GroupColumn implements ApiOutputValue<'GroupColumn'> {
+    constructor(readonly title: Text, readonly children: Array<{ show: ColumnGroupItemShow; column: Column }>) {}
+
+    __typename = 'GroupColumn' as const;
+}
 
 export class Record implements ApiOutputValue<'Record'> {
     __typename = 'Record' as const;
@@ -92,10 +119,12 @@ export class ApiTable implements ApiOutputValue<'Table'> {
 }
 
 export async function getTableRows<T>(
-    columns: TableDefinition<T>,
+    tableDefinition: TableDefinition<T>,
     items: T[],
     valenceMapper?: (item: T) => Valence | null,
 ) {
+    const columns = flattenTableDefinition(tableDefinition);
+
     return Promise.all(
         items.map(
             async item =>
@@ -107,28 +136,70 @@ export async function getTableRows<T>(
     );
 }
 
-export function getTableColumns(columns: TableDefinition<never>) {
-    return columns.map(({ columnMapper }, i) => columnMapper(i));
+function flattenTableDefinition<T>(tableDefinition: TableDefinition<T>): Array<AtomicColumnDefinition<T>> {
+    return tableDefinition.flatMap(column =>
+        column instanceof AtomicColumnDefinition
+            ? [column]
+            : flattenTableDefinition(column.children.map(x => x.column)),
+    );
 }
 
-export type ColumnDefinition<T> = {
-    columnMapper: (fieldIndex: number) => Column;
-    dataMapper: (item: T) => Field | null | Promise<Field | null>;
-};
+export function getTableColumns(tableDefinition: TableDefinition<never>) {
+    let index = -1;
+
+    function getLevel(column: ColumnDefinition<never>): Column {
+        return column instanceof AtomicColumnDefinition
+            ? column.columnMapper((index += 1))
+            : new GroupColumn(
+                  column.title,
+                  column.children.map(child => ({ show: child.show, column: getLevel(child.column) })),
+              );
+    }
+
+    return tableDefinition.map(getLevel);
+}
+
+export class AtomicColumnDefinition<T> {
+    constructor(
+        readonly columnMapper: (fieldIndex: number) => AtomicColumn,
+        readonly dataMapper: (item: T) => Field | null | Promise<Field | null>,
+    ) {}
+}
+
+export type ColumnGroupItemShow = ApiOutputValue<'ColumnGroupItemShow'>;
+
+export class GroupColumnDefinition<T> {
+    constructor(
+        readonly title: Text,
+        readonly children: Array<{ show: ColumnGroupItemShow; column: ColumnDefinition<T> }>,
+    ) {}
+}
+
+export type ColumnDefinition<T> = AtomicColumnDefinition<T> | GroupColumnDefinition<T>;
 
 export type TableDefinition<T> = Array<ColumnDefinition<T>>;
 
 export function mapTable<TFrom, TTo>(
-    generator: TableDefinition<TTo>,
+    tableDefinition: TableDefinition<TTo>,
     itemMapper: (item: TFrom) => TTo | null | Promise<TTo | null>,
 ): TableDefinition<TFrom> {
-    return generator.map(
-        ({ dataMapper, ...rest }): ColumnDefinition<TFrom> => ({
-            dataMapper: async item => {
-                const mappedItem: TTo | null = await itemMapper(item);
-                return mappedItem === null ? null : dataMapper(mappedItem);
-            },
-            ...rest,
-        }),
-    );
+    return tableDefinition.map(x => mapColumn(x, itemMapper));
+}
+
+export function mapColumn<TFrom, TTo>(
+    column: ColumnDefinition<TTo>,
+    itemMapper: (item: TFrom) => TTo | null | Promise<TTo | null>,
+): ColumnDefinition<TFrom> {
+    if (column instanceof AtomicColumnDefinition) {
+        const { dataMapper, columnMapper } = column;
+        return new AtomicColumnDefinition<TFrom>(columnMapper, async item => {
+            const mappedItem: TTo | null = await itemMapper(item);
+            return mappedItem === null ? null : dataMapper(mappedItem);
+        });
+    } else {
+        return new GroupColumnDefinition<TFrom>(
+            column.title,
+            column.children.map(child => ({ show: child.show, column: mapColumn(child.column, itemMapper) })),
+        );
+    }
 }

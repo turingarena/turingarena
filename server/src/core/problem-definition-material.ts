@@ -4,7 +4,7 @@ import { ApiContext } from '../main/api-context';
 import { createSimpleLoader } from '../main/base-model';
 import { ApiOutputValue } from '../main/graphql-types';
 import { unreachable } from '../util/unreachable';
-import { ColumnDefinition, Field, getTableColumns, TableDefinition } from './data/field';
+import { AtomicColumnDefinition, ColumnDefinition, Field, getTableColumns, TableDefinition } from './data/field';
 import { File } from './data/file';
 import { FulfillmentColumn, FulfillmentField, FulfillmentGradeDomain } from './data/fulfillment';
 import { HeaderColumn, HeaderField } from './data/header';
@@ -167,49 +167,48 @@ export class ProblemMaterial {
             (objective): ColumnDefinition<Submission> => {
                 const { title, gradeDomain } = objective;
                 if (gradeDomain instanceof ScoreGradeDomain) {
-                    return {
-                        columnMapper: i => new ScoreColumn(title, i),
-                        dataMapper: async submission => {
+                    return new AtomicColumnDefinition(
+                        i => new ScoreColumn(title, i),
+                        async submission => {
                             const outcome = await submission.getOutcome(objective);
                             return new ScoreField(gradeDomain.scoreRange, outcome?.grade ?? null);
                         },
-                    };
+                    );
                 }
                 if (gradeDomain instanceof FulfillmentGradeDomain) {
-                    return {
-                        columnMapper: i => new FulfillmentColumn(title, i),
-                        dataMapper: async submission => {
+                    return new AtomicColumnDefinition(
+                        i => new FulfillmentColumn(title, i),
+                        async submission => {
                             const outcome = await submission.getOutcome(objective);
                             const fulfilled = outcome === null ? null : outcome.grade > 0;
                             return new FulfillmentField(fulfilled);
                         },
-                    };
+                    );
                 }
                 throw new Error(`unexpected grade domain ${gradeDomain}`);
             },
         ),
-        {
-            columnMapper: i => new ScoreColumn(new Text([{ value: 'Total score' }]), i),
-            dataMapper: async submission => submission.getTotalScoreField(),
-        },
+        new AtomicColumnDefinition(
+            i => new ScoreColumn(new Text([{ value: 'Total score' }]), i),
+            async submission => submission.getTotalScoreField(),
+        ),
     ];
 
     submissionListColumns = getTableColumns(this.submissionTableDefinition);
 
     evaluationFeedbackTableDefinition: TableDefinition<TestCaseData> = [
-        {
-            columnMapper: i => new HeaderColumn(new Text([{ value: 'Subtask' }]), i),
-            dataMapper: async ({ objectiveIndex }) =>
+        new AtomicColumnDefinition(
+            i => new HeaderColumn(new Text([{ value: 'Subtask' }]), i),
+            async ({ objectiveIndex }) =>
                 new HeaderField(new Text([{ value: `Subtask ${objectiveIndex}` }]), objectiveIndex),
-        },
-        {
-            columnMapper: i => new HeaderColumn(new Text([{ value: 'Case' }]), i),
-            dataMapper: async ({ testCaseIndex }) =>
-                new HeaderField(new Text([{ value: `Case ${testCaseIndex}` }]), testCaseIndex),
-        },
-        {
-            columnMapper: i => new TimeUsageColumn(new Text([{ value: 'Time usage' }]), i),
-            dataMapper: async ({ timeUsage }) =>
+        ),
+        new AtomicColumnDefinition(
+            i => new HeaderColumn(new Text([{ value: 'Case' }]), i),
+            async ({ testCaseIndex }) => new HeaderField(new Text([{ value: `Case ${testCaseIndex}` }]), testCaseIndex),
+        ),
+        new AtomicColumnDefinition(
+            i => new TimeUsageColumn(new Text([{ value: 'Time usage' }]), i),
+            async ({ timeUsage }) =>
                 new TimeUsageField(
                     timeUsage !== null ? new TimeUsage(timeUsage) : null,
                     new TimeUsage(this.timeLimitSeconds * limitsMarginMultiplier),
@@ -222,10 +221,10 @@ export class ProblemMaterial {
                         ? 'WARNING'
                         : 'FAILURE',
                 ),
-        },
-        {
-            columnMapper: i => new MemoryUsageColumn(new Text([{ value: 'Memory usage' }]), i),
-            dataMapper: async ({ memoryUsage }) =>
+        ),
+        new AtomicColumnDefinition(
+            i => new MemoryUsageColumn(new Text([{ value: 'Memory usage' }]), i),
+            async ({ memoryUsage }) =>
                 new MemoryUsageField(
                     memoryUsage !== null ? new MemoryUsage(memoryUsage * memoryUnitBytes) : null,
                     new MemoryUsage(this.memoryLimitBytes * limitsMarginMultiplier),
@@ -238,15 +237,15 @@ export class ProblemMaterial {
                         ? 'WARNING'
                         : 'FAILURE',
                 ),
-        },
-        {
-            columnMapper: i => new MessageColumn(new Text([{ value: 'Message' }]), i),
-            dataMapper: async ({ message }) => new MessageField(new Text([{ value: `${message ?? ``}` }]), null),
-        },
-        {
-            columnMapper: i => new ScoreColumn(new Text([{ value: 'Score' }]), i),
-            dataMapper: async ({ score }) => new ScoreField(new ScoreRange(1, 2, true), score),
-        },
+        ),
+        new AtomicColumnDefinition(
+            i => new MessageColumn(new Text([{ value: 'Message' }]), i),
+            async ({ message }) => new MessageField(new Text([{ value: `${message ?? ``}` }]), null),
+        ),
+        new AtomicColumnDefinition(
+            i => new ScoreColumn(new Text([{ value: 'Score' }]), i),
+            async ({ score }) => new ScoreField(new ScoreRange(1, 2, true), score),
+        ),
     ];
 
     evaluationFeedbackColumns = getTableColumns(this.evaluationFeedbackTableDefinition);
