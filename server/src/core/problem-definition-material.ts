@@ -4,21 +4,23 @@ import { ApiContext } from '../main/api-context';
 import { createSimpleLoader } from '../main/base-model';
 import { ApiOutputValue } from '../main/graphql-types';
 import { unreachable } from '../util/unreachable';
-import { Field } from './data/field';
+import { ColumnDefinition, Field, getTableColumns, TableDefinition } from './data/field';
 import { File } from './data/file';
-import { FulfillmentColumn, FulfillmentGradeDomain } from './data/fulfillment';
-import { HeaderColumn } from './data/header';
+import { FulfillmentColumn, FulfillmentField, FulfillmentGradeDomain } from './data/fulfillment';
+import { HeaderColumn, HeaderField } from './data/header';
 import { Media } from './data/media';
 import { MemoryUsage, MemoryUsageColumn, MemoryUsageField } from './data/memory-usage';
-import { MessageColumn } from './data/message';
-import { ScoreColumn, ScoreGradeDomain, ScoreRange } from './data/score';
+import { MessageColumn, MessageField } from './data/message';
+import { ScoreColumn, ScoreField, ScoreGradeDomain, ScoreRange } from './data/score';
 import { Text } from './data/text';
 import { TimeUsage, TimeUsageColumn, TimeUsageField } from './data/time-usage';
+import { TestCaseData } from './evaluation-outcome';
 import { FileContentService } from './files/file-content-service';
 import { ObjectiveDefinition } from './objective-definition';
 import { ProblemDefinition } from './problem-definition';
 import { submissionFileTypeRules, submissionFileTypes } from './problem-definition-file-types';
 import { getProblemTaskInfo, ProblemTaskInfo } from './problem-definition-task-info';
+import { Submission } from './submission';
 
 export const problemMaterialSchema = gql`
     extend type ProblemDefinition {
@@ -91,6 +93,9 @@ export class SubmissionField implements ApiOutputValue<'SubmissionField'> {
 
 const memoryUnitBytes = 1024 * 1024;
 
+const limitsMarginMultiplier = 2;
+const warningWatermarkMultiplier = 0.2;
+
 export class ProblemMaterial {
     constructor(readonly problem: ProblemDefinition, readonly taskInfo: ProblemTaskInfo, readonly ctx: ApiContext) {}
 
@@ -157,23 +162,94 @@ export class ProblemMaterial {
             .map(d => d.scoreRange),
     );
 
-    submissionListColumns = [
-        ...this.objectives.map(({ title, gradeDomain }) => {
-            if (gradeDomain instanceof ScoreGradeDomain) return new ScoreColumn(title);
-            if (gradeDomain instanceof FulfillmentGradeDomain) return new FulfillmentColumn(title);
-            throw new Error(`unexpected grade domain ${gradeDomain}`);
-        }),
-        new ScoreColumn(new Text([{ value: 'Total score' }])),
+    submissionTableDefinition: TableDefinition<Submission> = [
+        ...this.objectives.map(
+            (objective): ColumnDefinition<Submission> => {
+                const { title, gradeDomain } = objective;
+                if (gradeDomain instanceof ScoreGradeDomain) {
+                    return {
+                        columnMapper: i => new ScoreColumn(title, i),
+                        dataMapper: async submission => {
+                            const outcome = await submission.getOutcome(objective);
+                            return new ScoreField(gradeDomain.scoreRange, outcome?.grade ?? null);
+                        },
+                    };
+                }
+                if (gradeDomain instanceof FulfillmentGradeDomain) {
+                    return {
+                        columnMapper: i => new FulfillmentColumn(title, i),
+                        dataMapper: async submission => {
+                            const outcome = await submission.getOutcome(objective);
+                            const fulfilled = outcome === null ? null : outcome.grade > 0;
+                            return new FulfillmentField(fulfilled);
+                        },
+                    };
+                }
+                throw new Error(`unexpected grade domain ${gradeDomain}`);
+            },
+        ),
+        {
+            columnMapper: i => new ScoreColumn(new Text([{ value: 'Total score' }]), i),
+            dataMapper: async submission => submission.getTotalScoreField(),
+        },
     ];
 
-    evaluationFeedbackColumns = [
-        new HeaderColumn(new Text([{ value: 'Subtask' }])),
-        new HeaderColumn(new Text([{ value: 'Case' }])),
-        new TimeUsageColumn(new Text([{ value: 'Time usage' }])),
-        new MemoryUsageColumn(new Text([{ value: 'Memory usage' }])),
-        new MessageColumn(new Text([{ value: 'Message' }])),
-        new ScoreColumn(new Text([{ value: 'Score' }])),
+    submissionListColumns = getTableColumns(this.submissionTableDefinition);
+
+    evaluationFeedbackTableDefinition: TableDefinition<TestCaseData> = [
+        {
+            columnMapper: i => new HeaderColumn(new Text([{ value: 'Subtask' }]), i),
+            dataMapper: async ({ objectiveIndex }) =>
+                new HeaderField(new Text([{ value: `Subtask ${objectiveIndex}` }]), objectiveIndex),
+        },
+        {
+            columnMapper: i => new HeaderColumn(new Text([{ value: 'Case' }]), i),
+            dataMapper: async ({ testCaseIndex }) =>
+                new HeaderField(new Text([{ value: `Case ${testCaseIndex}` }]), testCaseIndex),
+        },
+        {
+            columnMapper: i => new TimeUsageColumn(new Text([{ value: 'Time usage' }]), i),
+            dataMapper: async ({ timeUsage }) =>
+                new TimeUsageField(
+                    timeUsage !== null ? new TimeUsage(timeUsage) : null,
+                    new TimeUsage(this.timeLimitSeconds * limitsMarginMultiplier),
+                    new TimeUsage(this.timeLimitSeconds),
+                    timeUsage === null
+                        ? null
+                        : timeUsage <= warningWatermarkMultiplier * this.timeLimitSeconds
+                        ? 'NOMINAL'
+                        : timeUsage <= this.timeLimitSeconds
+                        ? 'WARNING'
+                        : 'FAILURE',
+                ),
+        },
+        {
+            columnMapper: i => new MemoryUsageColumn(new Text([{ value: 'Memory usage' }]), i),
+            dataMapper: async ({ memoryUsage }) =>
+                new MemoryUsageField(
+                    memoryUsage !== null ? new MemoryUsage(memoryUsage * memoryUnitBytes) : null,
+                    new MemoryUsage(this.memoryLimitBytes * limitsMarginMultiplier),
+                    new MemoryUsage(this.memoryLimitBytes),
+                    memoryUsage === null
+                        ? null
+                        : memoryUsage * memoryUnitBytes <= warningWatermarkMultiplier * this.memoryLimitBytes
+                        ? 'NOMINAL'
+                        : memoryUsage * memoryUnitBytes <= this.memoryLimitBytes
+                        ? 'WARNING'
+                        : 'FAILURE',
+                ),
+        },
+        {
+            columnMapper: i => new MessageColumn(new Text([{ value: 'Message' }]), i),
+            dataMapper: async ({ message }) => new MessageField(new Text([{ value: `${message ?? ``}` }]), null),
+        },
+        {
+            columnMapper: i => new ScoreColumn(new Text([{ value: 'Score' }]), i),
+            dataMapper: async ({ score }) => new ScoreField(new ScoreRange(1, 2, true), score),
+        },
     ];
+
+    evaluationFeedbackColumns = getTableColumns(this.evaluationFeedbackTableDefinition);
 
     async loadPublicContent(problem: ProblemDefinition, path: string) {
         const archive = await problem.archiveUnchecked();

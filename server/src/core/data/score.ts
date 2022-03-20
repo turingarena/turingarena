@@ -41,6 +41,7 @@ export const scoreSchema = gql`
     "Column containing scores."
     type ScoreColumn implements TitledColumn {
         title: Text!
+        fieldIndex: Int!
     }
 `;
 
@@ -93,5 +94,5 @@ export class ScoreField implements ApiOutputValue<'ScoreField'> {
 export class ScoreColumn implements ApiOutputValue<'ScoreColumn'> {
     __typename = 'ScoreColumn' as const;
 
-    constructor(readonly title: Text) {}
+    constructor(readonly title: Text, readonly fieldIndex: number) {}
 }

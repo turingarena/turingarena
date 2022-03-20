@@ -12,6 +12,7 @@ export const headerSchema = gql`
     "Column containing headers for each row."
     type HeaderColumn implements TitledColumn {
         title: Text!
+        fieldIndex: Int!
     }
 `;
 
@@ -24,5 +25,5 @@ export class HeaderField implements ApiOutputValue<'HeaderField'> {
 export class HeaderColumn implements ApiOutputValue<'HeaderColumn'> {
     __typename = 'HeaderColumn' as const;
 
-    constructor(readonly title: Text) {}
+    constructor(readonly title: Text, readonly fieldIndex: number) {}
 }

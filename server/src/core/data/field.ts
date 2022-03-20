@@ -24,6 +24,7 @@ export const fieldSchema = gql`
 
     "A column with a title."
     interface TitledColumn {
+        fieldIndex: Int!
         title: Text!
     }
 
@@ -80,23 +81,54 @@ export class ApiTable implements ApiOutputValue<'Table'> {
     __typename = 'Table' as const;
 
     constructor(readonly columns: Column[], readonly rows: Record[]) {}
+
+    static async fromColumnDefinitions<T>(
+        columns: TableDefinition<T>,
+        items: T[],
+        valenceMapper?: (item: T) => Valence | null,
+    ) {
+        return new ApiTable(getTableColumns(columns), await getTableRows<T>(columns, items, valenceMapper));
+    }
 }
 
-export type ColumnGenerator<T> = [Column, (item: T) => Field | null | Promise<Field | null>];
+export async function getTableRows<T>(
+    columns: TableDefinition<T>,
+    items: T[],
+    valenceMapper?: (item: T) => Valence | null,
+) {
+    return Promise.all(
+        items.map(
+            async item =>
+                new Record(
+                    await Promise.all(columns.map(async ({ dataMapper: mapper }) => mapper(item))),
+                    valenceMapper?.(item) ?? null,
+                ),
+        ),
+    );
+}
 
-export type TableGenerator<T> = Array<ColumnGenerator<T>>;
+export function getTableColumns(columns: TableDefinition<never>) {
+    return columns.map(({ columnMapper }, i) => columnMapper(i));
+}
+
+export type ColumnDefinition<T> = {
+    columnMapper: (fieldIndex: number) => Column;
+    dataMapper: (item: T) => Field | null | Promise<Field | null>;
+};
+
+export type TableDefinition<T> = Array<ColumnDefinition<T>>;
 
 export function mapTable<TFrom, TTo>(
-    generator: TableGenerator<TTo>,
-    mapper: (item: TFrom) => TTo | null | Promise<TTo | null>,
-): TableGenerator<TFrom> {
+    generator: TableDefinition<TTo>,
+    itemMapper: (item: TFrom) => TTo | null | Promise<TTo | null>,
+): TableDefinition<TFrom> {
     return generator.map(
-        ([column, cellMapper]): ColumnGenerator<TFrom> => [
-            column,
-            async item => {
-                const mappedItem: TTo | null = await mapper(item);
-                return mappedItem === null ? null : cellMapper(mappedItem);
+        ({ dataMapper, ...rest }): ColumnDefinition<TFrom> => ({
+            dataMapper: async item => {
+                const mappedItem: TTo | null = await itemMapper(item);
+                return mappedItem === null ? null : dataMapper(mappedItem);
             },
-        ],
+            ...rest,
+        }),
     );
 }

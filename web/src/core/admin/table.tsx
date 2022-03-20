@@ -1,16 +1,15 @@
 import { gql } from '@apollo/client';
-import { ValueFormatterParams, ValueGetterParams } from 'ag-grid-community';
+import { ColDef, ValueFormatterParams, ValueGetterParams } from 'ag-grid-community';
 import { AgGridColumn, AgGridReact } from 'ag-grid-react';
 import { css, cx } from 'emotion';
 import React from 'react';
 import {
   ColumnFragment,
-  DateTimeFieldFragment,
   FieldFragment,
   FulfillmentFieldFragment,
   HeaderFieldFragment,
   ScoreFieldFragment,
-  TableFragment
+  TableFragment,
 } from '../../generated/graphql-types';
 import { FragmentProps } from '../../util/fragment-props';
 import { Field } from '../data/field';
@@ -42,20 +41,20 @@ export function Table({ data }: FragmentProps<TableFragment>) {
     >
       <AgGridReact
         rowData={data.rows.map(row => row.fields)}
+        multiSortKey="ctrl"
         onGridReady={event => {
           event.api.sizeColumnsToFit();
         }}
       >
         {data.columns.map((column, i) => (
           <AgGridColumn
-            field={String(i)}
-            filter={getFilterMode(column)}
+            id={String(column.fieldIndex)}
+            headerName={column.title.variant}
             resizable
             sortable
-            headerName={column.title.variant}
-            valueGetter={(params: ValueGetterParams) => getCellValue(column, params.data[i] as FieldFragment | null)}
+            {...getAgGridColDef(column)}
             cellRendererFramework={(params: ValueFormatterParams) => {
-              const field = params.data[i] as FieldFragment | null;
+              const field = params.data[column.fieldIndex] as FieldFragment | null;
               return field && <Field data={field} />;
             }}
           />
@@ -65,34 +64,32 @@ export function Table({ data }: FragmentProps<TableFragment>) {
   );
 }
 
-function getFilterMode(column: ColumnFragment): 'set' | 'number' | 'text' | 'date' | null {
-  switch (column.__typename) {
-    case 'ScoreColumn':
-      return 'number';
-    case 'FulfillmentColumn':
-      return 'number';
-    case 'DateTimeColumn':
-      return null;
-    default:
-      return 'text';
-  }
-}
-
-function getCellValue(column: ColumnFragment, field: FieldFragment | null) {
-  if (field === null) return null;
+function getAgGridColDef(column: ColumnFragment): ColDef {
   switch (column.__typename) {
     case 'HeaderColumn':
-      return (field as HeaderFieldFragment).index ?? (field as HeaderFieldFragment).title.variant;
+      return {
+        valueGetter: (params: ValueGetterParams) =>
+          (params.data[column.fieldIndex] as HeaderFieldFragment | null)?.index ??
+          (params.data[column.fieldIndex] as HeaderFieldFragment | null)?.title?.variant,
+      };
     case 'ScoreColumn':
-      return (field as ScoreFieldFragment).score;
+      return {
+        filter: 'number',
+        valueGetter: (params: ValueGetterParams) =>
+          (params.data[column.fieldIndex] as ScoreFieldFragment | null)?.score ?? null,
+      };
     case 'FulfillmentColumn':
-      const fulfilled = (field as FulfillmentFieldFragment).fulfilled;
-      if (fulfilled === null) return null;
-      return fulfilled ? 1 : 0;
+      return {
+        filter: 'number',
+        valueGetter: (params: ValueGetterParams) => {
+          const fulfilled = (params.data[column.fieldIndex] as FulfillmentFieldFragment | null)?.fulfilled ?? null;
+          if (fulfilled === null) return null;
+          return fulfilled ? 1 : 0;
+        },
+      };
     case 'DateTimeColumn':
-      const { dateTime } = field as DateTimeFieldFragment;
-      return dateTime === null ? null : new Date(dateTime.local);
+      return {};
     default:
-      return null;
+      return { filter: 'text' };
   }
 }

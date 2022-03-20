@@ -26,6 +26,7 @@ export const fulfillmentSchema = gql`
     "Column containing boolean values indicating whether something is fulfilled or not."
     type FulfillmentColumn implements TitledColumn {
         title: Text!
+        fieldIndex: Int!
     }
 `;
 
@@ -49,5 +50,5 @@ export class FulfillmentField implements ApiOutputValue<'FulfillmentField'> {
 export class FulfillmentColumn implements ApiOutputValue<'FulfillmentColumn'> {
     __typename = 'FulfillmentColumn' as const;
 
-    constructor(readonly title: Text) {}
+    constructor(readonly title: Text, readonly fieldIndex: number) {}
 }

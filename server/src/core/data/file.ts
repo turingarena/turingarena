@@ -26,6 +26,7 @@ export const fileSchema = gql`
     "Column containing a date-time."
     type FileColumn implements TitledColumn {
         title: Text!
+        fieldIndex: Int!
     }
 `;
 
@@ -52,5 +53,5 @@ export class FileField implements ApiOutputValue<'FileField'> {
 export class FileColumn implements ApiOutputValue<'FileColumn'> {
     __typename = 'FileColumn' as const;
 
-    constructor(readonly title: Text) {}
+    constructor(readonly title: Text, readonly fieldIndex: number) {}
 }

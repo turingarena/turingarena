@@ -9,6 +9,7 @@ export const columnFragment = gql`
       title {
         ...Text
       }
+      fieldIndex
     }
   }
 

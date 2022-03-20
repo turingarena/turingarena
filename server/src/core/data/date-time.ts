@@ -30,6 +30,7 @@ export const dateTimeSchema = gql`
     "Column containing a date-time."
     type DateTimeColumn implements TitledColumn {
         title: Text!
+        fieldIndex: Int!
     }
 `;
 
@@ -61,5 +62,5 @@ export class DateTimeField implements ApiOutputValue<'DateTimeField'> {
 export class DateTimeColumn implements ApiOutputValue<'DateTimeColumn'> {
     __typename = 'DateTimeColumn' as const;
 
-    constructor(readonly title: Text) {}
+    constructor(readonly title: Text, readonly fieldIndex: number) {}
 }

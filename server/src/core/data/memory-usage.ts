@@ -28,6 +28,7 @@ export const memoryUsageSchema = gql`
     "Column containing memory usages."
     type MemoryUsageColumn implements TitledColumn {
         title: Text!
+        fieldIndex: Int!
     }
 `;
 
@@ -51,5 +52,5 @@ export class MemoryUsageField implements ApiOutputValue<'MemoryUsageField'> {
 export class MemoryUsageColumn implements ApiOutputValue<'MemoryUsageColumn'> {
     __typename = 'MemoryUsageColumn' as const;
 
-    constructor(readonly title: Text) {}
+    constructor(readonly title: Text, readonly fieldIndex: number) {}
 }

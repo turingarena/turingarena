@@ -10,15 +10,12 @@ import { Contest } from './contest';
 import { ApiDateTime } from './data/date-time';
 import { ApiTable, Record } from './data/field';
 import { FulfillmentField, FulfillmentGradeDomain } from './data/fulfillment';
-import { HeaderField } from './data/header';
-import { MemoryUsage, MemoryUsageField } from './data/memory-usage';
-import { MessageField } from './data/message';
-import { ScoreField, ScoreGradeDomain, ScoreRange } from './data/score';
-import { Text } from './data/text';
-import { TimeUsage, TimeUsageField } from './data/time-usage';
+import { ScoreField, ScoreGradeDomain } from './data/score';
 import { LiveEvaluationService } from './evaluate';
 import { Evaluation, EvaluationCache } from './evaluation';
+import { TestCaseData } from './evaluation-outcome';
 import { extractFile } from './files/file-content';
+import { ObjectiveDefinition } from './objective-definition';
 import { ProblemDefinition } from './problem-definition';
 import { ProblemMaterialCache } from './problem-definition-material';
 import { ProblemInstance } from './problem-instance';
@@ -85,6 +82,11 @@ export class Submission implements ApiOutputValue<'Submission'> {
         return new Evaluation(data.id, this.ctx);
     }
 
+    async getOutcome(objective: ObjectiveDefinition) {
+        const evaluation = await this.officialEvaluation();
+        return evaluation?.getOutcome(objective) ?? null;
+    }
+
     async summaryRow() {
         const scoreRange = (await this.getProblemMaterial()).scoreRange;
         const score = (await this.getTotalScore())?.score;
@@ -115,31 +117,27 @@ export class Submission implements ApiOutputValue<'Submission'> {
     }
 
     async feedbackTable() {
-        const {
-            objectives,
-            taskInfo,
-            evaluationFeedbackColumns,
-            timeLimitSeconds,
-            memoryLimitBytes,
-        } = await this.getProblemMaterial();
+        const problemMaterial = await this.getProblemMaterial();
+        const { objectives, taskInfo, evaluationFeedbackTableDefinition } = problemMaterial;
         const { scoring } = taskInfo.IOI;
-
-        const limitsMarginMultiplier = 2;
-        const memoryUnitBytes = 1024;
-        const warningWatermarkMultiplier = 0.2;
 
         const events = await this.getLiveEvaluationEvents();
 
-        const testCasesData = objectives.flatMap((objective, objectiveIndex) =>
-            new Array(scoring.subtasks[objectiveIndex].testcases).fill(0).map(() => ({
-                objective,
-                objectiveIndex,
-                timeUsage: null as number | null,
-                memoryUsage: null as number | null,
-                message: null as string | null,
-                score: null as number | null,
-            })),
-        );
+        const testCasesData = objectives
+            .flatMap((objective, objectiveIndex) =>
+                Array.from(
+                    { length: scoring.subtasks[objectiveIndex].testcases },
+                    (unused, i): Omit<TestCaseData, 'testCaseIndex'> => ({
+                        objective,
+                        objectiveIndex,
+                        timeUsage: null,
+                        memoryUsage: null,
+                        message: null,
+                        score: null,
+                    }),
+                ),
+            )
+            .map((data, i): TestCaseData => ({ ...data, testCaseIndex: i }));
 
         let compilationError: string | null = null;
 
@@ -178,44 +176,9 @@ export class Submission implements ApiOutputValue<'Submission'> {
             }
         }
 
-        const rows = testCasesData.map(({ objectiveIndex, score, message, timeUsage, memoryUsage }, testCaseIndex) => {
-            const fields = [
-                new HeaderField(new Text([{ value: `Subtask ${objectiveIndex}` }]), objectiveIndex),
-                new HeaderField(new Text([{ value: `Case ${testCaseIndex}` }]), testCaseIndex),
-                new TimeUsageField(
-                    timeUsage !== null ? new TimeUsage(timeUsage) : null,
-                    new TimeUsage(timeLimitSeconds * limitsMarginMultiplier),
-                    new TimeUsage(timeLimitSeconds),
-                    timeUsage === null
-                        ? null
-                        : timeUsage <= warningWatermarkMultiplier * timeLimitSeconds
-                        ? 'NOMINAL'
-                        : timeUsage <= timeLimitSeconds
-                        ? 'WARNING'
-                        : 'FAILURE',
-                ),
-                new MemoryUsageField(
-                    memoryUsage !== null ? new MemoryUsage(memoryUsage * memoryUnitBytes) : null,
-                    new MemoryUsage(memoryLimitBytes * limitsMarginMultiplier),
-                    new MemoryUsage(memoryLimitBytes),
-                    memoryUsage === null
-                        ? null
-                        : memoryUsage * memoryUnitBytes <= warningWatermarkMultiplier * memoryLimitBytes
-                        ? 'NOMINAL'
-                        : memoryUsage * memoryUnitBytes <= memoryLimitBytes
-                        ? 'WARNING'
-                        : 'FAILURE',
-                ),
-                new MessageField(new Text([{ value: `${message ?? ``}` }]), null),
-                new ScoreField(new ScoreRange(1, 2, true), score),
-            ];
-
-            const valence = score !== null ? (score >= 1 ? 'SUCCESS' : score > 0 ? 'PARTIAL' : 'FAILURE') : null;
-
-            return new Record(fields, valence);
-        });
-
-        return new ApiTable(evaluationFeedbackColumns, rows);
+        return ApiTable.fromColumnDefinitions(evaluationFeedbackTableDefinition, testCasesData, ({ score }) =>
+            score !== null ? (score >= 1 ? 'SUCCESS' : score > 0 ? 'PARTIAL' : 'FAILURE') : null,
+        );
     }
 
     private async getLiveEvaluationEvents() {
@@ -299,6 +262,13 @@ export class Submission implements ApiOutputValue<'Submission'> {
         const evaluation = await this.officialEvaluation();
         if (!evaluation) return null;
         return evaluation.getTotalScore();
+    }
+
+    async getTotalScoreField() {
+        return new ScoreField(
+            (await this.getProblemMaterial()).scoreRange,
+            (await this.getTotalScore())?.score ?? null,
+        );
     }
 }
 

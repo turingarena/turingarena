@@ -28,6 +28,7 @@ export const timeUsageSchema = gql`
     "Column containing time usages."
     type TimeUsageColumn implements TitledColumn {
         title: Text!
+        fieldIndex: Int!
     }
 `;
 
@@ -51,5 +52,5 @@ export class TimeUsageField implements ApiOutputValue<'TimeUsageField'> {
 export class TimeUsageColumn implements ApiOutputValue<'TimeUsageColumn'> {
     __typename = 'TimeUsageColumn' as const;
 
-    constructor(readonly title: Text) {}
+    constructor(readonly title: Text, readonly fieldIndex: number) {}
 }

@@ -14,6 +14,7 @@ export const messageFieldSchema = gql`
     "Column containing textual messages."
     type MessageColumn implements TitledColumn {
         title: Text!
+        fieldIndex: Int!
     }
 `;
 
@@ -26,5 +27,5 @@ export class MessageField implements ApiOutputValue<'MessageField'> {
 export class MessageColumn implements ApiOutputValue<'MessageColumn'> {
     __typename = 'MessageColumn' as const;
 
-    constructor(readonly title: Text) {}
+    constructor(readonly title: Text, readonly fieldIndex: number) {}
 }

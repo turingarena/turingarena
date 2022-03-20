@@ -66,6 +66,14 @@ export class Evaluation implements ApiOutputValue<'Evaluation'> {
         );
     }
 
+    async getOutcome(objective: ObjectiveDefinition) {
+        const outcomes = [...(await this.getObjectiveOutcomes()).entries()];
+        const objectiveOutcome = outcomes.find(([{ id }]) => id === objective.id);
+        if (!objectiveOutcome) return null;
+        const [, outcome] = objectiveOutcome;
+        return outcome;
+    }
+
     private async getProblemMaterial() {
         const submission = await this.submission();
         return submission.getProblemMaterial();
