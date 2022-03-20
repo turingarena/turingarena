@@ -356,6 +356,13 @@ export class Contest implements ApiOutputValue<'Contest'> {
                 new DateTimeColumn(new Text([{ value: 'Time' }])),
                 async evaluation => new DateTimeField(ApiDateTime.fromJSDate((await evaluation.getData()).createdAt)),
             ],
+            [
+                new ScoreColumn(new Text([{ value: 'Score' }])),
+                async evaluation => {
+                    const { score, scoreRange } = await evaluation.getTotalScore();
+                    return new ScoreField(scoreRange, score);
+                },
+            ],
         ];
 
         const evaluations = (await this.ctx.cache(EvaluationCache).all.load('')).map(

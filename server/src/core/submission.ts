@@ -1,4 +1,3 @@
-import { UIMessage } from '@edomora97/task-maker';
 import { gql } from 'apollo-server-core';
 import * as path from 'path';
 import { AllowNull, Column, Table } from 'sequelize-typescript';
@@ -14,13 +13,12 @@ import { FulfillmentField, FulfillmentGradeDomain } from './data/fulfillment';
 import { HeaderField } from './data/header';
 import { MemoryUsage, MemoryUsageField } from './data/memory-usage';
 import { MessageField } from './data/message';
-import { ScoreField, ScoreGrade, ScoreGradeDomain, ScoreRange } from './data/score';
+import { ScoreField, ScoreGradeDomain, ScoreRange } from './data/score';
 import { Text } from './data/text';
 import { TimeUsage, TimeUsageField } from './data/time-usage';
 import { LiveEvaluationService } from './evaluate';
 import { Evaluation, EvaluationCache } from './evaluation';
 import { extractFile } from './files/file-content';
-import { OutcomeCache } from './outcome';
 import { ProblemDefinition } from './problem-definition';
 import { ProblemMaterialCache } from './problem-definition-material';
 import { ProblemInstance } from './problem-instance';
@@ -81,17 +79,17 @@ export class Submission implements ApiOutputValue<'Submission'> {
     }
 
     async officialEvaluation() {
-        const data = await this.getOfficialEvaluationData();
+        const data = await this.ctx.cache(EvaluationCache).officialBySubmission.load(this.id);
         if (data === null) return null;
 
         return new Evaluation(data.id, this.ctx);
     }
 
     async summaryRow() {
-        const scoreRange = (await this.getMaterial()).scoreRange;
+        const scoreRange = (await this.getProblemMaterial()).scoreRange;
         const score = (await this.getTotalScore())?.score;
         const outcomes = await this.getObjectiveOutcomes();
-        const material = await this.getMaterial();
+        const material = await this.getProblemMaterial();
 
         const objectiveFields = material.objectives.map(objective => {
             const { gradeDomain } = objective;
@@ -123,7 +121,7 @@ export class Submission implements ApiOutputValue<'Submission'> {
             evaluationFeedbackColumns,
             timeLimitSeconds,
             memoryLimitBytes,
-        } = await this.getMaterial();
+        } = await this.getProblemMaterial();
         const { scoring } = taskInfo.IOI;
 
         const limitsMarginMultiplier = 2;
@@ -224,10 +222,9 @@ export class Submission implements ApiOutputValue<'Submission'> {
         const liveEvaluation = this.ctx.service(LiveEvaluationService).getBySubmission(this.id);
         if (liveEvaluation !== null) return liveEvaluation.events;
 
-        const evaluation = await this.getOfficialEvaluationData();
-        if (evaluation !== null) return JSON.parse(evaluation.eventsJson) as UIMessage[];
+        const evaluation = await this.officialEvaluation();
 
-        return [];
+        return evaluation?.events() ?? [];
     }
 
     async createdAt() {
@@ -288,47 +285,20 @@ export class Submission implements ApiOutputValue<'Submission'> {
         return submissionPath;
     }
 
-    async getOfficialEvaluationData() {
-        return this.ctx.cache(EvaluationCache).officialBySubmission.load(this.id);
-    }
-
-    async getMaterial() {
+    async getProblemMaterial() {
         const { instance } = await this.getUndertaking();
 
         return this.ctx.cache(ProblemMaterialCache).byId.load(instance.definition.id());
     }
 
     async getObjectiveOutcomes() {
-        const evaluation = await this.getOfficialEvaluationData();
-        if (evaluation === null) return null;
-
-        const outcomes = await this.ctx.cache(OutcomeCache).byEvaluation.load(evaluation.id);
-        const material = await this.getMaterial();
-
-        return new Map(
-            material.objectives.map((objective, objectiveIndex) => [
-                objective,
-                outcomes.find(a => a.objectiveIndex === objectiveIndex) ?? null,
-            ]),
-        );
+        return (await this.officialEvaluation())?.getObjectiveOutcomes() ?? null;
     }
 
     async getTotalScore() {
-        const outcomes = await this.getObjectiveOutcomes();
-        if (!outcomes) return null;
-        const material = await this.getMaterial();
-
-        return ScoreGrade.total(
-            material.objectives
-                .map(objective => {
-                    if (objective.gradeDomain instanceof ScoreGradeDomain) {
-                        return outcomes.get(objective)?.getScoreGrade(objective.gradeDomain) ?? null;
-                    }
-
-                    return null;
-                })
-                .flatMap(x => (x === null ? [] : [x])),
-        );
+        const evaluation = await this.officialEvaluation();
+        if (!evaluation) return null;
+        return evaluation.getTotalScore();
     }
 }
 
