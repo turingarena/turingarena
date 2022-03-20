@@ -97,9 +97,7 @@ export function ProblemUndertakingSubmissionList({ data }: FragmentProps<Problem
               </Link>
             </td>
             {submission.summaryRow.fields.map((field, fieldIndex) => (
-              <td key={`submission-${submissionIndex}-${fieldIndex}`}>
-                <Field data={field} />
-              </td>
+              <td key={`submission-${submissionIndex}-${fieldIndex}`}>{field && <Field data={field} />}</td>
             ))}
           </tr>
         ))}

@@ -339,7 +339,7 @@ export class Contest implements ApiOutputValue<'Contest'> {
             x => x,
         );
 
-        type MyColumn = [Column, (evaluation: Evaluation) => Field | Promise<Field>];
+        type MyColumn = [Column, (evaluation: Evaluation) => Field | null | Promise<Field | null>];
 
         const columns: Array<MyColumn> = [
             [
@@ -379,9 +379,9 @@ export class Contest implements ApiOutputValue<'Contest'> {
                               async evaluation => {
                                   const outcomes = [...(await evaluation.getObjectiveOutcomes()).entries()];
                                   const objectiveOutcome = outcomes.find(([{ id }]) => id === objective.id);
-                                  const outcome = objectiveOutcome?.[1] ?? null;
-                                  console.log(outcome, objective);
-                                  return new ScoreField(gradeDomain.scoreRange, objectiveOutcome?.[1]?.grade ?? null);
+                                  if (!objectiveOutcome) return null;
+                                  const [, outcome] = objectiveOutcome;
+                                  return new ScoreField(gradeDomain.scoreRange, outcome?.grade ?? null);
                               },
                           ]
                         : [
@@ -389,7 +389,8 @@ export class Contest implements ApiOutputValue<'Contest'> {
                               async evaluation => {
                                   const outcomes = [...(await evaluation.getObjectiveOutcomes()).entries()];
                                   const objectiveOutcome = outcomes.find(([{ id }]) => id === objective.id);
-                                  const outcome = objectiveOutcome?.[1] ?? null;
+                                  if (!objectiveOutcome) return null;
+                                  const [, outcome] = objectiveOutcome;
                                   const fulfilled = outcome === null ? null : outcome.grade > 0;
                                   return new FulfillmentField(fulfilled);
                               },

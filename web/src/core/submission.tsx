@@ -79,9 +79,7 @@ export function Submission({ data }: FragmentProps<SubmissionFragment>) {
           {data.feedbackTable.rows.map((row, rowIndex) => (
             <tr key={`submission-table-${rowIndex}`} className={getTableClassByValence(row.valence)}>
               {row.fields.map((field, fieldIndex) => (
-                <td key={`submission-table-${rowIndex}-${fieldIndex}`}>
-                  <Field data={field} />
-                </td>
+                <td key={`submission-table-${rowIndex}-${fieldIndex}`}>{field && <Field data={field} />}</td>
               ))}
             </tr>
           ))}

@@ -43,17 +43,11 @@ export function ScoreField({ data }: FragmentProps<ScoreFieldFragment>) {
 
   return (
     <>
-      {data.score === null ? (
-        <>{data.scoreRange.max.toFixed(data.scoreRange.decimalDigits)}</>
-      ) : (
-        <>
-          <span className="score">{data.score.toFixed(data.scoreRange.decimalDigits)}</span>
-          <small className="score-range">
-            {' / '}
-            {data.scoreRange.max.toFixed(data.scoreRange.decimalDigits)}
-          </small>
-        </>
-      )}
+      <span className="score">{data.score?.toFixed(data.scoreRange.decimalDigits) ?? <>?</>}</span>
+      <small className="score-range">
+        {' / '}
+        {data.scoreRange.max.toFixed(data.scoreRange.decimalDigits)}
+      </small>
     </>
   );
 }
@@ -64,6 +58,7 @@ export const FulfillmentField = ({ data }: FragmentProps<FulfillmentFieldFragmen
 
   switch (data.fulfilled) {
     case null:
+      return <>?</>;
     case true:
       return check;
     case false:

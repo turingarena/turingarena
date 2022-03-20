@@ -7,9 +7,10 @@ import {
   ColumnFragment,
   DateTimeFieldFragment,
   FieldFragment,
+  FulfillmentFieldFragment,
   HeaderFieldFragment,
   ScoreFieldFragment,
-  TableFragment,
+  TableFragment
 } from '../../generated/graphql-types';
 import { FragmentProps } from '../../util/fragment-props';
 import { Field } from '../data/field';
@@ -39,7 +40,12 @@ export function Table({ data }: FragmentProps<TableFragment>) {
         `,
       )}
     >
-      <AgGridReact rowData={data.rows.map(row => row.fields)}>
+      <AgGridReact
+        rowData={data.rows.map(row => row.fields)}
+        onGridReady={event => {
+          event.api.sizeColumnsToFit();
+        }}
+      >
         {data.columns.map((column, i) => (
           <AgGridColumn
             field={String(i)}
@@ -47,8 +53,11 @@ export function Table({ data }: FragmentProps<TableFragment>) {
             resizable
             sortable
             headerName={column.title.variant}
-            valueGetter={(params: ValueGetterParams) => getCellValue(column, params.data[i] as FieldFragment)}
-            cellRendererFramework={(params: ValueFormatterParams) => <Field data={params.data[i] as FieldFragment} />}
+            valueGetter={(params: ValueGetterParams) => getCellValue(column, params.data[i] as FieldFragment | null)}
+            cellRendererFramework={(params: ValueFormatterParams) => {
+              const field = params.data[i] as FieldFragment | null;
+              return field && <Field data={field} />;
+            }}
           />
         ))}
       </AgGridReact>
@@ -60,6 +69,8 @@ function getFilterMode(column: ColumnFragment): 'set' | 'number' | 'text' | 'dat
   switch (column.__typename) {
     case 'ScoreColumn':
       return 'number';
+    case 'FulfillmentColumn':
+      return 'number';
     case 'DateTimeColumn':
       return null;
     default:
@@ -67,12 +78,17 @@ function getFilterMode(column: ColumnFragment): 'set' | 'number' | 'text' | 'dat
   }
 }
 
-function getCellValue(column: ColumnFragment, field: FieldFragment) {
+function getCellValue(column: ColumnFragment, field: FieldFragment | null) {
+  if (field === null) return null;
   switch (column.__typename) {
     case 'HeaderColumn':
       return (field as HeaderFieldFragment).index ?? (field as HeaderFieldFragment).title.variant;
     case 'ScoreColumn':
       return (field as ScoreFieldFragment).score;
+    case 'FulfillmentColumn':
+      const fulfilled = (field as FulfillmentFieldFragment).fulfilled;
+      if (fulfilled === null) return null;
+      return fulfilled ? 1 : 0;
     case 'DateTimeColumn':
       const { dateTime } = field as DateTimeFieldFragment;
       return dateTime === null ? null : new Date(dateTime.local);

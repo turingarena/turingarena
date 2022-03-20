@@ -1,14 +1,14 @@
 import { gql } from 'apollo-server-core';
 import { ApiOutputValue } from '../../main/graphql-types';
-import { Valence } from './valence';
-import { ScoreField, ScoreColumn } from './score';
-import { FulfillmentField, FulfillmentColumn } from './fulfillment';
-import { MessageField, MessageColumn } from './message';
-import { TimeUsageField, TimeUsageColumn } from './time-usage';
-import { MemoryUsageField, MemoryUsageColumn } from './memory-usage';
-import { HeaderField, HeaderColumn } from './header';
 import { DateTimeColumn, DateTimeField } from './date-time';
 import { FileColumn, FileField } from './file';
+import { FulfillmentColumn, FulfillmentField } from './fulfillment';
+import { HeaderColumn, HeaderField } from './header';
+import { MemoryUsageColumn, MemoryUsageField } from './memory-usage';
+import { MessageColumn, MessageField } from './message';
+import { ScoreColumn, ScoreField } from './score';
+import { TimeUsageColumn, TimeUsageField } from './time-usage';
+import { Valence } from './valence';
 
 export const fieldSchema = gql`
     "Container for values to show users as feedback, e.g., in table cells."
@@ -40,7 +40,7 @@ export const fieldSchema = gql`
 
     "Collection of fields, in 1-to-1 correspondence with a collection of columns."
     type Record {
-        fields: [Field!]!
+        fields: [Field]!
         valence: Valence
     }
 
@@ -73,7 +73,7 @@ export type Column =
 export class Record implements ApiOutputValue<'Record'> {
     __typename = 'Record' as const;
 
-    constructor(readonly fields: Field[], readonly valence: Valence | null) {}
+    constructor(readonly fields: Array<Field | null>, readonly valence: Valence | null) {}
 }
 
 export class ApiTable implements ApiOutputValue<'Table'> {
