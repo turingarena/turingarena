@@ -2,7 +2,7 @@ import { gql } from '@apollo/client';
 import { ColDef, ValueFormatterParams, ValueGetterParams } from 'ag-grid-community';
 import { AgGridColumn, AgGridReact } from 'ag-grid-react';
 import { css, cx } from 'emotion';
-import React from 'react';
+import React, { useRef } from 'react';
 import {
   ColumnFragment,
   ColumnGroupItemShow,
@@ -31,6 +31,9 @@ export const tableFragment = gql`
 `;
 
 export function Table({ data }: FragmentProps<TableFragment>) {
+  /* Avoids losing state. FIXME: find a better solution (columns may change in fact) */
+  const { current: columns } = useRef(mapColumns(data.columns));
+
   return (
     <div
       className={cx(
@@ -47,7 +50,7 @@ export function Table({ data }: FragmentProps<TableFragment>) {
           width: 120,
         }}
       >
-        {mapColumns(data.columns)}
+        {columns}
       </AgGridReact>
     </div>
   );
@@ -91,6 +94,7 @@ function getAgGridColDef(column: ColumnFragment): ColDef {
   switch (column.__typename) {
     case 'HeaderColumn':
       return {
+        filter: 'text',
         valueGetter: (params: ValueGetterParams) =>
           (params.data[column.fieldIndex] as HeaderFieldFragment | null)?.index ??
           (params.data[column.fieldIndex] as HeaderFieldFragment | null)?.title?.variant,
