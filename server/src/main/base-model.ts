@@ -23,14 +23,15 @@ export function createByIdDataLoader<T extends UuidBaseModel<T>>(ctx: ApiContext
     return createSimpleLoader<string, T>(key => ctx.table(modelClass).findByPk(key));
 }
 
+export function createSimpleNullableLoader<TKey, TValue>(loadByKey: (key: TKey) => Promise<TValue | Error>) {
+    return new DataLoader<TKey, TValue>(keys => Promise.all(keys.map(async key => await loadByKey(key))), {
+        cacheKeyFn: key => (JSON.stringify(key) as unknown) as TKey,
+    });
+}
+
 export function createSimpleLoader<TKey, TValue>(
     loadByKey: (key: TKey) => Promise<TValue | null>,
     makeError: (key: TKey) => Error = key => new Error(`invalid key ${key}`),
 ) {
-    return new DataLoader<TKey, TValue>(
-        keys => Promise.all(keys.map(async key => (await loadByKey(key)) ?? makeError(key))),
-        {
-            cacheKeyFn: key => (JSON.stringify(key) as unknown) as TKey,
-        },
-    );
+    return createSimpleNullableLoader<TKey, TValue>(async key => (await loadByKey(key)) ?? makeError(key));
 }

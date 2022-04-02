@@ -1,5 +1,7 @@
 import { gql } from 'apollo-server-core';
+import { ApiCache } from '../../main/api-cache';
 import { ApiContext } from '../../main/api-context';
+import { createSimpleNullableLoader } from '../../main/base-model';
 import { ApiOutputValue } from '../../main/graphql-types';
 import { PackageLocation, PackageLocationData } from './package-location';
 
@@ -12,13 +14,16 @@ export const packageTargetSchema = gql`
     }
 `;
 
+export class PackageTargetCache extends ApiCache {
+    defaultLocationById = createSimpleNullableLoader(async (packageId: string) =>
+        this.ctx.table(PackageLocationData).findOne({ where: { packageId, locationName: 'default' } }),
+    );
+}
 export class PackageTarget implements ApiOutputValue<'PackageTarget'> {
     constructor(readonly ctx: ApiContext, readonly id: string, readonly defaultPath: string) {}
 
     async mainLocation() {
-        const data = await this.ctx
-            .table(PackageLocationData)
-            .findOne({ where: { packageId: this.id, locationName: 'default' } });
+        const data = await this.ctx.cache(PackageTargetCache).defaultLocationById.load(this.id);
 
         return new PackageLocation(this, 'default', data?.path ?? this.defaultPath);
     }
