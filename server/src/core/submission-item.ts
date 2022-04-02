@@ -63,7 +63,6 @@ export class SubmissionItem implements ApiOutputValue<'SubmissionItem'> {
 
     private readonly contentType = mime.lookup(this.data.fileName);
 
-    // FIXME: file name should be sanitized or constant (e.g. `submission-NUM-solution.py`)
     file = new File(
         `${this.field.name}.${this.fileType.name}${this.fileType.extension}`,
         null,
