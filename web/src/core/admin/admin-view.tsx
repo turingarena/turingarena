@@ -11,6 +11,12 @@ export const adminViewFragment = gql`
   fragment AdminView on Query {
     contest(id: "default") {
       id
+      contestTable {
+        ...Table
+      }
+      problemTable {
+        ...Table
+      }
       userTable {
         ...Table
       }
@@ -49,6 +55,12 @@ export function AdminView({ data }: { data: AdminViewFragment }) {
         <Switch>
           <Route path="/admin" exact>
             Admin
+          </Route>
+          <Route path="/admin/contests">
+            <Table key="contests" data={data.contest.contestTable} />
+          </Route>
+          <Route path="/admin/problems">
+            <Table key="problems" data={data.contest.problemTable} />
           </Route>
           <Route path="/admin/users">
             <Table key="users" data={data.contest.userTable} />

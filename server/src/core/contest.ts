@@ -5,6 +5,7 @@ import * as yaml from 'yaml';
 import { ApiContext } from '../main/api-context';
 import { ApiOutputValue } from '../main/graphql-types';
 import { unreachable } from '../util/unreachable';
+import { PackageRevision } from './archive/package-revision';
 import { PackageTarget } from './archive/package-target';
 import { ContestMetadata } from './contest-metadata';
 import { ApiDateTime, DateTimeColumn, DateTimeField } from './data/date-time';
@@ -54,6 +55,8 @@ export const contestSchema = gql`
 
         package: PackageTarget!
 
+        contestTable: Table!
+        problemTable: Table!
         userTable: Table!
         submissionTable: Table!
         evaluationTable: Table!
@@ -215,6 +218,76 @@ export class Contest implements ApiOutputValue<'Contest'> {
         const metadata = await this.getMetadata();
 
         return metadata.users.map(data => new User(this, data, this.ctx));
+    }
+
+    revisionTableDefinition: TableDefinition<PackageRevision> = [
+        new AtomicColumnDefinition(
+            i => new HeaderColumn(new Text([{ value: 'Path' }]), i),
+            async revision =>
+                revision.archiveHash === null
+                    ? null
+                    : new HeaderField(new Text([{ value: revision.branch.location.path }]), null),
+        ),
+        new AtomicColumnDefinition(
+            i => new HeaderColumn(new Text([{ value: 'Branch name' }]), i),
+            async revision =>
+                revision.archiveHash === null
+                    ? null
+                    : new HeaderField(new Text([{ value: revision.branch.name }]), null),
+        ),
+        new AtomicColumnDefinition(
+            i => new HeaderColumn(new Text([{ value: 'Commit hash' }]), i),
+            async revision =>
+                revision.archiveHash === null
+                    ? null
+                    : new HeaderField(new Text([{ value: revision.commitHash }]), null),
+        ),
+        new AtomicColumnDefinition(
+            i => new HeaderColumn(new Text([{ value: 'Archive hash' }]), i),
+            async revision =>
+                revision.archiveHash === null
+                    ? null
+                    : new HeaderField(new Text([{ value: revision.archiveHash }]), null),
+        ),
+    ];
+
+    packageTableDefinition: TableDefinition<PackageTarget> = [
+        ...mapTable<PackageTarget, PackageRevision>(this.revisionTableDefinition, async target =>
+            target.mainRevision(),
+        ),
+    ];
+
+    async contestTable() {
+        await this.ctx.authorizeAdmin();
+
+        const columns: TableDefinition<this> = [
+            new AtomicColumnDefinition(
+                i => new HeaderColumn(new Text([{ value: 'ID' }]), i),
+                problem => new HeaderField(new Text([{ value: problem.id }]), null),
+            ),
+            ...mapTable<this, PackageTarget>(this.packageTableDefinition, async contest => contest.packageUnchecked),
+        ];
+
+        return ApiTable.fromColumnDefinitions(columns, [this]);
+    }
+
+    async problemTable() {
+        await this.ctx.authorizeAdmin();
+
+        const problemSet = await this.problemSet();
+        const problems = await problemSet.problems();
+
+        const columns: TableDefinition<ProblemInstance> = [
+            new AtomicColumnDefinition(
+                i => new HeaderColumn(new Text([{ value: 'ID' }]), i),
+                problem => new HeaderField(new Text([{ value: problem.id }]), null),
+            ),
+            ...mapTable<ProblemInstance, PackageTarget>(this.packageTableDefinition, async problem =>
+                problem.definition.packageUnchecked(),
+            ),
+        ];
+
+        return ApiTable.fromColumnDefinitions(columns, problems);
     }
 
     async userTable() {
