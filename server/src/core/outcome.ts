@@ -1,11 +1,11 @@
 import { gql } from 'apollo-server-core';
-import { AllowNull, Column, ForeignKey, PrimaryKey, Table } from 'sequelize-typescript';
+import { Column, Table } from 'sequelize-typescript';
 import { ApiCache } from '../main/api-cache';
 import { ApiContext } from '../main/api-context';
 import { BaseModel, createSimpleLoader } from '../main/base-model';
 import { FulfillmentGrade } from './data/fulfillment';
 import { ScoreGrade, ScoreGradeDomain } from './data/score';
-import { EvaluationCache, EvaluationData } from './evaluation';
+import { EvaluationCache } from './evaluation';
 import { ProblemMaterialCache } from './problem-definition-material';
 import { Submission } from './submission';
 
@@ -22,19 +22,35 @@ export const outcomeSchema = gql`
 
 @Table({ tableName: 'outcomes' })
 export class OutcomeData extends BaseModel<OutcomeData> {
-    @PrimaryKey
-    @ForeignKey(() => EvaluationData)
-    @AllowNull(false)
+    @Column
+    problemId!: string;
+
+    @Column
+    userId!: string;
+
+    @Column
+    submissionId!: string;
+
+    @Column
+    submittedAt!: Date;
+
+    @Column
+    problemHash!: string;
+
     @Column
     evaluationId!: string;
 
-    @PrimaryKey
-    @AllowNull(false)
     @Column
-    objectiveIndex!: number;
+    evaluatedAt!: Date;
+
+    @Column
+    objectiveIndex!: number; // TODO: should be objective ID
 
     @Column
     grade!: number;
+
+    @Column
+    isRanked!: boolean;
 
     getScoreGrade({ scoreRange }: ScoreGradeDomain): ScoreGrade {
         return new ScoreGrade(scoreRange, this.grade);

@@ -1,5 +1,4 @@
 import { gql } from 'apollo-server-core';
-import { ApiContext } from '../main/api-context';
 import { ApiOutputValue } from '../main/graphql-types';
 import { Contest } from './contest';
 import { ScoreRange } from './data/score';
@@ -27,10 +26,9 @@ export const problemSetSchema = gql`
 `;
 
 export class ProblemSetDefinition implements ApiOutputValue<'ProblemSetDefinition'> {
-    readonly ctx: ApiContext;
-    constructor(readonly contest: Contest) {
-        this.ctx = contest.ctx;
-    }
+    constructor(readonly contest: Contest) {}
+
+    readonly ctx = this.contest.ctx;
 
     __typename = 'ProblemSetDefinition' as const;
 

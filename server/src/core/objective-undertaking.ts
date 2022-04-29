@@ -14,54 +14,19 @@ export class ObjectiveUndertaking {
     async getBestOutcome() {
         const outcomes = await this.ctx.db.query<OutcomeData>(
             `
-                WITH
-                    successful_evaluations AS (
-                        SELECT e.*
-                        FROM evaluations e
-                    ),
-                    official_evaluations AS (
-                        SELECT e.*
-                        FROM successful_evaluations e
-                        WHERE e.id = (
-                            SELECT e2.id
-                            FROM successful_evaluations e2
-                            WHERE e2.submission_id = e.submission_id
-                            ORDER BY e2.created_at DESC
-                            LIMIT 1
-                        )
-                    ),
-                    submission_outcomes AS (
-                        SELECT a.*, s.id as submission_id, s.username, s.contest_id, s.problem_name, s.created_at
-                        FROM outcomes a
-                                JOIN official_evaluations e ON a.evaluation_id = e.id
-                                JOIN submissions s ON e.submission_id = s.id
-                    ),
-                    problem_outcomes AS (
-                        SELECT a.*
-                        FROM submission_outcomes a
-                        WHERE a.submission_id = (
-                            SELECT a2.submission_id
-                            FROM submission_outcomes a2
-                            WHERE a2.username = a.username
-                            AND a2.contest_id = a.contest_id
-                            AND a2.problem_name = a.problem_name
-                            AND a2.objective_index = a.objective_index
-                            ORDER BY a2.grade DESC, a2.created_at
-                            LIMIT 1
-                        )
-                    )
                 SELECT *
-                FROM problem_outcomes
-                WHERE username = $username
-                    AND contest_id = $contestId
-                    AND problem_name = $problemName
-                    AND objective_index = $objectiveIndex;
+                    FROM outcomes
+                    WHERE user_id = $userId
+                        AND problem_id = $problemId
+                        AND objective_index = $objectiveIndex
+                    ORDER BY grade DESC
+                    LIMIT 1
+                ;
             `,
             {
                 bind: {
-                    contestId: this.instance.problem.definition.contest.id,
-                    problemName: this.instance.problem.definition.baseName,
-                    username: this.user.username,
+                    problemId: this.instance.problem.definition.id(),
+                    userId: this.user.id,
                     objectiveIndex: this.instance.definition.index,
                 },
                 type: QueryTypes.SELECT,
