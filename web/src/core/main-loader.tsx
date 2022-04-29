@@ -37,7 +37,7 @@ export function MainLoader() {
     } else {
       startPolling(30000);
     }
-  }, [data]);
+  }, [data, startPolling]);
 
   if (data === undefined && loading) return <>Loading...</>;
   if (error !== undefined) return <>Error! {error.message}</>;

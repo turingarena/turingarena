@@ -91,7 +91,8 @@ export class SubmissionField implements ApiOutputValue<'SubmissionField'> {
     __typename = 'SubmissionField' as const;
 }
 
-const memoryUnitBytes = 1024 * 1024;
+const memoryLimitUnitBytes = 1024 * 1024;
+const memoryUsageUnitBytes = 1024;
 
 const limitsMarginMultiplier = 2;
 const warningWatermarkMultiplier = 0.2;
@@ -132,7 +133,7 @@ export class ProblemMaterial {
     }
 
     timeLimitSeconds = this.taskInfo.IOI.limits.time;
-    memoryLimitBytes = this.taskInfo.IOI.limits.memory * memoryUnitBytes;
+    memoryLimitBytes = this.taskInfo.IOI.limits.memory * memoryLimitUnitBytes;
 
     attributes = [
         new ProblemAttribute(
@@ -226,14 +227,14 @@ export class ProblemMaterial {
             i => new MemoryUsageColumn(new Text([{ value: 'Memory usage' }]), i),
             async ({ memoryUsage }) =>
                 new MemoryUsageField(
-                    memoryUsage !== null ? new MemoryUsage(memoryUsage * memoryUnitBytes) : null,
+                    memoryUsage !== null ? new MemoryUsage(memoryUsage * memoryUsageUnitBytes) : null,
                     new MemoryUsage(this.memoryLimitBytes * limitsMarginMultiplier),
                     new MemoryUsage(this.memoryLimitBytes),
                     memoryUsage === null
                         ? null
-                        : memoryUsage * memoryUnitBytes <= warningWatermarkMultiplier * this.memoryLimitBytes
+                        : memoryUsage * memoryUsageUnitBytes <= warningWatermarkMultiplier * this.memoryLimitBytes
                         ? 'NOMINAL'
-                        : memoryUsage * memoryUnitBytes <= this.memoryLimitBytes
+                        : memoryUsage * memoryUsageUnitBytes <= this.memoryLimitBytes
                         ? 'WARNING'
                         : 'FAILURE',
                 ),
