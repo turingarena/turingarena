@@ -1,6 +1,6 @@
 import { UIMessage } from '@edomora97/task-maker';
 import { gql } from 'apollo-server-core';
-import { AllowNull, Column, ForeignKey, Table } from 'sequelize-typescript';
+import { AllowNull, Column, ForeignKey, Index, Table } from 'sequelize-typescript';
 import { ApiCache } from '../main/api-cache';
 import { ApiContext } from '../main/api-context';
 import { createByIdDataLoader, createSimpleLoader, UuidBaseModel } from '../main/base-model';
@@ -23,7 +23,6 @@ export const evaluationSchema = gql`
 /** An evaluation of a submission */
 @Table({ tableName: 'evaluations' })
 export class EvaluationData extends UuidBaseModel<EvaluationData> {
-    @ForeignKey(() => SubmissionData)
     @AllowNull(false)
     @Column
     submissionId!: string;

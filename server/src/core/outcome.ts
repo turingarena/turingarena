@@ -1,5 +1,5 @@
 import { gql } from 'apollo-server-core';
-import { Column, Table } from 'sequelize-typescript';
+import { AllowNull, Column, Table } from 'sequelize-typescript';
 import { ApiCache } from '../main/api-cache';
 import { ApiContext } from '../main/api-context';
 import { BaseModel, createSimpleLoader } from '../main/base-model';
@@ -20,35 +20,45 @@ export const outcomeSchema = gql`
     }
 `;
 
-@Table({ tableName: 'outcomes' })
+@Table({ tableName: 'outcomes', indexes: [{ fields: ['problem_id', 'user_id', 'objective_index', 'grade'] }] })
 export class OutcomeData extends BaseModel<OutcomeData> {
+    @AllowNull(false)
     @Column
     problemId!: string;
 
+    @AllowNull(false)
     @Column
     userId!: string;
 
+    @AllowNull(false)
     @Column
     submissionId!: string;
 
+    @AllowNull(false)
     @Column
     submittedAt!: Date;
 
+    @AllowNull(false)
     @Column
     problemHash!: string;
 
+    @AllowNull(false)
     @Column
     evaluationId!: string;
 
+    @AllowNull(false)
     @Column
     evaluatedAt!: Date;
 
+    @AllowNull(false)
     @Column
     objectiveIndex!: number; // TODO: should be objective ID
 
+    @AllowNull(false)
     @Column
     grade!: number;
 
+    @AllowNull(false)
     @Column
     isRanked!: boolean;
 
