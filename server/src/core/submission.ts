@@ -139,6 +139,8 @@ export class Submission implements ApiOutputValue<'Submission'> {
             )
             .map((data, i): TestCaseData => ({ ...data, testCaseIndex: i }));
 
+        // Currently unused, but needs to be.
+        // @ts-ignore
         let compilationError: string | null = null;
 
         for (const event of events ?? []) {
@@ -251,7 +253,7 @@ export class Submission implements ApiOutputValue<'Submission'> {
     async getProblemMaterial() {
         const { instance } = await this.getUndertaking();
 
-        return this.ctx.cache(ProblemMaterialCache).byId.load(instance.definition.id());
+        return this.ctx.cache(ProblemMaterialCache).byId.load(instance.definition.id);
     }
 
     async getObjectiveOutcomes() {
@@ -280,7 +282,7 @@ export class SubmissionCache extends ApiCache {
     byUndertaking = createSimpleLoader(async (id: string) => {
         const cpaut = await ProblemUndertaking.fromId(id, this.ctx);
         const problemName = cpaut.instance.definition.baseName;
-        const contestId = cpaut.instance.contest().id;
+        const contestId = cpaut.instance.contest.id;
         const username = cpaut.user.username;
 
         return (

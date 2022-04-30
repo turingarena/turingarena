@@ -50,7 +50,7 @@ export async function evaluateSubmission(ctx: ApiContext, submission: Submission
     const problemDefinition = problemUndertaking.instance.definition;
     const problemArchive = await problemDefinition.archiveUnchecked();
     const submittedAt = await submission.createdAt();
-    const material = await ctx.cache(ProblemMaterialCache).byId.load(problemDefinition.id());
+    const material = await ctx.cache(ProblemMaterialCache).byId.load(problemDefinition.id);
 
     const submissionPath = await submission.extract(path.join(ctx.config.cachePath, 'submission'));
 

@@ -25,7 +25,7 @@ export class ObjectiveUndertaking {
             `,
             {
                 bind: {
-                    problemId: this.instance.problem.definition.id(),
+                    problemId: this.instance.problem.definition.id,
                     userId: this.user.id,
                     objectiveIndex: this.instance.definition.index,
                 },

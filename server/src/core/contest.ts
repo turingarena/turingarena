@@ -180,7 +180,7 @@ export class Contest implements ApiOutputValue<'Contest'> {
         const problems = await this.getProblems();
 
         return Promise.all(
-            problems.map(async ({ definition }) => this.ctx.cache(ProblemMaterialCache).byId.load(definition.id())),
+            problems.map(async ({ definition }) => this.ctx.cache(ProblemMaterialCache).byId.load(definition.id)),
         );
     }
 

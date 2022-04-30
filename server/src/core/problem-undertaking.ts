@@ -42,10 +42,7 @@ export class ProblemUndertaking implements ApiOutputValue<'ProblemUndertaking'> 
     constructor(readonly instance: ProblemInstance, readonly user: User, readonly ctx: ApiContext) {}
 
     __typename = 'ProblemUndertaking' as const;
-
-    id(): string {
-        return `${this.instance.id}/${this.user.id}`;
-    }
+    id = `${this.instance.id}/${this.user.id}`;
 
     static async fromId(id: string, ctx: ApiContext) {
         const ids = id.split('/');
@@ -62,7 +59,7 @@ export class ProblemUndertaking implements ApiOutputValue<'ProblemUndertaking'> 
     }
 
     async submissions() {
-        return this.ctx.cache(SubmissionCache).byUndertaking.load(this.id());
+        return this.ctx.cache(SubmissionCache).byUndertaking.load(this.id);
     }
 
     view() {
@@ -70,7 +67,7 @@ export class ProblemUndertaking implements ApiOutputValue<'ProblemUndertaking'> 
     }
 
     async getObjectiveUndertakings() {
-        const material = await this.ctx.cache(ProblemMaterialCache).byId.load(this.instance.definition.id());
+        const material = await this.ctx.cache(ProblemMaterialCache).byId.load(this.instance.definition.id);
 
         return material.objectives.map(
             objective => new ObjectiveUndertaking(new ObjectiveInstance(this.instance, objective), this.user, this.ctx),

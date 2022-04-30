@@ -20,7 +20,5 @@ export const objectiveInstanceSchema = gql`
 export class ObjectiveInstance implements ApiOutputValue<'ObjectiveInstance'> {
     constructor(readonly problem: ProblemInstance, readonly definition: ObjectiveDefinition) {}
     __typename = 'ObjectiveInstance' as const;
-    id() {
-        return `${this.problem.definition.contest.id}/${this.problem.definition.baseName}/${this.definition.index}`;
-    }
+    id = `${this.problem.definition.contest.id}/${this.problem.definition.baseName}/${this.definition.index}`
 }

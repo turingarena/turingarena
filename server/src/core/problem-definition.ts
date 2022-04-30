@@ -28,15 +28,12 @@ export class ProblemDefinition implements ApiOutputValue<'ProblemDefinition'> {
 
     ctx = this.contest.ctx;
     fullName = `${this.contest.fullName}/problems/${this.baseName}`;
+    id = `${this.contest.id}/${this.baseName}`;
 
     static fromId(id: string, ctx: ApiContext): ProblemDefinition {
         const [contestId, problemName] = id.split('/');
 
         return new ProblemDefinition(new Contest(contestId, ctx), problemName);
-    }
-
-    id() {
-        return `${this.contest.id}/${this.baseName}`;
     }
 
     async package() {
@@ -62,46 +59,46 @@ export class ProblemDefinition implements ApiOutputValue<'ProblemDefinition'> {
     }
 
     async title() {
-        return (await this.ctx.cache(ProblemMaterialCache).byId.load(this.id())).title;
+        return (await this.ctx.cache(ProblemMaterialCache).byId.load(this.id)).title;
     }
 
     async statement() {
-        return (await this.ctx.cache(ProblemMaterialCache).byId.load(this.id())).statement();
+        return (await this.ctx.cache(ProblemMaterialCache).byId.load(this.id)).statement();
     }
 
     async attachments() {
-        return (await this.ctx.cache(ProblemMaterialCache).byId.load(this.id())).attachments();
+        return (await this.ctx.cache(ProblemMaterialCache).byId.load(this.id)).attachments();
     }
 
     async attributes() {
-        return (await this.ctx.cache(ProblemMaterialCache).byId.load(this.id())).attributes;
+        return (await this.ctx.cache(ProblemMaterialCache).byId.load(this.id)).attributes;
     }
 
     async objectives() {
-        return (await this.ctx.cache(ProblemMaterialCache).byId.load(this.id())).objectives;
+        return (await this.ctx.cache(ProblemMaterialCache).byId.load(this.id)).objectives;
     }
 
     async submissionFields() {
-        return (await this.ctx.cache(ProblemMaterialCache).byId.load(this.id())).submissionFields;
+        return (await this.ctx.cache(ProblemMaterialCache).byId.load(this.id)).submissionFields;
     }
 
     async submissionFileTypes() {
-        return (await this.ctx.cache(ProblemMaterialCache).byId.load(this.id())).submissionFileTypes;
+        return (await this.ctx.cache(ProblemMaterialCache).byId.load(this.id)).submissionFileTypes;
     }
 
     async submissionFileTypeRules() {
-        return (await this.ctx.cache(ProblemMaterialCache).byId.load(this.id())).submissionFileTypeRules;
+        return (await this.ctx.cache(ProblemMaterialCache).byId.load(this.id)).submissionFileTypeRules;
     }
 
     async submissionListColumns() {
-        return (await this.ctx.cache(ProblemMaterialCache).byId.load(this.id())).submissionListColumns;
+        return (await this.ctx.cache(ProblemMaterialCache).byId.load(this.id)).submissionListColumns;
     }
 
     async evaluationFeedbackColumns() {
-        return (await this.ctx.cache(ProblemMaterialCache).byId.load(this.id())).evaluationFeedbackColumns;
+        return (await this.ctx.cache(ProblemMaterialCache).byId.load(this.id)).evaluationFeedbackColumns;
     }
 
     async totalScoreDomain() {
-        return new ScoreGradeDomain((await this.ctx.cache(ProblemMaterialCache).byId.load(this.id())).scoreRange);
+        return new ScoreGradeDomain((await this.ctx.cache(ProblemMaterialCache).byId.load(this.id)).scoreRange);
     }
 }

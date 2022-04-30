@@ -53,7 +53,7 @@ export class ProblemView implements ApiOutputValue<'ProblemView'> {
     }
 
     async totalScoreField() {
-        const { scoreRange } = await this.ctx.cache(ProblemMaterialCache).byId.load(this.instance.definition.id());
+        const { scoreRange } = await this.ctx.cache(ProblemMaterialCache).byId.load(this.instance.definition.id);
         const undertaking = await this.undertaking();
 
         const scoreGrade = undertaking !== null ? await undertaking.totalScoreGrade() : null;
@@ -62,7 +62,7 @@ export class ProblemView implements ApiOutputValue<'ProblemView'> {
     }
 
     async objectives() {
-        const { objectives } = await this.ctx.cache(ProblemMaterialCache).byId.load(this.instance.definition.id());
+        const { objectives } = await this.ctx.cache(ProblemMaterialCache).byId.load(this.instance.definition.id);
 
         return objectives.map(
             objective => new ObjectiveView(new ObjectiveInstance(this.instance, objective), this.user, this.ctx),
