@@ -43,7 +43,7 @@
         "express": "^4.17.1",
         "graphql": "^14.7.0",
         "graphql-tools": "^4.0.8",
-        "jsonwebtoken": "^8.5.1",
+        "jsonwebtoken": "^9.0.0",
         "luxon": "^1.24.1",
         "mime-types": "^2.1.27",
         "reflect-metadata": "^0.1.13",
